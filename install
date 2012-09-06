@@ -44,7 +44,7 @@ linkables.each do |linkable|
 		FileUtils.rm_rf(target) if overwrite || overwrite_all
 		`mv "$HOME/.#{file}" "$HOME/.#{file}.backup"` if backup || backup_all
 	else
-		FileUtils.mkdir(File.dirname(target))
+		FileUtils.mkdir_p(File.dirname(target))
 	end
 	
 	`ln -s "#{linkable}" "#{target}"`

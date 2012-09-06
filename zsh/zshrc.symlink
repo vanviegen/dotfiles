@@ -1,4 +1,4 @@
-if [[ $SSH_CONNECTION ]]; then
+if [ "$SSH_CONNECTION" != "" ]; then
 	if [ "$TERM" != "screen" ] ; then
 		if [ "$TERM" != "screen-256color" ] ; then
 			if [ "$TERM" != "xterm-screen-256color" ] ; then
