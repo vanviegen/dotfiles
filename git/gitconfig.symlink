@@ -1,33 +1,57 @@
-# Sample gitconfig
-#
-# You probably want to change the [user] section here since you are not me.
-
-[hub]
-        protocol = https
 [user]
-        name = Zach Holman
-        email = zach@zachholman.com
-[credential]
-        helper = osxkeychain
-[alias]
-        co = checkout
-        promote = !$ZSH/bin/git-promote
-        wtf     = !$ZSH/bin/git-wtf
-        rank-contributers = !$ZSH/bin/git-rank-contributers
-        count   = !git shortlog -sn
+	name = Frank van Viegen
+	email = frank@paiq.nl
+
 [color]
-        diff = auto
-        status = auto
-        branch = auto
-        ui = true
-[core]
-        excludesfile = ~/.gitignore
-        editor = vim
-[apply]
-        whitespace = nowarn
-[mergetool]
-        keepBackup = false
+	diff = auto
+	status = auto
+	branch = auto
+
+[alias]
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	d = diff -C -w -U5 
+	dw = diff --patience -C -w -U5 --color-words='\\$?[a-zA-Z0-9_]+|->|[^ \\t]'
+	review = !git remote update -p > /dev/null && git branch -a --no-merged | grep -E ' *remotes/[^ ]*/(review|deploy)_'
+	promote = !$ZSH/bin/git-promote
+	wtf     = !$ZSH/bin/git-wtf
+
 [difftool]
-        prompt = false
+	tool = kdiff3
+	prompt = false
+
+[mergetool "kdiff3"]
+	path = /usr/bin/kdiff3
+
+[difftool "kdiff3"]
+	path = /usr/bin/kdiff3
+
+[apply]
+	whitespace = nowarn
+
+[mergetool "gvimdiff3"]
+	cmd = gvim -f -d -c \"wincmd J\" \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+[mergetool "vimdiff3"]
+	cmd = vim --nofork -c \"sp $BASE\" -c \"sp $LOCAL\" -c \"vert diffsplit $REMOTE\" -c \"set diffopt+=iwhite\" $MERGED
+[mergetool "threesome"]
+	cmd = "vim -f $BASE $LOCAL $REMOTE $MERGED -c 'ThreesomeInit'"
+	trustExitCode = true
+
+#[merge]
+#	tool = kdiff3
+#	conflictstyle = diff3
+[merge]
+	tool = kdiff3
+#[merge]
+#	tool = threesome
+
+[diff]
+	tool = vimdiff
+
 [help]
-        autocorrect = 1
+	autocorrect = 1
+

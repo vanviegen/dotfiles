@@ -1,0 +1,125 @@
+# $Id: screen-keys.conf,v 1.6 2010/02/02 21:34:16 nicm Exp $
+#
+# By Nicholas Marriott. Public domain.
+#
+# This configuration file binds many of the common GNU screen key bindings to
+# appropriate tmux key bindings. Note that for some key bindings there is no
+# tmux analogue and also that this set omits binding some commands available in
+# tmux but not in screen.
+#
+# Note this is only a selection of key bindings and they are in addition to the
+# normal tmux key bindings. This is intended as an example not as to be used
+# as-is.
+
+# Set the prefix to ^A.
+unbind C-b
+set -g prefix ^A
+bind a send-prefix
+
+# We've installed a custom tic for this
+set -g default-terminal "xterm-screen-256color" 
+
+# Set status bar
+set -g status-bg blue
+set -g status-fg black
+set -g status-interval 60
+set -g status-left-length 30
+set -g status-left '#[fg=yellow]#(echo $USER)@#H#[default]'  # (#S) is session id
+set -g status-right '#[fg=yellow]#(cut -d " " -f 1-3 /proc/loadavg)#[default]'
+
+# Highlight Active and Notify
+set-window-option -g window-status-current-bg green
+setw -g monitor-activity on
+#set -g visual-activity on # enable this for activity notifications
+
+# for passing through ctrl-arrow
+set-window-option -g xterm-keys
+
+set -s escape-time 0
+
+# When resuming and nothing available, start new session
+new-session
+
+# One-based window indexing
+set -g base-index 1
+
+# urxvt tab like window switching (-n: no prior escape seq)
+bind -n S-down new-window
+bind -n S-left prev
+bind -n S-right next
+bind -n M-left swap-window -t -1
+bind -n M-right swap-window -t +1
+
+# Allows us to use C-a a <command> to send commands to a TMUX session inside 
+# another TMUX session
+bind-key a send-prefix
+
+# Some GNU screen compatible keys:
+unbind c
+bind c new-window
+
+unbind ^D
+bind ^D detach
+
+unbind ^N
+bind ^N next-window
+unbind n
+bind n next-window
+
+unbind A
+bind A command-prompt "rename-window %%"
+
+unbind C-a
+bind-key C-a last-window
+
+unbind p
+bind p previous-window
+unbind BSpace
+bind BSpace previous-window
+
+# kill K k 
+unbind K
+bind K confirm-before "kill-window"
+unbind k
+bind k confirm-before "kill-window"
+
+# redisplay ^L l 
+unbind ^L
+bind ^L refresh-client
+unbind l
+bind l refresh-client
+
+# split -v |
+unbind |
+bind | split-window -h
+
+# split -v -
+unbind -
+bind - split-window -v
+
+# :kB: focus up
+unbind Tab
+bind Tab select-pane -t :.+
+unbind BTab
+bind Btab select-pane -t :.-
+
+# " windowlist -b
+unbind '"'
+bind '"' choose-window
+
+# Pane resizing using ctrl-A, ctrl-arrow
+bind-key -r C-down resize-pane -D 3
+bind-key -r C-up resize-pane -U 3
+bind-key -r C-left resize-pane -L 5
+bind-key -r C-right resize-pane -R 5
+
+# Make ctrl-A, arrow non-repeatable commands (so sans the -r)
+unbind up
+unbind down
+unbind left
+unbind right
+bind-key up select-pane -U
+bind-key down select-pane -D
+bind-key left select-pane -L
+bind-key right select-pane -R
+

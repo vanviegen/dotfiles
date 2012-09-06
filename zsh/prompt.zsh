@@ -14,9 +14,9 @@ git_dirty() {
   else
     if [[ $st == "nothing to commit (working directory clean)" ]]
     then
-      echo "on %{$fg_bold[green]%}$(git_prompt_info)%{$reset_color%}"
+      echo " on %{$fg_bold[green]%}$(git_prompt_info)%{$reset_color%}"
     else
-      echo "on %{$fg_bold[red]%}$(git_prompt_info)%{$reset_color%}"
+      echo " on %{$fg_bold[red]%}$(git_prompt_info)%{$reset_color%}"
     fi
   fi
 }
@@ -40,15 +40,6 @@ need_push () {
   fi
 }
 
-rb_prompt(){
-  if $(which rbenv &> /dev/null)
-  then
-	  echo "%{$fg_bold[yellow]%}$(rbenv version | awk '{print $1}')%{$reset_color%}"
-	else
-	  echo ""
-  fi
-}
-
 # This keeps the number of todos always available the right hand side of my
 # command line. I filter it to only count those tagged as "+next", so it's more
 # of a motivation to clear out the list.
@@ -69,15 +60,25 @@ todo(){
 }
 
 directory_name(){
-  echo "%{$fg_bold[cyan]%}%1/%\/%{$reset_color%}"
+  echo "%m:%{$fg_bold[cyan]%}%~%{$reset_color%}"
 }
 
-export PROMPT=$'\n$(rb_prompt) in $(directory_name) $(git_dirty)$(need_push)\n› '
-set_prompt () {
-  export RPROMPT="%{$fg_bold[cyan]%}$(todo)%{$reset_color%}"
-}
+export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)› '
+#set_prompt () {
+#  export RPROMPT="%{$fg_bold[cyan]%}$(todo)%{$reset_color%}"
+#}
 
 precmd() {
+  export DISPLAY=`cat ~/.display`
   title "zsh" "%m" "%55<...<%~"
-  set_prompt
+#  set_prompt
 }
+#rb_prompt(){
+#  if $(which rbenv &> /dev/null)
+#  then
+#	  echo "%{$fg_bold[yellow]%}$(rbenv version | awk '{print $1}')%{$reset_color%}"
+#	else
+#	  echo ""
+#  fi
+#}
+

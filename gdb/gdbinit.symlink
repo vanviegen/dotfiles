@@ -1,0 +1,5 @@
+set print static-members off
+set print pretty on
+handle SIGPIPE nostop
+set history save on
+

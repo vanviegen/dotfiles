@@ -21,9 +21,9 @@ subject](http://zachholman.com/2010/08/dotfiles-are-meant-to-be-forked/).
 Run this:
 
 ```sh
-git clone https://github.com/holman/dotfiles.git ~/.dotfiles
+git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-script/bootstrap
+./debian.sh
 ```
 
 This will symlink the appropriate files in `.dotfiles` to your home directory.

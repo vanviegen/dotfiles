@@ -1,85 +1,106 @@
-set noswapfile
+""" Init
+set background=dark
+"highlight clear
+"let g:colors_name = "koehler"
 
-" ----------------------------------------------------------------------------
-"  Text Formatting
-" ----------------------------------------------------------------------------
+colorscheme inkpot
 
-set autoindent             " automatic indent new lines
-set smartindent            " be smart about it
-inoremap # X<BS>#
-set nowrap                 " do not wrap lines
-set softtabstop=2          " yep, two
-set shiftwidth=2           " ..
-set tabstop=4
-set expandtab              " expand tabs to spaces
-set nosmarttab             " fuck tabs
-set formatoptions+=n       " support for numbered/bullet lists
-"set textwidth=80           " wrap at 80 chars by default
-set virtualedit=block      " allow virtual edit in visual block ..
+filetype off
+call pathogen#runtime_append_all_bundles() 
+filetype plugin indent on
 
-" ----------------------------------------------------------------------------
-"  Remapping
-" ----------------------------------------------------------------------------
+if exists("syntax_on")
+	syntax reset
+endif
 
-" lead with ,
-let mapleader = ","
+set laststatus=2 " always show the statusline
 
-" exit to normal mode with 'jj'
-inoremap jj <ESC>
+" Set colors for the statusline
+hi statusline ctermfg=red ctermbg=yellow
+hi statuslinenc ctermfg=white ctermbg=blue
 
+set encoding=utf8
+set fileencoding=utf8 " this does not force opening existing files in utf8; use fileencondings for that
+" Show fileencoding and bomb in the status line
+if has("statusline")
+	set statusline=%<%f\ %h%m%r%=%{\"[\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"]\ \"}%k\ %-14.(%l,%c%V%)\ %P
+endif
 
-" reflow paragraph with Q in normal and visual mode
-nnoremap Q gqap
-vnoremap Q gq
+set foldmethod=syntax
+set foldlevel=8
 
-" sane movement with wrap turned on
+autocmd FileType coffee setlocal makeprg=make
+
+" Automatically open, but do not go to (if there are errors) the quickfix /
+" location list window, or close it when is has become empty.
+"
+" Note: Must allow nesting of autocmds to enable any customizations for quickfix
+" buffers.
+" Note: Normally, :cwindow jumps to the quickfix window if the command opens it
+" (but not if it's already open). However, as part of the autocmd, this doesn't
+" seem to happen.
+"autocmd QuickFixCmdPost [^l]* nested cwindow
+"autocmd QuickFixCmdPost    l* nested lwindow
+
+set nocp
+set mouse=n
+let g:spchkmouse = 1
+let g:spchkautonext = 1
+let g:spchkdialect = "usa"
+
+let g:Tex_CompileRule_pdf = 'pdflatex -interaction=nonstopmode $^'
+let g:Tex_FormatDependency_pdf = 'pdf'
+let g:Tex_MultipleCompileFormats = 'dvi,pdf'
+let g:Tex_DefaultTargetFormat = 'pdf'
+
+set tags=tags;
+let g:ctags_statusline=1
+let g:ctags_title=1
+let generate_tags=1
+
+filetype plugin on " required for ctags plugins
+
+set t_Co=256 " 256 color terminal
+set nocp
+syntax on
+set ruler
+set showcmd
+set wmnu
+set ai
+set si
+set backspace=2
+set ts=4
+set sw=4
+set hlsearch
+set wildmode=longest,list
+set incsearch
+
+set ic " case insensitive
+set nu " line numbers
+
+highlight AlterTabs ctermbg=234
+autocmd Syntax * syn match AlterTabs /\(^\t\(\t\t\)*\)\@<=\t/
+
+highlight StartSpaces ctermbg=235
+autocmd Syntax * syn match StartSpaces /\(^  \(    \)*\)\@<=  /
+
+highlight EndSpaces ctermbg=52
+autocmd Syntax * syn match EndSpaces /[\t ][\t ]*[^ \t]\@<=$/
+
+highlight TabSpaceMix ctermbg=52
+autocmd Syntax * syn match TabSpaceMix /^\(\t*\t \@=\|  *\t\@=\)/
+
+au BufNewFile,BufRead *.jspp setf jspp
+au BufNewFile,BufRead *.phppp setf phppp
+au BufNewFile,BufRead *.csspp setf csspp
+
+vmap <F12> :CoffeeCompile<CR>
+
+" Reselect visual block after indent/outdent
+vnoremap < <gv
+vnoremap > >gv
+
+" Improve up/down movement on wrapped lines
 nnoremap j gj
 nnoremap k gk
-vnoremap j gj
-vnoremap k gk
-nnoremap <Down> gj
-nnoremap <Up> gk
-vnoremap <Down> gj
-vnoremap <Up> gk
-inoremap <Down> <C-o>gj
-inoremap <Up> <C-o>gk
 
-" ----------------------------------------------------------------------------
-"  UI
-" ----------------------------------------------------------------------------
-
-set ruler                  " show the cursor position all the time
-set noshowcmd              " don't display incomplete commands
-set nolazyredraw           " turn off lazy redraw
-set number                 " line numbers
-set wildmenu               " turn on wild menu
-set wildmode=list:longest,full
-set ch=2                   " command line height
-set backspace=2            " allow backspacing over everything in insert mode
-set whichwrap+=<,>,h,l,[,] " backspace and cursor keys wrap to
-set shortmess=filtIoOA     " shorten messages
-set report=0               " tell us about changes
-set nostartofline          " don't jump to the start of line when scrolling
-
-
-" ----------------------------------------------------------------------------
-" Visual Cues
-" ----------------------------------------------------------------------------
-
-set showmatch              " brackets/braces that is
-set mat=5                  " duration to show matching brace (1/10 sec)
-set incsearch              " do incremental searching
-set laststatus=2           " always show the status line
-set ignorecase             " ignore case when searching
-set nohlsearch             " don't highlight searches
-set visualbell             " shut the fuck up
-
-
-" ---------------------------------------------------------------------------
-"  Strip all trailing whitespace in file
-" ---------------------------------------------------------------------------
-
-function! StripWhitespace ()
-    exec ':%s/ \+$//gc'
-endfunction
-map ,s :call StripWhitespace ()<CR>

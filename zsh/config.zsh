@@ -6,6 +6,19 @@ fi
 
 export LSCOLORS="exfxcxdxbxegedabagacad"
 export CLICOLOR=true
+#export TERM=xterm-256color 
+export EDITOR='vim'
+
+export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+
+cd $HOME
+
+if [ "$TERM" != "dumb" ]; then
+	alias ls="ls -F --color"
+	alias l="ls -lAh --color"
+	alias ll="ls -l --color"
+	alias la='ls -A --color'
+fi
 
 fpath=($ZSH/zsh/functions $fpath)
 
@@ -26,7 +39,6 @@ setopt EXTENDED_HISTORY # add timestamps to history
 setopt PROMPT_SUBST
 setopt CORRECT
 setopt COMPLETE_IN_WORD
-setopt IGNORE_EOF
 
 setopt APPEND_HISTORY # adds history
 setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
