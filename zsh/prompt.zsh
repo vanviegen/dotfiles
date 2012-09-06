@@ -68,11 +68,16 @@ export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)› '
 #  export RPROMPT="%{$fg_bold[cyan]%}$(todo)%{$reset_color%}"
 #}
 
-precmd() {
-  export DISPLAY=`cat ~/.display`
-  title "zsh" "%m" "%55<...<%~"
-#  set_prompt
+function precmd() {
+    print -Pn "\e]2;%55<...<%~\a" # plain xterm title ($3 for pwd)
 }
+
+# preexec is called just before any command line is executed
+function preexec() {
+	export DISPLAY=`cat ~/.display`
+    print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
+}
+
 #rb_prompt(){
 #  if $(which rbenv &> /dev/null)
 #  then
