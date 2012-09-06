@@ -1,9 +1,11 @@
-if [ "$TERM" != "screen" ] ; then
-	if [ "$TERM" != "screen-256color" ] ; then
-		if [ "$TERM" != "xterm-screen-256color" ] ; then
-			echo "$DISPLAY" > ~/.display
-			tmux -L tmux-$USER attach -d
-			exit
+if [[ $SSH_CONNECTION ]]; then
+	if [ "$TERM" != "screen" ] ; then
+		if [ "$TERM" != "screen-256color" ] ; then
+			if [ "$TERM" != "xterm-screen-256color" ] ; then
+				echo "$DISPLAY" > ~/.display
+				tmux -L tmux-$USER attach -d
+				exit
+			fi
 		fi
 	fi
 fi
