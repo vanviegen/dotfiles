@@ -8,10 +8,10 @@ export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sb
 cd $HOME
 
 if [ "$TERM" != "dumb" ]; then
-	alias ls="ls -F --color"
-	alias l="ls -lAh --color"
-	alias ll="ls -l --color"
-	alias la='ls -A --color'
+	alias ls="ls -F --color=auto"
+	alias l="ls -lAh --color=auto"
+	alias ll="ls -l --color=auto"
+	alias la="ls -A --color=auto"
 fi
 
 fpath=($ZSH/zsh/functions $fpath)
