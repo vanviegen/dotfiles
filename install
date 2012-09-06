@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 require 'fileutils'
+require 'pathname'
 
 # Get into script directory
 Dir.chdir(File.dirname(__FILE__))
 pwd = Dir.pwd
 
 # Set the shell
-zsh = `which zsh`.strip
+zsh = `cat /etc/shells | grep /zsh | tail -n 1`.strip
 `chsh -s #{zsh}` if `grep "^$USER:" /etc/passwd | cut -d : -f 7`.strip != zsh
 
 # Compile custom terminfo
@@ -25,7 +26,7 @@ linkables.each do |linkable|
 
 	file = linkable.split('/').last.split('.symlink').last.gsub(/__/,'/')
 	target = "#{ENV["HOME"]}/.#{file}"
-	linkable = pwd+'/'+linkable
+	linkable = Pathname.new(pwd+'/'+linkable).realpath.to_s
 
 	if File.exists?(target) || File.symlink?(target)
 		next if File.symlink?(target) and File.readlink(target)==linkable
