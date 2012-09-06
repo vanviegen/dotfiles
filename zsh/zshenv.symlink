@@ -1,0 +1,3 @@
+unsetopt global_rcs
+IGNORE_SYSTEM_ZSH=1
+
