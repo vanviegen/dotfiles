@@ -21,9 +21,9 @@ subject](http://zachholman.com/2010/08/dotfiles-are-meant-to-be-forked/).
 Run this:
 
 ```sh
+apt-get install git ruby zsh tmux vim exuberant-ctags ncurses-bin
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
-./debian.sh
+~/.dotfiles/install
 ```
 
 This will symlink the appropriate files in `.dotfiles` to your home directory.
