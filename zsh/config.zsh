@@ -45,8 +45,8 @@ setopt complete_aliases
 
 zle -N newtab
 
-bindkey '^[^[[D' backward-word
-bindkey '^[^[[C' forward-word
+bindkey "^[[1;5D" backward-word
+bindkey "^[[1;5C" forward-word
 
 bindkey "^[OH" beginning-of-line
 bindkey "^[OF" end-of-line

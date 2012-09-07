@@ -1,13 +1,15 @@
-if [ "$SSH_CONNECTION" != "" ]; then
-	if [ "$TERM" != "screen" ] ; then
-		if [ "$TERM" != "screen-256color" ] ; then
-			if [ "$TERM" != "xterm-screen-256color" ] ; then
-				echo "$DISPLAY" > ~/.display
-				tmux -L tmux-$USER attach -d
-				exit
-			fi
-		fi
-	fi
+if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
+	INSCREEN=true
+fi
+
+# Just about any terminal nowadays supports 256 colors, but fails to reflect
+# that fact in its TERM setting. Let's just assume so:
+export TERM=xterm-256color
+
+if [ "$SSH_CONNECTION" != "" -a "$INSCREEN" != true ]; then
+	echo "$DISPLAY" > ~/.display
+	tmux -L tmux-$USER attach -d
+	exit
 fi
 
 # shortcut to this dotfiles path is $ZSH
