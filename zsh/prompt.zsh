@@ -60,7 +60,7 @@ todo(){
 }
 
 directory_name(){
-  echo "%m:%{$fg_bold[cyan]%}%~%{$reset_color%}"
+  echo "%{$fg_bold[green]%}%n%{$reset_color%}@%{$fg_bold[red]%}%m%{$reset_color%}:%{$fg_bold[cyan]%}%~%{$reset_color%}"
 }
 
 export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)› '
