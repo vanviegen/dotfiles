@@ -56,7 +56,7 @@ linkables.each do |linkable|
 end
 
 
-links = `cd "#{home}" ; find .[a-zA-Z0-9]* -printf "%l\t%p\n" | grep ^#{pwd} | cut -f 2`.strip.split("\n")
+links = `cd "#{home}" ; find .[a-zA-Z0-9]* -maxdepth 2 -printf "%l\t%p\n" | grep ^#{pwd} | cut -f 2`.strip.split("\n")
 
 links.each do |link|
 	if not targets[link]
