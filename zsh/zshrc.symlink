@@ -8,6 +8,8 @@ if [ "$SSH_CONNECTION" != "" ]; then
 			fi
 		fi
 	fi
+else
+	rm -f ~/.display
 fi
 
 # shortcut to this dotfiles path is $ZSH

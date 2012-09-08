@@ -63,7 +63,7 @@ directory_name(){
   echo "%m:%{$fg_bold[cyan]%}%~%{$reset_color%}"
 }
 
-export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)› '
+export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)▶ '
 #set_prompt () {
 #  export RPROMPT="%{$fg_bold[cyan]%}$(todo)%{$reset_color%}"
 #}
@@ -74,7 +74,9 @@ function precmd() {
 
 # preexec is called just before any command line is executed
 function preexec() {
-	export DISPLAY=`cat ~/.display`
+	if [ -f ~/.display ] ; then
+		export DISPLAY=`cat ~/.display`
+	fi
     print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
 }
 
