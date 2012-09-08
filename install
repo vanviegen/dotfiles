@@ -5,6 +5,7 @@ require 'pathname'
 # Get into script directory
 Dir.chdir(File.dirname(__FILE__))
 pwd = Dir.pwd
+home = ENV["HOME"]
 
 # Set the shell
 zsh = `cat /etc/shells | grep /zsh | tail -n 1`.strip
@@ -20,12 +21,15 @@ skip_all = false
 overwrite_all = false
 backup_all = false
 
+targets = {}
+
 linkables.each do |linkable|
 	overwrite = false
 	backup = false
 
-	file = linkable.split('/').last.split('.symlink').last.gsub(/__/,'/')
-	target = "#{ENV["HOME"]}/.#{file}"
+	target = '.' + linkable.split('/').last.split('.symlink').last.gsub(/__/,'/')
+	targets[target] = true
+	target = home + '/' + target
 	linkable = Pathname.new(pwd+'/'+linkable).realpath.to_s
 
 	if File.exists?(target) || File.symlink?(target)
@@ -42,10 +46,23 @@ linkables.each do |linkable|
 			end
 		end
 		FileUtils.rm_rf(target) if overwrite || overwrite_all
-		`mv "$HOME/.#{file}" "$HOME/.#{file}.backup"` if backup || backup_all
+		`mv "#{target}" "#{target}.backup"` if backup || backup_all
 	else
 		FileUtils.mkdir_p(File.dirname(target))
 	end
 	
+	print "linking #{target}\n"
 	`ln -s "#{linkable}" "#{target}"`
 end
+
+
+links = `cd "#{home}" ; find .[a-zA-Z0-9]* -maxdepth 2 -printf "%l\t%p\n" | grep ^#{pwd} | cut -f 2`.strip.split("\n")
+
+links.each do |link|
+	if not targets[link]
+		link = home+'/'+link
+		print "unlinking #{link}\n"
+		File.unlink(link)
+	end
+end
+
