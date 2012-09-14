@@ -14,6 +14,10 @@ zsh = `cat /etc/shells | grep /zsh | tail -n 1`.strip
 # Compile custom terminfo
 `tic xterm-screen-256color.terminfo`
 
+# Possibly download submodules
+`git submodule init`
+system('git submodule update')
+
 # Create symlinks
 linkables = Dir.glob('*/**{.symlink}')
 
