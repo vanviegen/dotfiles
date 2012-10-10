@@ -74,7 +74,7 @@ function precmd() {
 
 # preexec is called just before any command line is executed
 function preexec() {
-	if [ -f ~/.display ] ; then
+	if [ -f ~/.display -a "$SSH_CONNECTION" != "" -a "$INSCREEN" = true ]; then
 		export DISPLAY=`cat ~/.display`
 	fi
     print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
