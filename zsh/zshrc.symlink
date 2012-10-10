@@ -1,5 +1,5 @@
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
-	INSCREEN=true
+	export INSCREEN=true
 fi
 
 # Just about any terminal nowadays supports 256 colors, but fails to reflect
@@ -30,8 +30,8 @@ then
 fi
 
 # initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit
-compinit
+autoload -U compinit -u
+compinit -u
 
 # load every completion after autocomplete loads
 for config_file ($ZSH/**/completion.zsh) source $config_file

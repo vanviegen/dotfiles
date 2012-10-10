@@ -1,0 +1,8 @@
+#!/bin/sh
+
+case "$1" in
+	"") exec sudo -E zsh ;;
+	:*) n=`echo "$1" | cut -c 2-` ; shift ; cmd="$@" ; if [ "$cmd" = "" ] ; then cmd=zsh ; fi ; exec sudo -E su $n -p -c "$cmd" ;;
+	*) exec sudo -E $@ ;;
+esac
+
