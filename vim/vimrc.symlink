@@ -104,3 +104,5 @@ vnoremap > >gv
 nnoremap j gj
 nnoremap k gk
 
+map <F2> :NERDTreeToggle<CR>
+
