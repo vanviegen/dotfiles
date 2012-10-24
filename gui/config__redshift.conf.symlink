@@ -1,0 +1,10 @@
+[redshift]
+temp-day=6500
+temp-night=5300
+brightness-day=1.0
+brightness-night=0.7
+location-provider=manual
+
+[manual]
+lat=52.221537
+lon=6.893662
