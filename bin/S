@@ -1,8 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 
 case "$1" in
-	"") exec sudo -E zsh ;;
-	:*) n=`echo "$1" | cut -c 2-` ; shift ; cmd="$@" ; if [ "$cmd" = "" ] ; then cmd=zsh ; fi ; exec sudo -E su $n -p -c "$cmd" ;;
-	*) exec sudo -E $@ ;;
+	"")
+		exec sudo -E zsh
+		;;
+	:*)
+		n=`echo "$1" | cut -c 2-`
+		shift
+		t="$@"
+		if [ "$t" = "" ] ; then
+			cmd=zsh
+		else
+			cmd=""
+			for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
+		fi
+		exec sudo -E su $n -p -c "$cmd"
+		;;
+	*)
+		exec sudo -E "$@"
+		;;
 esac
 
