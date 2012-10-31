@@ -69,7 +69,9 @@ export PROMPT=$'$(directory_name)$(git_dirty)$(need_push)▶ '
 #}
 
 function precmd() {
-    print -Pn "\e]2;%55<...<%~\a" # plain xterm title ($3 for pwd)
+	if [ "$TERM" = "xterm-256color" ] ; then
+		print -Pn "\e]2;%55<...<%~\a" # plain xterm title ($3 for pwd)
+	fi
 }
 
 # preexec is called just before any command line is executed
@@ -77,7 +79,9 @@ function preexec() {
 	if [ -f ~/.display -a "$SSH_CONNECTION" != "" -a "$INSCREEN" = true ]; then
 		export DISPLAY=`cat ~/.display`
 	fi
-    print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
+	if [ "$TERM" = "xterm-256color" ] ; then
+		print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
+	fi
 }
 
 #rb_prompt(){

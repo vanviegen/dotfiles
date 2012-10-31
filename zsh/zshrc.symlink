@@ -1,10 +1,13 @@
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
 	export INSCREEN=true
+	export TERM=xterm-256color
 fi
 
-# Just about any terminal nowadays supports 256 colors, but fails to reflect
-# that fact in its TERM setting. Let's just assume so:
-export TERM=xterm-256color
+if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
+	# Just about any X terminal nowadays supports 256 colors, but fails to reflect
+	# that fact in its TERM setting. Let's just assume so:
+	export TERM=xterm-256color
+fi
 
 if [ "$SSH_CONNECTION" != "" ] ; then
 	if [ "$INSCREEN" != true ]; then
