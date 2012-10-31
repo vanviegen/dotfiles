@@ -18,32 +18,29 @@ fpath=($ZSH/zsh/functions $fpath)
 
 autoload -U $ZSH/zsh/functions/*(:t)
 
+setopt AUTO_CD # why would you type 'cd dir' if you could just type 'dir'?
+setopt AUTO_PUSHD # This makes cd=pushd
+setopt PUSHD_IGNORE_DUPS
+
+setopt LOCAL_OPTIONS # allow functions to have local options
+setopt LOCAL_TRAPS # allow functions to have local traps
+setopt PROMPT_SUBST # parameter expansion for prompt
+
+setopt COMPLETE_IN_WORD
+unsetopt AUTO_MENU # do not choose first option after 2x tab
+setopt AUTO_PARAM_SLASH # complete directories with a trailing /
+setopt COMPLETE_ALIASES # don't expand aliases _before_ completion has finished
+
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
-
-setopt NO_BG_NICE # don't nice background tasks
-setopt NO_HUP
-setopt NO_LIST_BEEP
-setopt LOCAL_OPTIONS # allow functions to have local options
-setopt LOCAL_TRAPS # allow functions to have local traps
-setopt HIST_VERIFY
-setopt SHARE_HISTORY # share history between sessions ???
 setopt EXTENDED_HISTORY # add timestamps to history
-setopt PROMPT_SUBST
-setopt CORRECT
-setopt COMPLETE_IN_WORD
-
 setopt APPEND_HISTORY # adds history
-setopt INC_APPEND_HISTORY SHARE_HISTORY  # adds history incrementally and share it across sessions
-setopt HIST_IGNORE_ALL_DUPS  # don't record dupes in history
-setopt HIST_REDUCE_BLANKS
+setopt INC_APPEND_HISTORY # adds history incrementally
+setopt HIST_IGNORE_SPACE # don't add cmds starting with a whitespace to hist
+setopt HIST_IGNORE_ALL_DUPS # don't record dupes in history
 
-# don't expand aliases _before_ completion has finished
-#   like: git comm-[tab]
-setopt complete_aliases
-
-zle -N newtab
+#zle -N newtab # Hmmm, this thing is thoroughly undocumented. Let's see what happens without it.
 
 bindkey "^[[1;5D" backward-word
 bindkey "^[[1;5C" forward-word
