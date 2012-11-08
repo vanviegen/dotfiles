@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'shellwords'
+$cnt = 20
+$human = true
+$onefs = false
+$apparent = false
+$aggr = false
+OptionParser.new do |o|
+	o.on('-n', '--number COUNT', Integer, 'Number of items to show') { |a| $cnt = a }
+	o.on('-c', '--computer', 'Computer-readable output') { |a| $human = !a }
+	o.on('-x', '--one-file-system', 'Skip directories on different file systems') { |a| $onefs = a }
+	o.on('-a', '--apparent-size', 'Print apparent sizes, rather than disk usage; although the apparent size is usually smaller, it may be larger due to holes in (sparse) files, internal fragmentation, indirect blocks, and the like') { |a| $apparent = a }
+	o.on('-A', '--aggregate', 'Show aggregate sizes') { |a| $aggr = a }
+	o.parse!
+end
+
+
+dirs = ARGV.length>0 ? ARGV : ['.']
+items = []
+IO.popen("du -B 1 -a " + ($apparent?'--apparent-size ':'') + ($onefs?'-x ':'') + dirs.map { |d| Shellwords.escape(d) }.join(' ')) do |data|
+	data.each_line do |line|
+		line = line.strip.split "\t"
+		items.push [line[0].to_i, line[1]]
+	end
+end
+
+items.sort!
+
+result = {}
+items.reverse_each do |item|
+	# We're taking one extra result here, in case item is a child of the
+	# currently worst result, which it should replace.
+	break if result.length > $cnt and item[0] < result.sort_by{|x|x[1][0]}[-$cnt-1][1][0]
+	result[item[1]] = [item[0],item[0]]
+	
+	path = item[1].split '/'
+	loop do
+		path.pop
+		break if path.length==0
+		parent = path.join '/'
+		if result[parent] or result[parent=parent+'/']
+			result[parent][0] -= item[0]
+			break
+		end
+	end
+end
+
+result = result.sort_by{|x|x[1][0]}
+result = result.slice([0,result.length-$cnt].max..-1)
+
+if $aggr
+	result = result.map{|x| [x[0],x[1][1]] }
+	result = result.sort_by { |x| x[1] }
+else
+	result = result.map{|x| [x[0],x[1][0]] }
+end
+
+minSize = result[0][1]
+maxSize = result[-1][1]
+
+result.sort!
+
+mult = false
+if $human
+	if minSize*(mult=1.0/1024/1024/1024)>=0.7
+		$human = 'G'
+	elsif minSize*(mult=1.0/1024/1024)>=0.7
+		$human = 'M'
+	elsif minSize*(mult=1.0/1024)>=0.7
+		$human = 'K'
+	else
+		$human = ''
+		mult = false
+	end
+else
+	$human = ''
+end
+sizeLen = (mult ? (maxSize*mult).round : maxSize).to_s.length
+
+result.each { |item|
+	print (mult ? (item[1]*mult).round : item[1]).to_s.rjust(sizeLen)+$human+'  '+item[0]+"\n"
+}
+
