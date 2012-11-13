@@ -52,6 +52,3 @@
 [diff]
 	tool = vimdiff
 
-[help]
-	autocorrect = 1
-
