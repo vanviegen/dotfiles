@@ -10,5 +10,5 @@ if [ "$pager" = "" ] ; then
 	pager="less -FXRS"
 fi
 
-git ls-files -co --exclude-standard | xargs pcregrep --color=always -uHn $@ 2> /dev/null | $pager
+git ls-files -co --exclude-standard | xargs -L 100 pcregrep --buffer-size=1M --color=always -sHn $@ | $pager
 
