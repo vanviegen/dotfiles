@@ -1,5 +1,5 @@
 # code search
-alias cs='git grep -i -n --color'
+alias cs='git grep -P -n --untracked --color'
 
 # The rest of my fun git aliases
 #alias gl='git pull --prune'
