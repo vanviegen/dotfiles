@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ "$#" -lt 1 ] ; then
+	echo "syntax: cs PCRE\n\nCode Search. Search the current git tree (both tracked and untracked files) using a Perl compatible regular expression."
+	exit 1
+fi
+
+pager="`git config --get core.pager`"
+if [ "$pager" = "" ] ; then
+	pager="less -FXRS"
+fi
+
+git ls-files -co --exclude-standard | xargs pcregrep --color=always -uHn $@ 2> /dev/null | $pager
+

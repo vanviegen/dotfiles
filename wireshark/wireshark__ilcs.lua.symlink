@@ -457,8 +457,12 @@ do
 	local hpdt = DissectorTable.get("http.port")
 	hpdt:add(80,ilcs)
 	hpdt:add(28717,ilcs)
+	hpdt:add(20000,ilcs)
+	hpdt:add(20001,ilcs)
 	local wsdt = DissectorTable.get("ws.port")
 	wsdt:add(80,ilcs)
 	wsdt:add(28717,ilcs)
+	wsdt:add(20000,ilcs)
+	wsdt:add(20001,ilcs)
 end
 
