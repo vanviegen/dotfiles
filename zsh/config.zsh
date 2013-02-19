@@ -16,10 +16,6 @@ if [ "$TERM" != "dumb" ]; then
 	alias la="ls -A --color=auto"
 fi
 
-fpath=($ZSH/zsh/functions $fpath)
-
-autoload -U $ZSH/zsh/functions/*(:t)
-
 setopt AUTO_CD # why would you type 'cd dir' if you could just type 'dir'?
 setopt AUTO_PUSHD # This makes cd=pushd
 setopt PUSHD_IGNORE_DUPS
