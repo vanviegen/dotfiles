@@ -21,7 +21,7 @@ dirs = ARGV.length>0 ? ARGV : ['.']
 items = []
 IO.popen("du -B 1 -a " + ($apparent?'--apparent-size ':'') + ($onefs?'-x ':'') + dirs.map { |d| Shellwords.escape(d) }.join(' ')) do |data|
 	data.each_line do |line|
-		line = line.strip.split "\t"
+		line = line.force_encoding("iso-8859-1").strip.split "\t"
 		items.push [line[0].to_i, line[1]]
 	end
 end

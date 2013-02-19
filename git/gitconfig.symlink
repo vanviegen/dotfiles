@@ -13,7 +13,7 @@
 	br = branch
 	co = checkout
 	df = diff
-	l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	l = log --full-history --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
 	d = diff -C -w -U5 
 	dw = diff --patience -C -w -U5 --color-words='\\$?[a-zA-Z0-9_]+|->|[^ \\t]'
 	review = !git remote update -p > /dev/null && git branch -a --no-merged | grep -E ' *remotes/[^ ]*/(review|deploy)_'

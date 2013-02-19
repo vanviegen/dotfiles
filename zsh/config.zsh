@@ -5,7 +5,9 @@ export EDITOR='vim'
 
 export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
-cd $HOME
+if [ "$zshNoDirChange" = "" ] ; then
+	cd $HOME
+fi
 
 if [ "$TERM" != "dumb" ]; then
 	alias ls="ls -F --color=auto"
@@ -31,7 +33,9 @@ unsetopt AUTO_MENU # do not choose first option after 2x tab
 setopt AUTO_PARAM_SLASH # complete directories with a trailing /
 setopt COMPLETE_ALIASES # don't expand aliases _before_ completion has finished
 
-HISTFILE=~/.zsh_history
+if [ "$HISTFILE" = "" ] ; then
+	HISTFILE=~/.zsh_history
+fi
 HISTSIZE=10000
 SAVEHIST=10000
 setopt EXTENDED_HISTORY # add timestamps to history

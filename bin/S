@@ -1,23 +1,30 @@
 #!/bin/bash
 
 case "$1" in
-	"")
-		exec sudo -E zsh
-		;;
 	:*)
-		n=`echo "$1" | cut -c 2-`
+		user="`echo "$1" | cut -c 2-`"
 		shift
-		t="$@"
-		if [ "$t" = "" ] ; then
-			cmd=zsh
-		else
-			cmd=""
-			for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
-		fi
-		exec sudo -E su $n -p -c "$cmd"
 		;;
 	*)
-		exec sudo -E "$@"
+		user=root
 		;;
 esac
+
+export zshNoDirChange=true
+export HISTFILE="$(eval echo ~${user})/.zsh_history-$USER"
+
+if [ "$#" == 0 ] ; then
+	set -- zsh "$@"
+fi
+
+if [ "$user" = "root" ] ; then
+	exec sudo -E "$@"
+fi
+
+for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
+if [ "$#" = 1 ] ; then
+	# otherwise, there won't be a controlling terminal (so ctrl-c terms shell)
+	exec sudo -E su $user -p -s "`which $cmd`"
+fi
+exec sudo -E su $user -p -c "$cmd"
 
