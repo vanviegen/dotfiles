@@ -16,12 +16,12 @@ The `install` script creates symlinks from your home dir into the `~/.dotfiles` 
 
 Everything is configured and tweaked within `~/.dotfiles`.
 
-You'll want to change `git/gitconfig.symlink`, which will set you up as
+You'll want to change `~/.dotfiles/git/gitconfig.symlink`, which will set you up
 committing as me. You probably don't want that.
 
 ## updating
 
-Run the `dotfiles` script to do a `git pull` and a `~/.dotfiles/install`. Running the later will cause new symlinks into `~/.dotfiles` to be created and stale symlinks to be removed from your home dir.
+In `~/.dotfiles` do a `git pull` followed by an `./install`. The latter will cause new symlinks to be created and stale symlinks to be removed from your home dir. Additionally, it will update any submodules (used for vim extensions).
 
 ## topical
 
@@ -43,8 +43,6 @@ There's a few special files in the hierarchy.
   your `$HOME`. This is so you can keep all of those versioned in your dotfiles
   but still keep those autoloaded files in your home directory. These get
   symlinked in when you run `rake install`.
-- **topic/\*.completion.sh**: Any files ending in `completion.sh` get loaded
-  last so that they get loaded after we set up zsh autocomplete functions.
 
 ## thanks
 
