@@ -126,6 +126,8 @@ do
 			msgtree:set_text("Cancel subscription")
 		elseif cmd=='D' then
 			msgtree:set_text("End tab")
+		elseif cmd=='P' then
+			msgtree:set_text("Ping")
 		else
 			msgtree:set_text("Unknown command")
 		end
@@ -244,7 +246,8 @@ do
 		if ver=='2' then
 			if response then
 				local followup = headers:fetchPart(2,true)
-				headertree:add(followup:range(), "Follow-up: "..(followup:str()=='R' and "please reconnect" or (followup:str()=='D' and "nothing to listen for" or "handled by tab "..followup:str())))
+				fus = followup:str()
+				headertree:add(followup:range(), "Follow-up: "..(fus=='R' and "reconnect to stall" or (fus=='A' and "reconnect for active requests" or (fus=='E' and "sync lost, reload" or (fus=='D' and "nothing to listen for" or "handled by tab "..fus)))))
 				pvList = ''
 				while true do
 					local pvReply = data:fetchPart(1)
@@ -334,9 +337,15 @@ do
 					
 				local flags = headers:fetchPart(2,true)
 				local flagText = "none"
-				if flags and flags:uint() and (flags:uint()%2)>0 then
-					flagText = "no-response"
-					descr = descr .. ", no response"
+				if flags and flags:uint() then
+					mode = flags:uint() % 4
+					if mode==1 then
+						flagText = "no-response"
+						descr = descr .. ", no response"
+					elseif mode==2 then
+						flagText = "no-stall"
+						descr = descr .. ", no stall"
+					end
 				end
 				headertree:add(flags:range(), "Flags: "..flagText)
 			
