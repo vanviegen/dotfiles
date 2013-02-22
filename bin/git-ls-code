@@ -1,0 +1,4 @@
+#!/bin/sh
+
+git ls-files -co --exclude-standard | grep -v -E ".(gif|png|jpg|mp3|ogg|jar|swf|swflib|exe|tbz2|tar|gz|tgz|dll|ico|ttf|woff|eot|xcf|pem)$"
+

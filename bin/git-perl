@@ -19,7 +19,7 @@ if [ $dry = "false" ] ; then
 	git reset -q HEAD^
 fi
 
-git ls-files -co --exclude-standard | while read -r a ; do
+git-ls-code | while read -r a ; do
 	if [ -e "$a" ] ; then
 		cat "$a" | perl -pe "$1" > "$a".perl
 		if cmp -s "$a" "$a".perl ; then
