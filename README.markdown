@@ -5,7 +5,7 @@
 On a debian/ubuntu box, run this:
 
 ```sh
-sudo apt-get install git ruby zsh tmux vim exuberant-ctags ncurses-bin pcregrep
+sudo apt-get install git ruby zsh tmux vim-nox exuberant-ctags ncurses-bin pcregrep
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 ~/.dotfiles/install
 ```

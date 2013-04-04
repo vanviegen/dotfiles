@@ -37,17 +37,12 @@
 	cmd = gvim -f -d -c \"wincmd J\" \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
 [mergetool "vimdiff3"]
 	cmd = vim --nofork -c \"sp $BASE\" -c \"sp $LOCAL\" -c \"vert diffsplit $REMOTE\" -c \"set diffopt+=iwhite\" $MERGED
-[mergetool "threesome"]
-	cmd = "vim -f $BASE $LOCAL $REMOTE $MERGED -c 'ThreesomeInit'"
+[mergetool "splice"]
+	cmd = "vim -f $BASE $LOCAL $REMOTE $MERGED -c 'SpliceInit'"
 	trustExitCode = true
 
-#[merge]
-#	tool = kdiff3
-#	conflictstyle = diff3
 [merge]
-	tool = kdiff3
-#[merge]
-#	tool = threesome
+	tool = splice
 
 [diff]
 	tool = vimdiff

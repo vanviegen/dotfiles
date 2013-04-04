@@ -1,6 +1,3 @@
-[submodule "vim/vim.symlink/bundle/threesome"]
-	path = vim/vim.symlink/bundle/threesome
-	url = https://github.com/sjl/threesome.vim.git
 [submodule "vim/vim.symlink/bundle/vim-coffee-script"]
 	path = vim/vim.symlink/bundle/vim-coffee-script
 	url = git://github.com/kchmck/vim-coffee-script.git
@@ -10,3 +7,6 @@
 [submodule "vim/vim.symlink/bundle/nerdtree"]
 	path = vim/vim.symlink/bundle/nerdtree
 	url = https://github.com/scrooloose/nerdtree.git
+[submodule "vim/vim.symlink/bundle/splice"]
+	path = vim/vim.symlink/bundle/splice
+	url = https://github.com/sjl/splice.vim.git
