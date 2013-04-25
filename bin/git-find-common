@@ -14,29 +14,48 @@ end
 
 def getCommits(fn)
 	savedDir = Dir.pwd
-	Dir.chdir File.dirname(fn) 
-	base = File.basename(fn)
+
+	Dir.chdir File.dirname(fn)
+	relative = File.basename(fn)
+	fn = Dir.pwd.split '/'
+	while not File.exists?('.git') do
+		throw "no .git found for: #{relative}" if fn.empty?
+		Dir.chdir '..'
+		relative = fn.pop()+'/'+relative
+	end
 
 	# Find all commits that are ancestors of changes to fhe file.
-	commits = ['HEAD'] + `git log "--pretty=format:%P" "#{base}"`.split(/\s+/)
+	tmps = ["!HEAD"] + `git log --follow --name-only "--pretty=format:!%P" -- "#{relative}"`.split("\n")
 
 	# For each of these ancestors, get the sha1 of the file.
-	shas = commits.map { |commit|
-		`git ls-tree -l "#{commit}" "#{base}" | cut -d ' ' -f 3`.strip()
+	shas = []
+	commits = []
+	files = []
+	tmps.each { |tmp|
+		tmp.strip!
+		if tmp[0]=='!'
+			sha = `git ls-tree -l "#{tmp[1..-1]}" -- "#{relative}" | cut -d ' ' -f 3`.strip()
+			next if sha==''
+			files.push relative
+			commits.push tmp[1..-1]
+			shas.push sha
+		elsif tmp!=''
+			relative = tmp
+		end
 	}
 
 	Dir.chdir savedDir
-
-	return commits,shas
+	
+	return commits,shas,files
 end
 
-cs1,ss1 = getCommits ARGV[0]
-cs2,ss2 = getCommits ARGV[1]
+cs1,ss1,fs1 = getCommits ARGV[0]
+cs2,ss2,fs2 = getCommits ARGV[1]
 
 ss1.each_with_index { |s,n1|
 	n2 = ss2.index(s)
 	if n2
-		print "#{cs1[n1]} #{cs1[n2]}\n"
+		print "#{cs1[n1]} #{fs1[n1]}\n#{cs2[n2]} #{fs2[n2]}\n"
 		exit 0
 	end
 }

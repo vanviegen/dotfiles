@@ -1,4 +1,9 @@
 #!/bin/sh
 
-git ls-files -co --exclude-standard | grep -v -E ".(gif|png|jpg|mp3|ogg|jar|swf|swflib|exe|tbz2|tar|gz|tgz|dll|ico|ttf|woff|eot|xcf|pem)$"
+for x in `git ls-files -co --exclude-standard | grep -v -E ".(gif|png|jpg|mp3|ogg|jar|swf|swflib|exe|tbz2|tar|gz|tgz|dll|ico|ttf|woff|eot|xcf|pem)$"` ; do
+	# Filter out symlinks
+	if [ ! -L "$x" ] ; then
+		echo $x
+	fi
+done
 
