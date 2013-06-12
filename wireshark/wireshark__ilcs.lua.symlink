@@ -144,10 +144,11 @@ do
 	local ilcs = Proto("ilcs","Implicit Link Comet Stream")
 	local defaultCallbacks = { ['0']='Reload', ['1']='Eval', ['-2']='Acknowledge upto: ', ['-3']='Increment: ', ['-4']='Decrement: ' }
 
-	local browsers, browserTmps, httpConnCont, httpConns
+	local browsers, idportGuids, browserTmps, httpConnCont, httpConns
 
 	function ilcs.init()
 		browsers = {}
+		idportGuids = {}
 		browserTmps = 0
 
 		httpConnCount = 0
@@ -199,20 +200,6 @@ do
 			headertree:add(flags:range(), "Requesting timeout: " .. (flags:uint()>0 and (flags:str().." seconds") or "server-defined"))
 		end
 
-		local browserId = headers:fetchPart(2)
-		if not browserId or browserId:str()=='reload' then
-			descr = descr .. ", reload!"
-			ilcstree:set_text(descr)
-			pinfo.cols.info = descr
-			return true
-		end
-		headertree:add(browserId:range(), "Browser id: "..browserId:str())
-
-		local securityCode = headers:fetchPart(2)
-		headertree:add(securityCode:range(), "Security code: "..securityCode:str())
-		
-		local browserName
-
 		local idport = { (tostring(pinfo.src).."/"..tostring(pinfo.src_port)), (tostring(pinfo.dst).."/"..tostring(pinfo.dst_port)) }
 		idport = response and idport[1]..idport[2] or idport[2]..idport[1]
 		if not httpConns[idport] then
@@ -220,19 +207,45 @@ do
 			httpConns[idport] = httpConnCount
 		end
 		descr = descr .. ", conn=" .. httpConns[idport]
-		
-		if browserId:uint() and  browserId:uint()>0 then
-			descr = descr .. ", browser=" .. browserId:str()
-			browserName = browserId:str()..':'..securityCode:str()
-			if browsers[idport] then
-				print("migrating browser info '"..idport.."' to '"..browserName.."'")
-				browsers[browserName] = browsers[idport]
-				browsers[idport] = nil
-			end
+
+		local browserName
+
+		if response and idportGuids[idport] then
+			-- guid-style responses don't have a browser id
+			browserName = idportGuids[idport]
+			descr = descr .. ", browser=" .. browserName
 		else
-			descr = descr .. ", new browser"
-			browserTmps = browserTmps + 1
-			browserName = idport
+			local browserId = headers:fetchPart(2)
+			if not browserId or browserId:str()=='reload' then
+				descr = descr .. ", reload!"
+				ilcstree:set_text(descr)
+				pinfo.cols.info = descr
+				return true
+			end
+			headertree:add(browserId:range(), "Browser id: "..browserId:str())
+
+			if browserId:str():len()==32 then
+				-- guid-style request, no seperate secret
+				browserName = browserId:str()
+				idportGuids[idport] = browserName
+				descr = descr .. ", browser=" .. browserName
+			elseif browserId:uint() and browserId:uint()>0 then
+				-- legacy
+				descr = descr .. ", browser=" .. browserId:str()
+				local securityCode = headers:fetchPart(2)
+				headertree:add(securityCode:range(), "Security code: "..securityCode:str())
+				browserName = browserId:str()..':'..securityCode:str()
+			else
+				-- legacy
+				descr = descr .. ", new browser"
+				browserTmps = browserTmps + 1
+				browserName = idport
+			end
+
+			if browsers[idport] then
+				browsers[browserName] = browsers[idport]
+				browsers[idport] = null
+			end
 		end
 
 		if not browsers[browserName] then
