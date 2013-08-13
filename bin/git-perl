@@ -19,30 +19,33 @@ if [ $dry = "false" ] ; then
 	git reset -q HEAD^
 fi
 
+tmpFile="/tmp/git-perl-tmp.$$"
+logFile="/tmp/git-perl-log.$$"
 git-ls-code | while read -r a ; do
-	if [ -e "$a" ] ; then
-		cat "$a" | perl -pe "$1" > "$a".perl
-		if cmp -s "$a" "$a".perl ; then
-			rm "$a".perl
-		else
-			git diff --color --no-index -- "$a" "$a".perl | tail -n +1 >> perl.$$.log
-			if [ $dry = "true" ] ; then
-				rm "$a".perl
-			else
-				mv "$a".perl "$a"
+	if [ -f "$a" ] ; then
+		cat "$a" | perl -pe "$1" > $tmpFile
+		if ! cmp -s "$a" $tmpFile ; then
+			git diff --color --no-index -- "$a" $tmpFile | tail -n +1 >> $logFile
+			if [ $dry != "true" ] ; then
+				cat $tmpFile > "$a" # don't change file permissions
 			fi
 		fi
 	fi
 done
+rm -f $tmpFile
 
 pager="`git config --get core.pager`"
 if [ "$pager" = "" ] ; then
 	pager="less -FXRS"
 fi
-cat perl.$$.log | $pager
-rm perl.$$.log
+if [ -f $logFile ] ; then
+	cat $logFile | $pager
+	rm $logFile
 
-if [ $dry = "false" ] ; then
-	echo "undo: git reset --hard $backup ; git reset -q HEAD^"
+	if [ $dry = "false" ] ; then
+		echo "undo: git reset --hard $backup ; git reset -q HEAD^"
+	fi
+else
+	echo "no changes"
 fi
 
