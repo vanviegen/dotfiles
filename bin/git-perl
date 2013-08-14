@@ -13,17 +13,21 @@ if [ "$#" != 1 ] ; then
 fi
 
 if [ $dry = "false" ] ; then
+	org=`git rev-parse HEAD`
 	git add -A
 	git commit -q -m "Backup commit before git perl $1 $2"
 	backup=`git rev-parse HEAD`
-	git reset -q HEAD^
+	git reset -q $org
 fi
 
 tmpFile="/tmp/git-perl-tmp.$$"
 logFile="/tmp/git-perl-log.$$"
 git-ls-code | while read -r a ; do
 	if [ -f "$a" ] ; then
-		cat "$a" | perl -pe "$1" > $tmpFile
+		if ( ! cat "$a" | perl -pe "$1" > $tmpFile ) ; then
+			echo "aborting"
+			break
+		fi
 		if ! cmp -s "$a" $tmpFile ; then
 			git diff --color --no-index -- "$a" $tmpFile | tail -n +1 >> $logFile
 			if [ $dry != "true" ] ; then
