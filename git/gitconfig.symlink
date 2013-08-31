@@ -42,7 +42,7 @@
 	trustExitCode = true
 
 [merge]
-	tool = splice
+	tool = kdiff3
 
 [diff]
 	tool = vimdiff
