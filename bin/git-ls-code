@@ -1,9 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-for x in `git ls-files -co --exclude-standard | grep -v -E ".(gif|png|jpg|mp3|ogg|jar|swf|swflib|exe|tbz2|tar|gz|tgz|dll|ico|ttf|woff|eot|xcf|pem)$|FacebookSDK.framework"` ; do
+root="`git rev-parse --show-cdup`"
+if [ $? != 0 ] ; then exit 1 ; fi 
+
+regex='$^'
+if [ -f "$root".searchignore ] ; then
+	while read glob ; do
+		regex="$regex|^$glob"'$'
+	done  < <(cat "$root".searchignore | sed -E 's/[.]/[.]/g' | sed -E 's/[*]/.*/g' | sed -E 's/[?]/./g')
+fi
+
+while read file ; do
 	# Filter out symlinks
-	if [ ! -L "$x" ] ; then
-		echo $x
-	fi
-done
+	if [ ! -L "$file" ] ; then echo $file ; fi
+done < <(git ls-files "$root" -co --exclude-standard | grep -v -E "$regex")
 
