@@ -10,5 +10,5 @@ if [ "$pager" = "" ] ; then
 	pager="less -FXRS"
 fi
 
-git-ls-code | xargs -L 100 pcregrep --buffer-size=1M --color=always -sHn "$@" | $pager
+git-ls-code | xargs -L 100 pcregrep --buffer-size=1M --color=always -usHn "$@" | $pager
 
