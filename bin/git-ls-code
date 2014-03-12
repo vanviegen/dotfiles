@@ -1,17 +1,34 @@
 #!/bin/bash
 
-root="`git rev-parse --show-cdup`"
 if [ $? != 0 ] ; then exit 1 ; fi 
 
+startDir="`pwd`"
+dir=""
+cwd="$startDir"
+while [ ! -d .git ] ; do
+	dir="`basename $cwd`/$dir"
+	cd ..
+	ncwd="`pwd`"
+	if [ "$cwd" = "$ncwd" ] ; then
+		echo "no git repository?"
+		exit 1
+	fi
+	cwd="$ncwd"
+done
+
 regex='$^'
-if [ -f "$root".searchignore ] ; then
+if [ -f .searchignore ] ; then
 	while read glob ; do
 		regex="$regex|^$glob"'$'
-	done  < <(cat "$root".searchignore | sed -E 's/[.]/[.]/g' | sed -E 's/[*]/.*/g' | sed -E 's/[?]/./g')
+	done  < <(cat .searchignore | sed -E 's/[.]/[.]/g' | sed -E 's/[*]/.*/g' | sed -E 's/[?]/./g')
 fi
 
+cutPos="x$dir"
+cutPos=${#cutPos}
+
+cd "$startDir"
 while read file ; do
 	# Filter out symlinks
 	if [ ! -L "$file" ] ; then echo $file ; fi
-done < <(git ls-files "$root" -co --exclude-standard | grep -v -E "$regex")
+done < <(git ls-files -co --exclude-standard | awk '{ print "'"$dir"'" $0 }' | grep -v -E "$regex" | cut -c $cutPos- )
 

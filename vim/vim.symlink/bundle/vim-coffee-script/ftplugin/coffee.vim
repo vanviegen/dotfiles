@@ -64,7 +64,7 @@ function! s:CoffeeCompileUpdate(startline, endline)
   endif
 
   " Compile input.
-  let output = system(g:coffee_compiler . ' -ascb 2>&1', input)
+  let output = system(g:coffee_compiler . ' -scb 2>&1', input)
 
   " Be sure we're in the CoffeeCompile buffer before overwriting.
   if exists('b:coffee_compile_buf')
