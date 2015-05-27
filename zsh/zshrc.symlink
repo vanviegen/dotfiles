@@ -1,6 +1,6 @@
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
 	export INSCREEN=true
-	export TERM=xterm-256color
+	export TERM=xterm-screen-256color
 fi
 
 if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
@@ -47,4 +47,7 @@ zstyle ':completion:*:descriptions' format '%B%d%b'
 zstyle ':completion:*:messages' format '%d'
 zstyle ':completion:*:warnings' format 'No matches for: %d'
 zstyle ':completion:*' group-name ''
+
+export PAGER=less
+export LESS="-iMSx4 -FX -R"
 

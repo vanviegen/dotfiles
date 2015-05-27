@@ -1,0 +1,45 @@
+\set QUIET 1
+
+\set VERBOSITY verbose
+\set ON_ERROR_ROLLBACK interactive
+-- show execution times
+\timing
+
+-- limit paging
+\pset pager always
+
+-- replace nulls
+\pset null ¤
+\pset linestyle unicode
+\pset border 2
+
+-- colorize
+--\set PROMPT1 '%[%033[33;1m%]%x%[%033[0m%]%[%033[1m%]%/%[%033[0m%]%R%# '
+--\set PROMPT1 '%[%033[1m%]%M %n@%/%R%[%033[0m%]%# '
+--harolds
+--\set PROMPT1 '%[%033[1m%]%M/%/%R%[%033[0m%]%# '
+--\set PROMPT2 '[more] %R > '
+
+\echo '\naliases'
+\echo '  :du   table sizes including indexes and toasts'
+\echo '  :idx  index usage'
+\echo '  :ps   currently running queries'
+\echo ''
+
+--logging
+-- Use a separate history file per-database.
+--\set HISTFILE ~/.psql_history- :DBNAME
+-- If a command is run more than once in a row, only store it once in the
+-- history.
+\set HISTCONTROL ignoredups
+
+-- Autocomplete keywords (like SELECT) in upper-case, even if you started
+-- typing them in lower case.
+\set COMP_KEYWORD_CASE upper
+
+--helpful queries
+\set du 'SELECT relname AS "relation", pg_size_pretty(pg_total_relation_size(C.oid)) AS "total_size"  FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN (\'pg_catalog\', \'information_schema\') AND C.relkind <> \'i\' AND nspname !~ \'^pg_toast\' ORDER BY pg_total_relation_size(C.oid) DESC LIMIT 20;'
+\set idx 'select * from (select relname as "table",indexrelname as "index",idx_scan cnt from pg_stat_user_indexes union select relname as "table", NULL as "index", seq_scan cnt from pg_stat_user_tables where seq_scan>0) x order by "table",cnt desc;'
+\set ps 'select * from (SELECT procpid, round(extract(epoch from now()-xact_start)::numeric,1) as "time", regexp_replace(current_query, \'\n[ \n\r\t\s]*\',\'↵ \',\'ng\') as query FROM pg_stat_activity where xact_start is not null and procpid!=pg_backend_pid() union select null as procpid, null as time, \'<IDLE>: \' || (select count(*) from pg_stat_activity where xact_start is null)::text) x order by time desc NULLS LAST;'
+
+\unset QUIET

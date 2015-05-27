@@ -1,0 +1,3 @@
+bind "\e[1;5D" vi-prev-word
+bind "\e[1;5C" vi-next-word
+
