@@ -14,9 +14,8 @@
 	co = checkout
 	df = diff
 	l = log --full-history --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
-	d = diff -C -w -U5 
+	d = difftool
 	dw = diff --patience -C -w -U5 --color-words='\\$?[a-zA-Z0-9_]+|->|[^ \\t]'
-	review = !git remote update -p > /dev/null && git branch -a --no-merged | grep -E ' *remotes/[^ ]*/(review|deploy)_'
 	promote = !$ZSH/bin/git-promote
 	wtf     = !$ZSH/bin/git-wtf
 
@@ -47,3 +46,5 @@
 [diff]
 	tool = vimdiff
 
+[push]
+	default = simple

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+git remote update -p > /dev/null
+x=$(git branch -ar --no-merged | grep -E "$1")
+if [ $(echo "$x" | wc -l) -gt 1 ] ; then
+	echo "More than one matching branch:"
+	echo $x
+	exit 1
+fi
+if [ "$x" = "" ] ; then
+	echo "No matching branch"
+	exit 1
+fi
+
+echo $x
+git checkout -B tmp $x && git rebase master && git diff master
+

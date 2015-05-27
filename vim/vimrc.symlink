@@ -5,6 +5,8 @@ set background=dark
 
 colorscheme inkpot
 
+set shell=/bin/dash
+
 filetype off
 call pathogen#runtime_append_all_bundles() 
 filetype plugin indent on
