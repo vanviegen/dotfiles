@@ -21,6 +21,7 @@
 --\set PROMPT2 '[more] %R > '
 
 \echo '\naliases'
+\echo '  :av   autovacuum info'
 \echo '  :du   table sizes including indexes and toasts'
 \echo '  :idx  index usage'
 \echo '  :ps   currently running queries'
@@ -41,5 +42,6 @@
 \set du 'SELECT relname AS "relation", pg_size_pretty(pg_total_relation_size(C.oid)) AS "total_size"  FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN (\'pg_catalog\', \'information_schema\') AND C.relkind <> \'i\' AND nspname !~ \'^pg_toast\' ORDER BY pg_total_relation_size(C.oid) DESC LIMIT 20;'
 \set idx 'select * from (select relname as "table",indexrelname as "index",idx_scan cnt from pg_stat_user_indexes union select relname as "table", NULL as "index", seq_scan cnt from pg_stat_user_tables where seq_scan>0) x order by "table",cnt desc;'
 \set ps 'select * from (SELECT procpid, round(extract(epoch from now()-xact_start)::numeric,1) as "time", regexp_replace(current_query, \'\n[ \n\r\t\s]*\',\'↵ \',\'ng\') as query FROM pg_stat_activity where xact_start is not null and procpid!=pg_backend_pid() union select null as procpid, null as time, \'<IDLE>: \' || (select count(*) from pg_stat_activity where xact_start is null)::text) x order by time desc NULLS LAST;'
+\set av 'SELECT psut.relname, to_char(psut.last_vacuum, \'YYYY-MM-DD HH24:MI\') as last_vacuum, to_char(psut.last_autovacuum, \'YYYY-MM-DD HH24:MI\') as last_autovacuum, to_char(pg_class.reltuples, \'9G999G999G999\') AS n_tup, to_char(psut.n_dead_tup, \'9G999G999G999\') AS dead_tup, to_char(CAST(current_setting(\'autovacuum_vacuum_threshold\') AS bigint) + (CAST(current_setting(\'autovacuum_vacuum_scale_factor\') AS numeric) * pg_class.reltuples), \'9G999G999G999\') AS av_threshold, CASE WHEN CAST(current_setting(\'autovacuum_vacuum_threshold\') AS bigint) + (CAST(current_setting(\'autovacuum_vacuum_scale_factor\') AS numeric) * pg_class.reltuples) < psut.n_dead_tup THEN \'*\' ELSE \'\' END AS expect_av FROM pg_stat_user_tables psut JOIN pg_class on psut.relid = pg_class.oid ORDER BY 1;'
 
 \unset QUIET
