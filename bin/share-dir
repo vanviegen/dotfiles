@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e # exit on error
+chgrp -R "$1" "$2"
+chmod -R g+rwX "$2"
+find "$2" -type d -exec chmod g+s {} \;
+
