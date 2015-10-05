@@ -110,3 +110,18 @@ map <F2> :NERDTreeToggle<CR>
 
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
 
+let mapleader = "\<Space>"
+nnoremap <Leader>o :CtrlP<CR>
+nnoremap <Leader>w :w<CR>
+" enter visual line mode:
+nmap <Leader><Leader> V
+" select text you just pasted
+noremap gV `[v`]
+" system clipboard copy/paste:
+vmap <Leader>y "+y
+vmap <Leader>d "+d
+nmap <Leader>p "+p
+nmap <Leader>P "+P
+vmap <Leader>p "+p
+vmap <Leader>P "+P
+
