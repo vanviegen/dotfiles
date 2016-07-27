@@ -1,6 +1,10 @@
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
 	export INSCREEN=true
 	export TERM=xterm-screen-256color
+	# This is a custom terminfo file compiled by the install script.
+	# We set the TERMINFO variable, so that it can be found even when in
+	# sudo/su.
+	export TERMINFO=$HOME/.terminfo
 fi
 
 if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
