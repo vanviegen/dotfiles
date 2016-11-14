@@ -1,3 +1,4 @@
 #!/bin/sh
-nice ionice -c 3 pagecache-management.sh "$@"
+
+nice ionice -c 3 nocache "$@"
 
