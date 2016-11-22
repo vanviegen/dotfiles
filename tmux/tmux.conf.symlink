@@ -16,6 +16,12 @@ unbind C-b
 set -g prefix ^A
 bind a send-prefix
 
+# Mouse mode
+set -g mode-mouse on
+set -g mouse-resize-pane on
+set -g mouse-select-pane on
+set -g mouse-select-window on
+
 # We've installed a custom tic for this
 set -g default-terminal "xterm-screen-256color" 
 
