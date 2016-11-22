@@ -58,3 +58,12 @@ zstyle ':completion:*' group-name ''
 export PAGER=less
 export LESS="-iMSx4 -FX -R"
 
+export FZF_DEFAULT_COMMAND='rg --files'
+
+# fzf Auto-completion
+source "$HOME/.dotfiles/fzf/shell/completion.zsh" 2> /dev/null
+
+# zfz Key bindings
+source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
+
+

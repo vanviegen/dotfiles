@@ -29,6 +29,6 @@ cutPos=${#cutPos}
 cd "$startDir"
 while read file ; do
 	# Filter out symlinks
-	if [ ! -L "$file" ] ; then echo $file ; fi
-done < <(git ls-files -co --exclude-standard | awk '{ print "'"$dir"'" $0 }' | grep -v -E "$regex" | cut -c $cutPos- )
+	if [ -e "$file" -a ! -L "$file" ] ; then echo $file ; fi
+done < <(git ls-files -co --exclude-standard | awk '{ print "'"$dir"'" $0 }' | grep -v -E "$regex" | cut -c $cutPos-  | sort -u )
 

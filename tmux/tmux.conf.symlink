@@ -29,7 +29,7 @@ set -g status-right '#[fg=yellow]#(cut -d " " -f 1-3 /proc/loadavg)#[default]'
 
 # Highlight Active and Notify
 set-window-option -g window-status-current-bg green
-setw -g monitor-activity on
+#setw -g monitor-activity on
 #set -g visual-activity on # enable this for activity notifications
 
 # for passing through ctrl-arrow

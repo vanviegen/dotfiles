@@ -14,6 +14,9 @@ zsh = `cat /etc/shells | grep /zsh | tail -n 1`.strip
 # Compile custom terminfo
 `tic xterm-screen-256color.terminfo`
 
+# Install vim plugins
+system("vim -c ':PlugInstall' -c ':q!' -c ':q!'")
+
 # Create symlinks
 linkables = Dir.glob('*/**{.symlink}')
 

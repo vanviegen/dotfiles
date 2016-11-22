@@ -3,12 +3,36 @@ set background=dark
 "highlight clear
 "let g:colors_name = "koehler"
 
+
+call plug#begin('~/.vim/plugged')
+
+" Make sure you use single quotes
+
+" Load file explorer on-demand
+Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+
+" Easily search for, substitute, and abbreviate multiple variants of a word
+Plug 'tpope/vim-abolish'
+
+" Ctrl-p
+set rtp+=~/.dotfiles/fzf
+Plug 'junegunn/fzf.vim'
+
+Plug 'terryma/vim-expand-region'
+Plug 'tpope/vim-fugitive'
+
+Plug 'kchmck/vim-coffee-script'
+
+" Add plugins to &runtimepath
+call plug#end()
+
+
+
 colorscheme inkpot
 
-set shell=/bin/dash
+set shell=/bin/bash
 
 filetype off
-call pathogen#runtime_append_all_bundles() 
 filetype plugin indent on
 
 if exists("syntax_on")
@@ -108,10 +132,7 @@ nnoremap k gk
 
 map <F2> :NERDTreeToggle<CR>
 
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
-
 let mapleader = "\<Space>"
-nnoremap <Leader>o :CtrlP<CR>
 nnoremap <Leader>w :w<CR>
 " enter visual line mode:
 nmap <Leader><Leader> V
@@ -122,4 +143,29 @@ vmap <Leader>y "+y
 vmap <Leader>d "+d
 nmap <Leader>p "+p
 nmap <Leader>P "+P
+
+
+" Open file selector
+nnoremap <c-p> :FZF<CR>
+nnoremap <Leader>o :FZF<CR>
+
+
+" Insert mode completion
+imap <c-x><c-f> <plug>(fzf-complete-path)
+imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+imap <c-x><c-l> <plug>(fzf-complete-line)
+inoremap <expr> <c-x><c-k> fzf#vim#complete#word({'left': '15%'})
+
+" git status
+noremap <F3> :GFiles?<CR>
+
+" vim command history
+noremap <F4> :History:<CR>
+
+" rg command suffix, [options]
+function Rg(term)
+  return call('fzf#vim#grep', ['rg --no-heading --line-number --color always '.shellescape(a:term), 0])
+endfunction
+command! -bang -nargs=* Rg call Rg(<q-args>)
+noremap <F5> :Rg<Space>
 
