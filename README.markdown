@@ -5,12 +5,12 @@
 On a debian/ubuntu box, run this:
 
 ```sh
-sudo apt-get install sudo git ruby zsh tmux vim-nox exuberant-ctags ncurses-bin pcregrep nocache
+sudo apt-get install sudo git ruby zsh tmux vim-nox ncurses-bin nocache
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 ~/.dotfiles/install
 ```
 
-The `install` script creates symlinks from your home dir into the `~/.dotfiles` dir. It also installs an appropriate terminfo to use for 256 color tmux. If your default shell isn't set to `zsh` yet, it'll ask for your password in order to set it. In order for this change to take effect, you'll need to start a new login session (i.e. logout of your window manager).
+The `install` script creates symlinks from your home dir into the `~/.dotfiles` dir. It also installs an appropriate terminfo to use for 256 color tmux. If your default shell isn't set to `zsh` yet, it'll ask for your password in order to set it. For this change to take effect, you'll need to start a new login session (i.e. logout of your window manager).
 
 ## customizing
 
