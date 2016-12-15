@@ -66,4 +66,6 @@ source "$HOME/.dotfiles/fzf/shell/completion.zsh" 2> /dev/null
 # zfz Key bindings
 source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
 
+# we need to override the term here, as dircolors has never heard of xterm-screen-256color
+eval `TERM=xterm dircolors`
 
