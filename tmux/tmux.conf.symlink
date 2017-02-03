@@ -129,3 +129,6 @@ bind-key down select-pane -D
 bind-key left select-pane -L
 bind-key right select-pane -R
 
+unbind e
+bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "vim + -c 'set nonu' ~/tmux.buffer ; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
+
