@@ -1,0 +1,35 @@
+def -docstring 'invoke fzf to open a file' \
+  fzf-file %{ %sh{
+    FILE=`rg --files | fzf-tmux -d 15`
+    if [ -n "$FILE" ]; then
+      echo "edit ${FILE}"
+    fi
+  }}
+
+def -docstring 'invoke fzf to select a buffer' \
+  fzf-buffer %{ %sh{
+    BUFFER=`echo ${kak_buflist} | tr : '\n' | fzf-tmux -d 15`
+    if [ -n "$BUFFER" ]; then
+      echo "buffer ${BUFFER}"
+    fi
+  }}
+
+map global normal <c-p> :fzf-file<ret>
+map global normal <c-b> :fzf-buffer<ret>
+
+def -docstring 'tmux create vertical split' \
+  tmux-vert %{ %sh{
+	  TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v "~/.dotfiles/bin/kak -c $kak_session"
+  }}
+
+def -docstring 'tmux create horizontal split' \
+  tmux-hor %{ %sh{
+	  TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h "~/.dotfiles/bin/kak -c $kak_session"
+  }}
+
+map global user v :tmux-vert<ret>
+map global user h :tmux-hor<ret>
+
+decl str grepcmd 'rg --no-heading --line-number --color never'
+hook global WinCreate .* %{ addhl show_matching }
+

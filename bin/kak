@@ -1,0 +1,5 @@
+#!/bin/sh
+
+dir=`dirname "$0"`/../kak
+LD_LIBRARY_PATH="$dir/lib" exec "$dir/bin/kak" "$@"
+
