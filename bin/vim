@@ -1,0 +1,10 @@
+#!/bin/bash
+
+read -n1 -p "Really use (v)im, or use (k)akoune? " vk
+
+if [ "$vk" = "v" ] ; then
+	exec /usr/bin/vim "$@"
+else
+	exec `which kak` "$@"
+fi
+
