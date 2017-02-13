@@ -1,35 +1,72 @@
-def -docstring 'invoke fzf to open a file' \
-  fzf-file %{ %sh{
-    FILE=`rg --files | fzf-tmux -d 15`
-    if [ -n "$FILE" ]; then
-      echo "edit ${FILE}"
-    fi
-  }}
+def fzf-file -docstring 'invoke fzf to open a file' %{%sh{
+	( # running this async:
+		FILE=`rg --files | fzf-tmux -d 15`
+		if [ -n "$FILE" ]; then
+			echo "eval -client $kak_client %{edit $FILE}" | ~/.dotfiles/bin/kak -p $kak_session
+		fi
+	) > /dev/null 2>&1 < /dev/null &
+}}
 
-def -docstring 'invoke fzf to select a buffer' \
-  fzf-buffer %{ %sh{
-    BUFFER=`echo ${kak_buflist} | tr : '\n' | fzf-tmux -d 15`
-    if [ -n "$BUFFER" ]; then
-      echo "buffer ${BUFFER}"
-    fi
-  }}
+def fzf-buffer -docstring 'invoke fzf to select a buffer' %{%sh{
+	( # running this async:
+		BUFFER=`echo ${kak_buflist} | tr : '\n' | fzf-tmux -d 15`
+		if [ -n "$BUFFER" ]; then
+			echo "eval -client $kak_client %{buffer $BUFFER}" | ~/.dotfiles/bin/kak -p $kak_session
+		fi
+	) > /dev/null 2>&1 < /dev/null &
+}}
 
+def tmux-vert -docstring 'tmux create vertical split' %{%sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+}}
+
+def tmux-hor -docstring 'tmux create horizontal split' %{%sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+}}
+
+def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
+	# escape args
+	args=
+	for a in "$@"; do
+		a=`echo "$a" | sed 's/"/\\"/g' | sed "s/'/'\\\\\\''/g"`
+		args="$args'$a' "
+	done
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" -l 7 "if ( $args ) ; then sleep 1 ; else echo -n 'Press enter to close... ' ; read ; fi"
+}}
+
+def grep-selection %{grep %sh{echo "\\\\b$kak_selection\\\\b"}}
+
+# open file using fzf
+map global user o :fzf-file<ret>
 map global normal <c-p> :fzf-file<ret>
+
+# save and close current buffer
+map global user c ":try w ; db<ret>"
+
+# switch buffer using fzf
+map global user b :fzf-buffer<ret>
 map global normal <c-b> :fzf-buffer<ret>
 
-def -docstring 'tmux create vertical split' \
-  tmux-vert %{ %sh{
-	  TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v "~/.dotfiles/bin/kak -c $kak_session"
-  }}
+# quit window
+map global user q :q<ret>
 
-def -docstring 'tmux create horizontal split' \
-  tmux-hor %{ %sh{
-	  TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h "~/.dotfiles/bin/kak -c $kak_session"
-  }}
+# search all files
+map global user g ":grep "
 
-map global normal <a-v> :tmux-vert<ret>
-map global normal <a-h> :tmux-hor<ret>
-map global normal <f5> ":grep "
+# vertical split
+map global user v :tmux-vert<ret>
+
+# horizontal split
+map global user h :tmux-hor<ret>
+
+# run a shell command
+map global user r ":run "
+
+# run a shell command prefixed with the 'e' dispatcher
+map global user e ":run e "
+
+# select the word under the cursor and search all files for it
+map global user w "<a-i>w:grep-selection<ret>"
 
 # use tabs
 set global tabstop 4
@@ -44,13 +81,16 @@ set global scrolloff 3,10
 # narrate everything we're doing - comment this out once you're comfortable with kakoune
 set global autoinfo command|onkey|normal 
 
-# disable auto autocomplete
-set global autoshowcompl false
-
 # no need for clippy
 set global ui_options "ncurses_assistant=none"
 
 # show matching brackets
 hook global WinCreate .* %{ addhl show_matching }
 
+colorscheme base16
+face Default rgb:d8d8d8,rgb:000000
+face PrimarySelection default+rb
+face PrimaryCursor default+rbBu
+face SecondarySelection default+r
+face SecondaryCursor default+rBu
 

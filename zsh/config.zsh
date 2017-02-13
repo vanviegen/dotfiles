@@ -1,13 +1,9 @@
 export LSCOLORS="exfxcxdxbxegedabagacad"
 export CLICOLOR=true
 #export TERM=xterm-256color 
-export EDITOR='vim'
+export EDITOR='kak'
 
 export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
-
-if [ "$zshNoDirChange" = "" ] ; then
-	cd $HOME
-fi
 
 if [ "$TERM" != "dumb" ]; then
 	alias ls="ls -F --color=auto"

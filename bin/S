@@ -10,7 +10,6 @@ case "$1" in
 		;;
 esac
 
-export zshNoDirChange=true
 export HISTFILE="$(eval echo ~${user})/.zsh_history-$USER"
 
 if [ "$#" == 0 ] ; then

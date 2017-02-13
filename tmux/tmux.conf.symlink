@@ -62,7 +62,7 @@ bind-key a send-prefix
 
 # Some GNU screen compatible keys:
 unbind c
-bind c new-window
+bind c new-window -c "#{pane_current_path}"
 
 unbind ^D
 bind ^D detach
@@ -97,11 +97,11 @@ bind l refresh-client
 
 # split -v |
 unbind |
-bind | split-window -h
+bind | split-window -h -c "#{pane_current_path}"
 
 # split -v -
 unbind -
-bind - split-window -v
+bind - split-window -v -c "#{pane_current_path}"
 
 # :kB: focus up
 unbind Tab
@@ -130,5 +130,6 @@ bind-key left select-pane -L
 bind-key right select-pane -R
 
 unbind e
-bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "vim + -c 'set nonu' ~/tmux.buffer ; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
+# bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "vim + -c 'set nonu' ~/tmux.buffer ; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
+bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "~/.dotfiles/bin/kak ~/tmux.buffer -e 'exec gj'; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
 
