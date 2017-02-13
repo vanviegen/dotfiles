@@ -7,17 +7,25 @@ hook global BufCreate .*[.](php) %{
 
 # Highlighters
 # ‾‾‾‾‾‾‾‾‾‾‾‾
+#add-highlighter -group / regions -default code php  \
+#    double_string '"'  (?<!\\)(\\\\)*" '' \
+#    single_string "'"  (?<!\\)(\\\\)*' '' \
+#    comment       // '$'             '' \
+#    comment       /\*  \*/             '' \
+#    comment       '#'  '$'             ''
 
-add-highlighter -group / regions -default code php  \
-    double_string '"'  (?<!\\)(\\\\)*" '' \
-    single_string "'"  (?<!\\)(\\\\)*' '' \
-    comment       //   '$'             '' \
-    comment       /\*  \*/             '' \
-    comment       '#'  '$'             ''
+add-highlighter -group / regions -default code -match-capture php  \
+    double_string  '"'         (?<!\\)(?:\\\\)*" '' \
+    single_string  "'"         (?<!\\)(?:\\\\)*' '' \
+    heredoc_string "<<<(\w+)$" "^(\w+);?$"       '' \
+    comment        //          '$'               '' \
+    comment        /\*         \*/               '' \
+    comment        '#'         '$'               ''
 
-add-highlighter -group /php/double_string fill string
-add-highlighter -group /php/single_string fill string
-add-highlighter -group /php/comment       fill comment
+add-highlighter -group /php/double_string  fill string
+add-highlighter -group /php/single_string  fill string
+add-highlighter -group /php/heredoc_string fill string
+add-highlighter -group /php/comment        fill comment
 
 add-highlighter -group /php/code regex \$\w* 0:identifier
 add-highlighter -group /php/code regex \b(false|null|parent|self|this|true)\b 0:value
@@ -28,6 +36,12 @@ add-highlighter -group /php/code regex (?<=\W)/[^\n/]+/[gimy]* 0:meta
 # Keywords are collected at
 # http://php.net/manual/en/reserved.keywords.php
 add-highlighter -group /php/code regex \b(__halt_compiler|abstract|and|array|as|break|callable|case|catch|class|clone|const|continue|declare|default|die|do|echo|else|elseif|empty|enddeclare|endfor|endforeach|endif|endswitch|endwhile|eval|exit|extends|final|finally|for|foreach|function|global|goto|if|implements|include|include_once|instanceof|insteadof|interface|isset|list|namespace|new|or|print|private|protected|public|require|require_once|return|static|switch|throw|trait|try|unset|use|var|while|xor|yield|__CLASS__|__DIR__|__FILE__|__FUNCTION__|__LINE__|__METHOD__|__NAMESPACE__|__TRAIT__)\b 0:keyword
+
+# String interpolation
+add-highlighter -group /php/double_string regex (?<!\\)(?:\\\\)*\$[a-zA-Z0-9_]+ 0:identifier
+add-highlighter -group /php/double_string regex {\$.*?} 0:identifier
+add-highlighter -group /php/heredoc_string regex (?<!\\)(?:\\\\)*\$[a-zA-Z0-9_]+ 0:identifier
+add-highlighter -group /php/heredoc_string regex {\$.*?} 0:identifier
 
 # Commands
 # ‾‾‾‾‾‾‾‾
