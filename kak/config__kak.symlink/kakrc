@@ -24,6 +24,10 @@ def tmux-hor -docstring 'tmux create horizontal split' %{%sh{
 	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
 }}
 
+def tmux-win -docstring 'tmux create another window for this kak session' %{%sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux new-window -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+}}
+
 def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
 	# escape args
 	args=
@@ -31,17 +35,15 @@ def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
 		a=`echo "$a" | sed 's/"/\\"/g' | sed "s/'/'\\\\\\''/g"`
 		args="$args'$a' "
 	done
-	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" -l 7 "if ( $args ) ; then sleep 1 ; else echo -n 'Press enter to close... ' ; read ; fi"
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -d -c "#{pane_current_path}" -l 7 "if ( ! $args ) ; then tmux resize-pane -U 14 ; read ; fi"
 }}
-
-def grep-selection %{grep %sh{echo "\\\\b$kak_selection\\\\b"}}
 
 # open file using fzf
 map global user o :fzf-file<ret>
 map global normal <c-p> :fzf-file<ret>
 
 # save and close current buffer
-map global user c ":try w ; db<ret>"
+map global user x ":try w ; db<ret>"
 
 # switch buffer using fzf
 map global user b :fzf-buffer<ret>
@@ -51,13 +53,16 @@ map global normal <c-b> :fzf-buffer<ret>
 map global user q :q<ret>
 
 # search all files
-map global user g ":grep "
+map global user g %{:grep %{}<left>}
 
 # vertical split
 map global user v :tmux-vert<ret>
 
 # horizontal split
 map global user h :tmux-hor<ret>
+
+# new tmux window
+map global user n :tmux-win<ret>
 
 # run a shell command
 map global user r ":run "
@@ -66,7 +71,10 @@ map global user r ":run "
 map global user e ":run e "
 
 # select the word under the cursor and search all files for it
-map global user w "<a-i>w:grep-selection<ret>"
+map global user w "<a-i>w:grep<ret>"
+
+# copy the selection to the system clipboard, pasted with ctrl-(shift-)v
+map global user c "<a-|>xclip -selection clipboard<ret>"
 
 # use tabs
 set global tabstop 4

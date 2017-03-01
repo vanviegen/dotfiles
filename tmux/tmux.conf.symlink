@@ -98,10 +98,14 @@ bind l refresh-client
 # split -v |
 unbind |
 bind | split-window -h -c "#{pane_current_path}"
+unbind h
+bind h split-window -h -c "#{pane_current_path}"
 
 # split -v -
 unbind -
 bind - split-window -v -c "#{pane_current_path}"
+unbind v
+bind v split-window -v -c "#{pane_current_path}"
 
 # :kB: focus up
 unbind Tab
@@ -119,6 +123,11 @@ bind-key -r C-up resize-pane -U 3
 bind-key -r C-left resize-pane -L 5
 bind-key -r C-right resize-pane -R 5
 
+bind-key -r C-j resize-pane -D 3
+bind-key -r C-k resize-pane -U 3
+bind-key -r C-h resize-pane -L 5
+bind-key -r C-l resize-pane -R 5
+
 # Make ctrl-A, arrow non-repeatable commands (so sans the -r)
 unbind up
 unbind down
@@ -128,6 +137,10 @@ bind-key up select-pane -U
 bind-key down select-pane -D
 bind-key left select-pane -L
 bind-key right select-pane -R
+bind-key k select-pane -U
+bind-key j select-pane -D
+bind-key h select-pane -L
+bind-key l select-pane -R
 
 unbind e
 # bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "vim + -c 'set nonu' ~/tmux.buffer ; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
