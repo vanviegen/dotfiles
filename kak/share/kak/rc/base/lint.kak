@@ -12,7 +12,7 @@ def lint -docstring 'Parse the current buffer with a linter' %{
         printf '%s\n' "eval -no-hooks write $dir/buf"
 
         printf '%s\n' "eval -draft %{
-                  edit! -fifo $dir/fifo *lint-output*
+                  edit! -fifo $dir/fifo -debug *lint-output*
                   set buffer filetype make
                   set buffer make_current_error_line 0
                   hook -group fifo buffer BufCloseFifo .* %{
@@ -44,7 +44,7 @@ def lint -docstring 'Parse the current buffer with a linter' %{
                 errors = errors $2 "," $3 "," substr($4,2) ":"
                 # fix case where $5 is not the last field because of extra :s in the message
                 for (i=5; i<=NF; i++) errors = errors $i ":"
-                errors = substr(errors, 1, length(errors)-1) "\n"
+                errors = substr(errors, 1, length(errors)-1) " (col " $3 ")\n"
             }
             END {
                 print "set \"buffer=" file "\" lint_flags  %{" stamp ":" substr(flags,  1, length(flags)-1)  "}"
