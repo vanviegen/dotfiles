@@ -18,7 +18,7 @@ add-highlighter -group / regions -default code coffee     \
     regex         '///' ///[gimy]*           '' \
     double_string '"' (?<!\\)(\\\\)*"        '' \
     single_string "'" "'"                    '' \
-    regex         '/' (?<!\\)(\\\\)*/[gimy]* '' \
+    regex         '(?:(?<=[(=])[ \t]*/|/(?![ \t]|$))(?=.*?/)' (?<!\\)(\\\\)*/[gimy]* '' \
     comment       '#' '$'                    ''
 
 # Regular expression flags are: g → global match, i → ignore case, m → multi-lines, y → sticky
@@ -36,11 +36,14 @@ add-highlighter -group /coffee/comment fill comment
 # Keywords are collected at
 # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#Keywords
 # http://coffeescript.org/documentation/docs/lexer.html#section-63
-add-highlighter -group /coffee/code regex [$@]\w* 0:variable
-add-highlighter -group /coffee/code regex \b(Array|Boolean|Date|Function|Number|Object|RegExp|String)\b 0:type
-add-highlighter -group /coffee/code regex \b(document|false|no|null|off|on|parent|self|this|true|undefined|window|yes)\b 0:value
+add-highlighter -group /coffee/code regex [$@.]\w+ 0:variable
+add-highlighter -group /coffee/code regex \b\w+: 0:variable
+add-highlighter -group /coffee/code regex \b[A-Z][A-Za-z0-9_]+\b 0:type
+add-highlighter -group /coffee/code regex \b(false|no|null|off|on|this|true|undefined|Infinity|NaN|yes)\b 0:value
 add-highlighter -group /coffee/code regex \b(and|is|isnt|not|or)\b 0:operator
-add-highlighter -group /coffee/code regex \b(break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|native|new|package|private|protected|public|return|static|super|switch|throw|try|typeof|var|void|while|with|yield)\b 0:keyword
+add-highlighter -group /coffee/code regex [-+*/%<>&|^!?=]+ 0:operator
+add-highlighter -group /coffee/code regex \b(arguments|break|by|case|catch|class|const|continue|debugger|default|delete|do|else|enum|eval|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|loop|native|new|of|package|private|protected|public|return|static|super|switch|then|throw|try|typeof|unless|until|var|void|when|while|with|yield)\b 0:keyword
+add-highlighter -group /coffee/code regex !?[-=]> 0:keyword
 
 # Commands
 # ‾‾‾‾‾‾‾‾
