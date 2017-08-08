@@ -38,6 +38,17 @@ def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
 	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -d -c "#{pane_current_path}" -l 7 "if ( ! $args ) ; then tmux resize-pane -U 14 ; read ; fi"
 }}
 
+# map insert mode jj to escape
+hook global InsertChar j %{ try %{
+  exec -draft hH <a-k>jj<ret> d
+  exec <esc>
+}}
+
+map global normal <a-j> 6j
+map global normal <a-k> 6k
+map global normal <a-J> 6J
+map global normal <a-K> 6K
+
 # open file using fzf
 map global user o :fzf-file<ret>
 map global normal <c-p> :fzf-file<ret>
@@ -65,10 +76,10 @@ map global user h :tmux-hor<ret>
 map global user n :tmux-win<ret>
 
 # run a shell command
-map global user r ":run "
+map global user r ":wa<ret>:run "
 
 # run a shell command prefixed with the 'e' dispatcher
-map global user e ":run e "
+map global user e ":wa<ret>:run e "
 
 # select the word under the cursor and search all files for it
 map global user w "<a-i>w:grep<ret>"
