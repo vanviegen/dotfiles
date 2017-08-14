@@ -106,6 +106,32 @@ set global ui_options "ncurses_assistant=none"
 # show matching brackets
 hook global WinCreate .* %{ addhl show_matching }
 
+hook global WinSetOption filetype=python %{
+	expand-tabs
+}
+hook global WinSetOption filetype=nim %{
+	expand-tabs
+}
+
+def expand-tabs %{
+	set buffer indentwidth 4
+	map global insert <backspace> '<a-;>:insert-bs<ret>'
+
+	hook global InsertChar \t %{
+	    exec -draft h@
+	}
+
+	def -hidden insert-bs %{
+	    try %{
+	        # delete indentwidth spaces before cursor
+	        exec -draft -no-hooks h %opt{indentwidth}H <a-k>\A<space>+\Z<ret> d
+	    } catch %{
+	        exec <backspace>
+	    }
+	}
+}
+	        
+
 colorscheme base16
 face Default rgb:d8d8d8,rgb:000000
 face PrimarySelection default+rb
