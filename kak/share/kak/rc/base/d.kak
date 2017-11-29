@@ -5,13 +5,13 @@
 # ‾‾‾‾‾‾‾‾‾
 
 hook global BufCreate .*\.di? %{
-    set buffer filetype d
+    set-option buffer filetype d
 }
 
 # Highlighters
 # ‾‾‾‾‾‾‾‾‾‾‾‾
 
-add-highlighter -group / regions -default code d \
+add-highlighter shared/ regions -default code d \
     string '"' (?<!\\)(\\\\)*" '' \
     verbatim_string ` ` '' \
     verbatim_string_prefixed 'r"' '"' '' \
@@ -20,17 +20,17 @@ add-highlighter -group / regions -default code d \
     comment /\* \*/ '' \
     comment '//' $ ''
 
-add-highlighter -group /d/string fill string
-add-highlighter -group /d/verbatim_string fill magenta
-add-highlighter -group /d/verbatim_string_prefixed fill magenta
-add-highlighter -group /d/token fill meta
-add-highlighter -group /d/disabled fill rgb:777777
-add-highlighter -group /d/comment fill comment
+add-highlighter shared/d/string fill string
+add-highlighter shared/d/verbatim_string fill magenta
+add-highlighter shared/d/verbatim_string_prefixed fill magenta
+add-highlighter shared/d/token fill meta
+add-highlighter shared/d/disabled fill rgb:777777
+add-highlighter shared/d/comment fill comment
 
-add-highlighter -group /d/string regex %{\\(x[0-9a-fA-F]{2}|[0-7]{1,3}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})\b} 0:value
-add-highlighter -group /d/code regex %{'((\\.)?|[^'\\])'} 0:value
-add-highlighter -group /d/code regex "-?([0-9_]*\.(?!0[xXbB]))?\b([0-9_]+|0[xX][0-9a-fA-F_]*\.?[0-9a-fA-F_]+|0[bb][01_]+)([ep]-?[0-9_]+)?[fFlLuUi]*\b" 0:value
-add-highlighter -group /d/code regex "\b(this)\b\s*[^(]" 1:value
+add-highlighter shared/d/string regex %{\\(x[0-9a-fA-F]{2}|[0-7]{1,3}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})\b} 0:value
+add-highlighter shared/d/code regex %{'((\\.)?|[^'\\])'} 0:value
+add-highlighter shared/d/code regex "-?([0-9_]*\.(?!0[xXbB]))?\b([0-9_]+|0[xX][0-9a-fA-F_]*\.?[0-9a-fA-F_]+|0[bb][01_]+)([ep]-?[0-9_]+)?[fFlLuUi]*\b" 0:value
+add-highlighter shared/d/code regex "\b(this)\b\s*[^(]" 1:value
 
 %sh{
     # Grammar
@@ -63,67 +63,67 @@ add-highlighter -group /d/code regex "\b(this)\b\s*[^(]" 1:value
 
     # Add the language's grammar to the static completion list
     printf %s\\n "hook global WinSetOption filetype=d %{
-        set window static_words '${keywords}:${attributes}:${types}:${values}:${decorators}:${properties}'
+        set-option window static_words '${keywords}:${attributes}:${types}:${values}:${decorators}:${properties}'
     }" | sed 's,|,:,g'
 
     # Highlight keywords
     printf %s "
-        add-highlighter -group /d/code regex \b(${keywords})\b 0:keyword
-        add-highlighter -group /d/code regex \b(${attributes})\b 0:attribute
-        add-highlighter -group /d/code regex \b(${types})\b 0:type
-        add-highlighter -group /d/code regex \b(${values})\b 0:value
-        add-highlighter -group /d/code regex @(${decorators})\b 0:attribute
-        add-highlighter -group /d/code regex \b(${tokens})\b 0:builtin
-        add-highlighter -group /d/code regex \.(${properties})\b 1:builtin
+        add-highlighter shared/d/code regex \b(${keywords})\b 0:keyword
+        add-highlighter shared/d/code regex \b(${attributes})\b 0:attribute
+        add-highlighter shared/d/code regex \b(${types})\b 0:type
+        add-highlighter shared/d/code regex \b(${values})\b 0:value
+        add-highlighter shared/d/code regex @(${decorators})\b 0:attribute
+        add-highlighter shared/d/code regex \b(${tokens})\b 0:builtin
+        add-highlighter shared/d/code regex \.(${properties})\b 1:builtin
     "
 }
 
 # Commands
 # ‾‾‾‾‾‾‾‾
 
-def -hidden d-indent-on-new-line %~
-    eval -draft -itersel %=
+define-command -hidden d-indent-on-new-line %~
+    evaluate-commands -draft -itersel %=
         # preserve previous line indent
-        try %{ exec -draft \;K<a-&> }
+        try %{ execute-keys -draft \;K<a-&> }
         # indent after lines ending with { or (
-        try %[ exec -draft k<a-x> <a-k> [{(]\h*$ <ret> j<a-gt> ]
+        try %[ execute-keys -draft k<a-x> <a-k> [{(]\h*$ <ret> j<a-gt> ]
         # cleanup trailing white spaces on the previous line
-        try %{ exec -draft k<a-x> s \h+$ <ret>d }
+        try %{ execute-keys -draft k<a-x> s \h+$ <ret>d }
         # align to opening paren of previous line
-        try %{ exec -draft [( <a-k> \`\([^\n]+\n[^\n]*\n?\' <ret> s \`\(\h*.|.\' <ret> '<a-;>' & }
+        try %{ execute-keys -draft [( <a-k> \A\([^\n]+\n[^\n]*\n?\z <ret> s \A\(\h*.|.\z <ret> '<a-;>' & }
         # copy // comments prefix
-        try %{ exec -draft \;<c-s>k<a-x> s ^\h*\K/{2,} <ret> y<c-o><c-o>P<esc> }
+        try %{ execute-keys -draft \;<c-s>k<a-x> s ^\h*\K/{2,} <ret> y<c-o><c-o>P<esc> }
         # indent after a switch's case/default statements
-        try %[ exec -draft k<a-x> <a-k> ^\h*(case|default).*:$ <ret> j<a-gt> ]
+        try %[ execute-keys -draft k<a-x> <a-k> ^\h*(case|default).*:$ <ret> j<a-gt> ]
         # indent after if|else|while|for
-        try %[ exec -draft \;<a-F>)MB <a-k> \`(if|else|while|for)\h*\(.*\)\h*\n\h*\n?\' <ret> s \`|.\' <ret> 1<a-&>1<a-space><a-gt> ]
+        try %[ execute-keys -draft \;<a-F>)MB <a-k> \A(if|else|while|for)\h*\(.*\)\h*\n\h*\n?\z <ret> s \A|.\z <ret> 1<a-&>1<a-space><a-gt> ]
     =
 ~
 
-def -hidden d-indent-on-opening-curly-brace %[
+define-command -hidden d-indent-on-opening-curly-brace %[
     # align indent with opening paren when { is entered on a new line after the closing paren
-    try %[ exec -draft -itersel h<a-F>)M <a-k> \`\(.*\)\h*\n\h*\{\' <ret> s \`|.\' <ret> 1<a-&> ]
+    try %[ execute-keys -draft -itersel h<a-F>)M <a-k> \A\(.*\)\h*\n\h*\{\z <ret> s \A|.\z <ret> 1<a-&> ]
 ]
 
-def -hidden d-indent-on-closing-curly-brace %[
+define-command -hidden d-indent-on-closing-curly-brace %[
     # align to opening curly brace when alone on a line
-    try %[ exec -itersel -draft <a-h><a-k>^\h+\}$<ret>hms\`|.\'<ret>1<a-&> ]
+    try %[ execute-keys -itersel -draft <a-h><a-k>^\h+\}$<ret>hms\A|.\z<ret>1<a-&> ]
 ]
 
 # Initialization
 # ‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
-hook -group d-highlight global WinSetOption filetype=d %{ add-highlighter ref d }
+hook -group d-highlight global WinSetOption filetype=d %{ add-highlighter window ref d }
 
 hook global WinSetOption filetype=d %{
     # cleanup trailing whitespaces when exiting insert mode
-    hook window InsertEnd .* -group d-hooks %{ try %{ exec -draft <a-x>s^\h+$<ret>d } }
+    hook window InsertEnd .* -group d-hooks %{ try %{ execute-keys -draft <a-x>s^\h+$<ret>d } }
     hook window InsertChar \n -group d-indent d-indent-on-new-line
     hook window InsertChar \{ -group d-indent d-indent-on-opening-curly-brace
     hook window InsertChar \} -group d-indent d-indent-on-closing-curly-brace
 }
 
-hook -group d-highlight global WinSetOption filetype=(?!d).* %{ remove-highlighter d }
+hook -group d-highlight global WinSetOption filetype=(?!d).* %{ remove-highlighter window/d }
 
 hook global WinSetOption filetype=(?!d).* %{
     remove-hooks window d-hooks

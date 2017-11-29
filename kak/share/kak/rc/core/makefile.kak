@@ -2,21 +2,21 @@
 # ‾‾‾‾‾‾‾‾‾
 
 hook global BufCreate .*/?[mM]akefile %{
-    set buffer filetype makefile
+    set-option buffer filetype makefile
 }
 
 # Highlighters
 # ‾‾‾‾‾‾‾‾‾‾‾‾
 
-add-highlighter -group / regions -default content makefile \
+add-highlighter shared/ regions -default content makefile \
    comment '#' '$' '' \
-   eval '\$\(' '\)' '\('
+   evaluate-commands '\$\(' '\)' '\('
 
-add-highlighter -group /makefile/comment fill comment
-add-highlighter -group /makefile/eval fill value
+add-highlighter shared/makefile/comment fill comment
+add-highlighter shared/makefile/evaluate-commands fill value
 
-add-highlighter -group /makefile/content regex ^[\w.%-]+\h*:\s 0:variable
-add-highlighter -group /makefile/content regex [+?:]= 0:operator
+add-highlighter shared/makefile/content regex ^[\w.%-]+\h*:\s 0:variable
+add-highlighter shared/makefile/content regex [+?:]= 0:operator
 
 %sh{
     # Grammar
@@ -24,39 +24,39 @@ add-highlighter -group /makefile/content regex [+?:]= 0:operator
 
     # Add the language's grammar to the static completion list
     printf %s\\n "hook global WinSetOption filetype=makefile %{
-        set window static_words '${keywords}'
+        set-option window static_words '${keywords}'
     }" | sed 's,|,:,g'
 
     # Highlight keywords
-    printf %s "add-highlighter -group /makefile/content regex \b(${keywords})\b 0:keyword"
+    printf %s "add-highlighter shared/makefile/content regex \b(${keywords})\b 0:keyword"
 }
 
 # Commands
 # ‾‾‾‾‾‾‾‾
 
-def -hidden makefile-indent-on-new-line %{
-    eval -draft -itersel %{
+define-command -hidden makefile-indent-on-new-line %{
+    evaluate-commands -draft -itersel %{
         # preserve previous line indent
-        try %{ exec -draft \;K<a-&> }
+        try %{ execute-keys -draft \;K<a-&> }
         ## If the line above is a target indent with a tab
-        try %{ exec -draft Z k<a-x> <a-k>^[^:]+:\s<ret> z i<tab> }
+        try %{ execute-keys -draft Z k<a-x> <a-k>^[^:]+:\s<ret> z i<tab> }
         # cleanup trailing white space son previous line
-        try %{ exec -draft k<a-x> s \h+$ <ret>d }
+        try %{ execute-keys -draft k<a-x> s \h+$ <ret>d }
         # indent after some keywords
-        try %{ exec -draft Z k<a-x> <a-k> ^\h*(ifeq|ifneq|ifdef|ifndef|else|define)\b<ret> z <a-gt> }
+        try %{ execute-keys -draft Z k<a-x> <a-k> ^\h*(ifeq|ifneq|ifdef|ifndef|else|define)\b<ret> z <a-gt> }
     }
 }
 
 # Initialization
 # ‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
-hook -group makefile-highlight global WinSetOption filetype=makefile %{ add-highlighter ref makefile }
+hook -group makefile-highlight global WinSetOption filetype=makefile %{ add-highlighter window ref makefile }
 
 hook global WinSetOption filetype=makefile %{
     hook window InsertChar \n -group makefile-indent makefile-indent-on-new-line
 }
 
-hook -group makefile-highlight global WinSetOption filetype=(?!makefile).* %{ remove-highlighter makefile }
+hook -group makefile-highlight global WinSetOption filetype=(?!makefile).* %{ remove-highlighter window/makefile }
 
 hook global WinSetOption filetype=(?!makefile).* %{
     remove-hooks window makefile-indent

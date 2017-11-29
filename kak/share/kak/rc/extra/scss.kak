@@ -7,32 +7,32 @@
 # ‾‾‾‾‾‾‾‾‾
 
 hook global BufCreate .*[.](scss) %{
-    set buffer filetype scss
+    set-option buffer filetype scss
 }
 
 # Highlighters
 # ‾‾‾‾‾‾‾‾‾‾‾‾
 
-add-highlighter -group / regions -default core scss \
+add-highlighter shared/ regions -default core scss \
     comment // $ ''
 
-add-highlighter -group /scss/comment fill comment
+add-highlighter shared/scss/comment fill comment
 
-add-highlighter -group /scss/core ref css
+add-highlighter shared/scss/core ref css
 
-add-highlighter -group /scss/core regex @[A-Za-z][A-Za-z0-9_-]* 0:meta
+add-highlighter shared/scss/core regex @[A-Za-z][A-Za-z0-9_-]* 0:meta
 
 # Commands
 # ‾‾‾‾‾‾‾‾
 
-def -hidden scss-filter-around-selections      css-filter-around-selections
-def -hidden scss-indent-on-new-line            css-indent-on-new-line
-def -hidden scss-indent-on-closing-curly-brace css-indent-on-closing-curly-brace
+define-command -hidden scss-filter-around-selections      css-filter-around-selections
+define-command -hidden scss-indent-on-new-line            css-indent-on-new-line
+define-command -hidden scss-indent-on-closing-curly-brace css-indent-on-closing-curly-brace
 
 # Initialization
 # ‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
-hook -group scss-highlight global WinSetOption filetype=scss %{ add-highlighter ref scss }
+hook -group scss-highlight global WinSetOption filetype=scss %{ add-highlighter window ref scss }
 
 hook global WinSetOption filetype=scss %[
     hook window InsertEnd  .* -group scss-hooks  scss-filter-around-selections
@@ -40,7 +40,7 @@ hook global WinSetOption filetype=scss %[
     hook window InsertChar \} -group scss-indent scss-indent-on-closing-curly-brace
 ]
 
-hook -group scss-highlight global WinSetOption filetype=(?!scss).* %{ remove-highlighter scss }
+hook -group scss-highlight global WinSetOption filetype=(?!scss).* %{ remove-highlighter window/scss }
 
 hook global WinSetOption filetype=(?!scss).* %{
     remove-hooks window scss-indent

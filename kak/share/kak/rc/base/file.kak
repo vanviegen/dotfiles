@@ -3,13 +3,14 @@ hook global BufOpenFile .* %{ %sh{
         mime=$(file -b --mime-type "${kak_buffile}")
         case "${mime}" in
             application/*+xml) filetype="xml" ;;
+            image/*+xml) filetype="xml" ;; #SVG
             message/rfc822) filetype="mail" ;;
             text/x-shellscript) filetype="sh" ;;
             text/x-*) filetype="${mime#text/x-}" ;;
             text/*)   filetype="${mime#text/}" ;;
         esac
         if [ -n "${filetype}" ]; then
-            printf "set buffer filetype '%s'\n" "${filetype}"
+            printf "set-option buffer filetype '%s'\n" "${filetype}"
         fi
     fi
 } }

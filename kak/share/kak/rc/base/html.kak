@@ -5,75 +5,77 @@
 # ‾‾‾‾‾‾‾‾‾
 
 hook global BufCreate .*\.html %{
-    set buffer filetype html
+    set-option buffer filetype html
 }
 
 hook global BufCreate .*\.xml %{
-    set buffer filetype xml
+    set-option buffer filetype xml
 }
 
 # Highlighters
 # ‾‾‾‾‾‾‾‾‾‾‾‾
 
-add-highlighter -group / regions html                  \
+add-highlighter shared/ regions html                  \
     comment <!--     -->                  '' \
     tag     <          >                  '' \
     style   <style\b.*?>\K  (?=</style>)  '' \
     script  <script\b.*?>\K (?=</script>) ''
 
-add-highlighter -group /html/comment fill comment
+add-highlighter shared/html/comment fill comment
 
-add-highlighter -group /html/style  ref css
-add-highlighter -group /html/script ref javascript
+add-highlighter shared/html/style  ref css
+add-highlighter shared/html/script ref javascript
 
-add-highlighter -group /html/tag regex </?(\w+) 1:keyword
+add-highlighter shared/html/tag regex \b([a-zA-Z0-9_-]+)=? 1:attribute
+add-highlighter shared/html/tag regex </?(\w+) 1:keyword
+add-highlighter shared/html/tag regex <(!DOCTYPE(\h+\w+)+) 1:meta
 
-add-highlighter -group /html/tag regions content \
+add-highlighter shared/html/tag regions content \
     string '"' (?<!\\)(\\\\)*"      '' \
     string "'" "'"                  ''
 
-add-highlighter -group /html/tag/content/string fill string
+add-highlighter shared/html/tag/content/string fill string
 
 # Commands
 # ‾‾‾‾‾‾‾‾
 
-def -hidden html-filter-around-selections %{
+define-command -hidden html-filter-around-selections %{
     # remove trailing white spaces
-    try %{ exec -draft -itersel <a-x> s \h+$ <ret> d }
+    try %{ execute-keys -draft -itersel <a-x> s \h+$ <ret> d }
 }
 
-def -hidden html-indent-on-char %{
-    eval -draft -itersel %{
+define-command -hidden html-indent-on-greater-than %[
+    evaluate-commands -draft -itersel %[
         # align closing tag to opening when alone on a line
-        try %{ exec -draft <space> <a-h> s ^\h+</(\w+)>$ <ret> <a-\;> <a-?> <lt><c-r>1 <ret> s \`|.\' <ret> <a-r> 1<a-&> }
-    }
-}
+        try %[ execute-keys -draft <space> <a-h> s ^\h+<lt>/(\w+)<gt>$ <ret> {c<lt><c-r>1,<lt>/<c-r>1<gt> <ret> s \A|.\z <ret> 1<a-&> ]
+    ]
+]
 
-def -hidden html-indent-on-new-line %{
-    eval -draft -itersel %{
+define-command -hidden html-indent-on-new-line %{
+    evaluate-commands -draft -itersel %{
         # preserve previous line indent
-        try %{ exec -draft \; K <a-&> }
+        try %{ execute-keys -draft \; K <a-&> }
         # filter previous line
-        try %{ exec -draft k : html-filter-around-selections <ret> }
+        try %{ execute-keys -draft k : html-filter-around-selections <ret> }
         # indent after lines ending with opening tag
-        try %{ exec -draft k <a-x> <a-k> <[^/][^>]+>$ <ret> j <a-gt> }
+        try %{ execute-keys -draft k <a-x> <a-k> <[^/][^>]+>$ <ret> j <a-gt> }
     }
 }
 
 # Initialization
 # ‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
-hook -group html-highlight global WinSetOption filetype=(?:html|xml) %{ add-highlighter ref html }
+hook -group html-highlight global WinSetOption filetype=(?:html|xml) %{ add-highlighter window ref html }
 
 hook global WinSetOption filetype=(?:html|xml) %{
     hook window InsertEnd  .* -group html-hooks  html-filter-around-selections
-    hook window InsertChar .* -group html-indent html-indent-on-char
+    hook window InsertChar '>' -group html-indent html-indent-on-greater-than
     hook window InsertChar \n -group html-indent html-indent-on-new-line
 }
 
-hook -group html-highlight global WinSetOption filetype=(?!html|xml).* %{ remove-highlighter html }
+hook -group html-highlight global WinSetOption filetype=(?!html)(?!xml).* %{ remove-highlighter window/html }
 
-hook global WinSetOption filetype=(?!html|xml).* %{
+hook global WinSetOption filetype=(?!html)(?!xml).* %{
     remove-hooks window html-indent
     remove-hooks window html-hooks
 }

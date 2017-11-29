@@ -1,15 +1,31 @@
-decl str formatcmd ""
-def format -docstring "Format the contents of the current buffer" %{
-    %sh{
-        if [ ! -z "${kak_opt_formatcmd}" ]; then
-            readonly kak_opt_formatcmd=$(printf '%s' "${kak_opt_formatcmd}" | sed 's/ /<space>/g')
-            ## Save the current position of the cursor
-            readonly x=$((kak_cursor_column - 1))
-            readonly y="${kak_cursor_line}"
+declare-option -docstring "shell command to which the contents of the current buffer is piped" \
+    str formatcmd
 
-            printf %s\\n "exec -draft %{%|${kak_opt_formatcmd}<ret>}"
-            ## Try to restore the position of the cursor as it was prior to formatting
-            printf %s\\n "exec gg ${y}g ${x}l"
+define-command format -docstring "Format the contents of the current buffer" %{ evaluate-commands -draft %{
+    %sh{
+        if [ -n "${kak_opt_formatcmd}" ]; then
+            path_file_tmp=$(mktemp "${TMPDIR:-/tmp}"/kak-formatter-XXXXXX)
+            printf %s\\n "
+                write \"${path_file_tmp}\"
+
+                %sh{
+                    readonly path_file_out=\$(mktemp \"${TMPDIR:-/tmp}\"/kak-formatter-XXXXXX)
+
+                    if cat \"${path_file_tmp}\" | eval \"${kak_opt_formatcmd}\" > \"\${path_file_out}\"; then
+                        printf '%s\\n' \"execute-keys \\%|cat<space>'\${path_file_out}'<ret>\"
+                        printf '%s\\n' \"%sh{ rm -f '\${path_file_out}' }\"
+                    else
+                        printf '%s\\n' \"
+                            evaluate-commands -client '${kak_client}' echo -markup '{Error}formatter returned an error (\$?)'
+                        \"
+                        rm -f \"\${path_file_out}\"
+                    fi
+
+                    rm -f \"${path_file_tmp}\"
+                }
+            "
+        else
+            printf '%s\n' "evaluate-commands -client '${kak_client}' echo -markup '{Error}formatcmd option not specified'"
         fi
     }
-}
+} }

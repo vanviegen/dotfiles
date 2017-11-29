@@ -1,22 +1,35 @@
-## If set to true, backups will be removed as soon as they have been restored
-decl bool autorestore_purge_restored true
+declare-option -docstring "remove backups once they've been restored" \
+    bool autorestore_purge_restored true
 
 ## Insert the content of the backup file into the current buffer, if a suitable one is found
-def autorestore-restore-buffer -docstring "Restore the backup for the current file if it exists" %{
+define-command autorestore-restore-buffer -docstring "Restore the backup for the current file if it exists" %{
     %sh{
         buffer_basename="${kak_buffile##*/}"
         buffer_dirname=$(dirname "${kak_buffile}")
 
-        ## Find the name of the latest backup created for the buffer that was open
-        backup_path=$(ls -1t ."${kak_bufname}".kak.* 2>/dev/null | head -n 1)
+        if [ -f "${kak_buffile}" ]; then
+            newer=$(find "${buffer_dirname}"/".${buffer_basename}.kak."* -newer "${kak_buffile}" -exec ls -1t {} + 2>/dev/null | head -n 1)
 
-        if [ -z "${backup_path}" ]; then
-            exit
+            older=$(find "${buffer_dirname}"/".${buffer_basename}.kak."* \! -newer "${kak_buffile}" -exec ls -1t {} + 2>/dev/null | head -n 1)
+        else
+            # New buffers that were never written to disk.
+            newer=$(ls -1t "${buffer_dirname}"/".${buffer_basename}.kak."* 2>/dev/null | head -n 1)
+        fi
+
+        if [ -z "${newer}" ]; then
+            if [ -n "${older}" ]; then
+                printf %s\\n "
+                    echo -debug Old backup file(s) found: will not restore ${older} .
+                "
+            fi
+            exit   
         fi
 
         printf %s\\n "
             ## Replace the content of the buffer with the content of the backup file
-            exec -draft %{ %d!cat<space>${backup_path}<ret>d }
+            echo -debug Restoring file: ${newer}
+
+            execute-keys -draft %{ %d!cat<space>\"${newer}\"<ret>d }
 
             ## If the backup file has to be removed, issue the command once
             ## the current buffer has been saved
@@ -24,10 +37,9 @@ def autorestore-restore-buffer -docstring "Restore the backup for the current fi
             ## buffer was restored, do not remove the backup
             hook -group autorestore buffer BufWritePost '${kak_buffile}' %{
                 nop %sh{
-                    if [ \"\${kak_opt_autorestore_purge_restored}\" = true ]; then
-                        ls -1 '${buffer_dirname}'/.'${buffer_basename}'.kak.* 2>/dev/null | while read -r f; do
-                            rm -f \"\${f}\"
-                        done
+                    if [ \"\${kak_opt_autorestore_purge_restored}\" = true ];
+                    then
+                        rm -f \"${buffer_dirname}/.${buffer_basename}.kak.\"* 
                     fi
                 }
             }
@@ -36,24 +48,23 @@ def autorestore-restore-buffer -docstring "Restore the backup for the current fi
 }
 
 ## Remove all the backups that have been created for the current buffer
-def autorestore-purge-backups -docstring "Remove all the backups of the current buffer" %{
-    nop %sh{
-        if [ ! -f "${kak_buffile}" ]; then
-            exit
-        fi
+define-command autorestore-purge-backups -docstring "Remove all the backups of the current buffer" %{
+    %sh{
+        [ ! -f "${kak_buffile}" ] && exit
 
         buffer_basename="${kak_bufname##*/}"
         buffer_dirname=$(dirname "${kak_bufname}")
 
-        ls -1 "${buffer_dirname}"/."${buffer_basename}".kak.* 2>/dev/null | while read -r f; do
-            rm -f "${f}"
-        done
+        rm -f "${buffer_dirname}/.${buffer_basename}.kak."*
+
+        printf %s\\n "
+            echo -markup {Information}Backup files removed.
+            "
     }
-    echo -color Information 'Backup files removed'
 }
 
 ## If for some reason, backup files need to be ignored
-def autorestore-disable -docstring "Disable automatic backup recovering" %{
+define-command autorestore-disable -docstring "Disable automatic backup recovering" %{
     remove-hooks global autorestore
 }
 

@@ -1,28 +1,29 @@
-decl str docsclient
+declare-option -docstring "name of the client in which documentation is to be displayed" \
+    str docsclient
 
 hook -group git-log-highlight global WinSetOption filetype=git-log %{
-    add-highlighter group git-log-highlight
-    add-highlighter -group git-log-highlight regex '^(commit) ([0-9a-f]+)$' 1:yellow 2:red
-    add-highlighter -group git-log-highlight regex '^([a-zA-Z_-]+:) (.*?)$' 1:green 2:magenta
-    add-highlighter -group git-log-highlight ref diff # highlight potential diffs from the -p option
+    add-highlighter window group git-log-highlight
+    add-highlighter window/git-log-highlight regex '^(commit) ([0-9a-f]+)$' 1:yellow 2:red
+    add-highlighter window/git-log-highlight regex '^([a-zA-Z_-]+:) (.*?)$' 1:green 2:magenta
+    add-highlighter window/git-log-highlight ref diff # highlight potential diffs from the -p option
 }
 
-hook -group git-log-highlight global WinSetOption filetype=(?!git-log).* %{ remove-highlighter git-log-highlight }
+hook -group git-log-highlight global WinSetOption filetype=(?!git-log).* %{ remove-highlighter window/git-log-highlight }
 
 hook -group git-status-highlight global WinSetOption filetype=git-status %{
-    add-highlighter group git-status-highlight
-    add-highlighter -group git-status-highlight regex '^\h+(?:((?:both )?modified:)|(added:|new file:)|(deleted(?: by \w+)?:)|(renamed:)|(copied:))(?:.*?)$' 1:yellow 2:green 3:red 4:cyan 5:blue 6:magenta
+    add-highlighter window group git-status-highlight
+    add-highlighter window/git-status-highlight regex '^\h+(?:((?:both )?modified:)|(added:|new file:)|(deleted(?: by \w+)?:)|(renamed:)|(copied:))(?:.*?)$' 1:yellow 2:green 3:red 4:cyan 5:blue 6:magenta
 }
 
-hook -group git-status-highlight global WinSetOption filetype=(?!git-status).* %{ remove-highlighter git-status-highlight }
+hook -group git-status-highlight global WinSetOption filetype=(?!git-status).* %{ remove-highlighter window/git-status-highlight }
 
-decl line-flags git_blame_flags
-decl line-flags git_diff_flags
+declare-option -hidden line-specs git_blame_flags
+declare-option -hidden line-specs git_diff_flags
 
-face GitBlame default,magenta
-face GitDiffFlags default,black
+set-face GitBlame default,magenta
+set-face GitDiffFlags default,black
 
-def -params 1.. \
+define-command -params 1.. \
   -docstring %sh{printf '%%{git [<arguments>]: git wrapping helper
 All the optional arguments are forwarded to the git utility
 Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n-log\n-show\n-show-diff\n-status\n-update-diff}'} \
@@ -38,13 +39,13 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
            log)  filetype=git-log ;;
            status)  filetype=git-status ;;
         esac
-        output=$(mktemp -d -t kak-git.XXXXXXXX)/fifo
+        output=$(mktemp -d "${TMPDIR:-/tmp}"/kak-git.XXXXXXXX)/fifo
         mkfifo ${output}
         ( git "$@" > ${output} 2>&1 ) > /dev/null 2>&1 < /dev/null &
 
-        printf %s "eval -try-client '$kak_opt_docsclient' %{
+        printf %s "evaluate-commands -try-client '$kak_opt_docsclient' %{
                   edit! -fifo ${output} *git*
-                  set buffer filetype '${filetype}'
+                  set-option buffer filetype '${filetype}'
                   hook -group fifo buffer BufCloseFifo .* %{
                       nop %sh{ rm -r $(dirname ${output}) }
                       remove-hooks buffer fifo
@@ -54,9 +55,9 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
 
     run_git_blame() {
         (
-            printf %s "eval -client '$kak_client' %{
-                      try %{ add-highlighter flag_lines GitBlame git_blame_flags }
-                      set buffer=$kak_bufname git_blame_flags '$kak_timestamp'
+            printf %s "evaluate-commands -client '$kak_client' %{
+                      try %{ add-highlighter window flag_lines GitBlame git_blame_flags }
+                      set-option buffer=$kak_bufname git_blame_flags '$kak_timestamp'
                   }" | kak -p ${kak_session}
                   git blame "$@" --incremental ${kak_buffile} | awk '
                   function send_flags(text, flag, i) {
@@ -69,7 +70,7 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
                           flag=flag ":" line+i "|" text
                       }
                       cmd = "kak -p " ENVIRON["kak_session"]
-                      print "set -add buffer=" ENVIRON["kak_bufname"] " git_blame_flags %{" flag "}" | cmd
+                      print "set-option -add buffer=" ENVIRON["kak_bufname"] " git_blame_flags %{" flag "}" | cmd
                       close(cmd)
                   }
                   /^([0-9a-f]{40}) ([0-9]+) ([0-9]+) ([0-9]+)/ {
@@ -106,7 +107,7 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
                  line++
             }
             /^\-/ { flags=flags ":" line "|{red}-" }
-            END { print "set buffer git_diff_flags ", flags }
+            END { print "set-option buffer git_diff_flags ", flags }
         '
     }
 
@@ -114,9 +115,9 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
         # Handle case where message needs not to be edited
         if grep -E -q -e "-m|-F|-C|--message=.*|--file=.*|--reuse-message=.*|--no-edit"; then
             if git commit "$@" > /dev/null 2>&1; then
-                echo 'echo -color Information Commit succeeded'
+                echo 'echo -markup "{Information}Commit succeeded"'
             else
-                echo 'echo -color Error Commit failed'
+                echo 'echo -markup "{Error}Commit failed"'
             fi
             exit
         fi <<-EOF
@@ -129,9 +130,9 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
         printf %s "edit '$msgfile'
               hook buffer BufWritePost '.*\Q$msgfile\E' %{ %sh{
                   if git commit -F '$msgfile' --cleanup=strip $@ > /dev/null; then
-                     printf %s 'eval -client $kak_client echo -color Information Commit succeeded; delete-buffer'
+                     printf %s 'evaluate-commands -client $kak_client echo -markup %{{Information}Commit succeeded}; delete-buffer'
                   else
-                     printf %s 'eval -client $kak_client echo -color Error Commit failed'
+                     printf %s 'evaluate-commands -client $kak_client echo -markup %{{Error}Commit failed}'
                   fi
               } }"
     }
@@ -141,12 +142,12 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
        blame) shift; run_git_blame "$@" ;;
        hide-blame)
             printf %s "try %{
-                set buffer=$kak_bufname git_blame_flags ''
-                remove-highlighter hlflags_git_blame_flags
+                set-option buffer=$kak_bufname git_blame_flags ''
+                remove-highlighter window/hlflags_git_blame_flags
             }"
             ;;
        show-diff)
-           echo 'try %{ add-highlighter flag_lines GitDiffFlags git_diff_flags }'
+           echo 'try %{ add-highlighter window flag_lines GitDiffFlags git_diff_flags }'
            update_diff
            ;;
        update-diff) update_diff ;;
@@ -158,19 +159,19 @@ Available commands:\n-add\n-rm\n-blame\n-commit\n-checkout\n-diff\n-hide-blame\n
        add)
            name="${2:-${kak_buffile}}"
            if git add -- "${name}" > /dev/null 2>&1; then
-              printf %s "echo -color Information 'git: added ${name}'"
+              printf %s "echo -markup '{Information}git: added ${name}'"
            else
-              printf %s "echo -color Error 'git: unable to add ${name}'"
+              printf %s "echo -markup '{Error}git: unable to add ${name}'"
            fi
            ;;
        rm)
            name="${2:-${kak_buffile}}"
            if git rm -- "${name}" > /dev/null 2>&1; then
-              printf %s "echo -color Information 'git: removed ${name}'"
+              printf %s "echo -markup '{Information}git: removed ${name}'"
            else
-              printf %s "echo -color Error 'git: unable to remove ${name}'"
+              printf %s "echo -markup '{Error}git: unable to remove ${name}'"
            fi
            ;;
-       *) printf %s "echo -color Error %{unknown git command '$1'}"; exit ;;
+       *) printf %s "echo -markup %{{Error}unknown git command '$1'}"; exit ;;
     esac
 }}
