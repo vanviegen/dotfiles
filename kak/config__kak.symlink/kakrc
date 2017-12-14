@@ -139,3 +139,6 @@ face PrimaryCursor default+rbBu
 face SecondarySelection default+r
 face SecondaryCursor default+rBu
 
+hook global BufCreate .*[.](phpz) %{	
+    set-option buffer filetype php
+}
