@@ -1,0 +1,12 @@
+#!/bin/sh
+
+base=`basename "$0"`
+dir=`dirname "$0"`
+for a in /usr/bin /usr/local/bin $dir/linux-x64 ; do
+	if [ -e "$a/$base" ] ; then
+		exec "$a/$base" "$@"
+	fi
+done
+
+echo $base not found
+

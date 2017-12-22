@@ -1,1 +1,2 @@
-rg
+#!/bin/sh
+exec `dirname "$0"`/rg "$@"

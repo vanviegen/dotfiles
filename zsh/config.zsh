@@ -1,15 +1,23 @@
-export LSCOLORS="exfxcxdxbxegedabagacad"
-export CLICOLOR=true
 #export TERM=xterm-256color 
 export EDITOR='kak'
 
-export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	export CLICOLOR=1
+else
+	LS_OPTS="--color=auto"
+fi
 
 if [ "$TERM" != "dumb" ]; then
-	alias ls="ls -F --color=auto"
-	alias l="ls -lAh --color=auto"
-	alias ll="ls -l --color=auto"
-	alias la="ls -A --color=auto"
+	alias ls="ls -F $LS_OPTS"
+	alias l="ls -lAh $LS_OPTS"
+	alias ll="ls -l $LS_OPTS"
+	alias la="ls -A $LS_OPTS"
+fi
+
+export LSCOLORS="exfxcxdxbxegedabagacad"
+# we need to override the term here, as dircolors has never heard of xterm-screen-256color
+if ( command -v dircolors > /dev/null 2>&1 ) ; then
+	eval `TERM=xterm dircolors`
 fi
 
 setopt AUTO_CD # why would you type 'cd dir' if you could just type 'dir'?

@@ -1,5 +1,8 @@
+# shortcut to this dotfiles path is $ZSH
+export ZSH=$HOME/.dotfiles
+export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
-	export INSCREEN=true
 	export TERM=xterm-screen-256color
 	# This is a custom terminfo file compiled by the install script.
 	# We set the TERMINFO variable, so that it can be found even when in
@@ -14,20 +17,20 @@ if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
 fi
 
 if [ "$SSH_CONNECTION" != "" ] ; then
-	if [ "$INSCREEN" != true ]; then
-		echo "$DISPLAY" > ~/.display
-		tmux -L tmux-$USER attach -d
-		exit
-	fi
+	echo "$DISPLAY" > ~/.display
 else
 	rm -f ~/.display
 fi
 
+if [ "$TMUX" = "" ] ; then
+	printf "\033k`hostname -s`\033\\"
+	export INSCREEN=$hostid
+	exec tmux -L tmux-$USER attach -d
+	exit
+fi
+
 # Vim-style key binding
 bindkey -v
-
-# shortcut to this dotfiles path is $ZSH
-export ZSH=$HOME/.dotfiles
 
 # source every .zsh file in this rep
 for config_file ($ZSH/**/*.zsh) source $config_file
@@ -66,6 +69,5 @@ source "$HOME/.dotfiles/fzf/shell/completion.zsh" 2> /dev/null
 # zfz Key bindings
 source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
 
-# we need to override the term here, as dircolors has never heard of xterm-screen-256color
-eval `TERM=xterm dircolors`
 
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"

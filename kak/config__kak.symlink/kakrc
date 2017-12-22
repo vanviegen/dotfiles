@@ -85,7 +85,7 @@ map global user e ":wa<ret>:run e "
 map global user w "<a-i>w:grep<ret>"
 
 # copy the selection to the system clipboard, pasted with ctrl-(shift-)v
-map global user c "<a-|>xclip -selection clipboard<ret>"
+map global user c "<a-|>if ( command -v pbcopy > /dev/null ) ; then pbcopy ; else xclip -selection clipboard ; fi<ret>"
 
 # use tabs
 set global tabstop 4
@@ -104,7 +104,7 @@ set global autoinfo command|onkey|normal
 set global ui_options "ncurses_assistant=none"
 
 # show matching brackets
-hook global WinCreate .* %{ addhl show_matching }
+add-highlighter global show_matching
 
 hook global WinSetOption filetype=python %{
 	expand-tabs

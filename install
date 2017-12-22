@@ -4,12 +4,15 @@ require 'pathname'
 
 # Get into script directory
 Dir.chdir(File.dirname(__FILE__))
-pwd = Dir.pwd
+pwd = Dir.pwd + '/'
 home = ENV["HOME"]
 
 # Set the shell
+
 zsh = `cat /etc/shells | grep /zsh | tail -n 1`.strip
-`chsh -s #{zsh}` if `grep "^$USER:" /etc/passwd | cut -d : -f 7`.strip != zsh
+if ENV["SHELL"] != zsh
+	`chsh -s #{zsh}`
+end
 
 # Compile custom terminfo
 `tic xterm-screen-256color.terminfo`
@@ -31,9 +34,9 @@ linkables.each do |linkable|
 	backup = false
 
 	target = '.' + linkable.split('/').last.split('.symlink').last.gsub(/__/,'/')
-	targets[target] = true
 	target = home + '/' + target
-	linkable = Pathname.new(pwd+'/'+linkable).realpath.to_s
+	targets[target] = true
+	linkable = Pathname.new(pwd+linkable).realpath.to_s
 
 	if File.exists?(target) || File.symlink?(target)
 		next if File.symlink?(target) and File.readlink(target)==linkable
@@ -58,13 +61,13 @@ linkables.each do |linkable|
 	`ln -s "#{linkable}" "#{target}"`
 end
 
-links = `cd "#{home}" ; find .[a-zA-Z0-9]* -maxdepth 2 -printf "%l\t%p\n" | grep ^#{pwd} | cut -f 2`.strip.split("\n")
-
-links.each do |link|
-	if not targets[link]
-		link = home+'/'+link
-		print "unlinking #{link}\n"
-		File.unlink(link)
+(Dir["#{home}/.*"] + Dir["#{home}/.*/**"]).each do |file|
+	if File.lstat(file).symlink?
+		link = File.readlink(file)
+		if link.start_with?(pwd) and not targets[file]
+			print "unlinking #{file}\n"
+			File.unlink(file)
+		end
 	end
 end
 
