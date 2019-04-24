@@ -3,3 +3,4 @@ set print pretty on
 handle SIGPIPE nostop
 set history save on
 
+set startup-with-shell off

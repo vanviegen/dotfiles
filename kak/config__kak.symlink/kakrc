@@ -56,6 +56,9 @@ map global normal <c-p> :fzf-file<ret>
 # save and close current buffer
 map global user x ":try w ; db<ret>"
 
+# (un)comment lines
+map global user u :comment-line<ret>
+
 # switch buffer using fzf
 map global user b :fzf-buffer<ret>
 map global normal <c-b> :fzf-buffer<ret>
