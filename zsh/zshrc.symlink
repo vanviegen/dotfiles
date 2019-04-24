@@ -3,11 +3,7 @@ export ZSH=$HOME/.dotfiles
 export PATH="$ZSH/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
-	export TERM=xterm-screen-256color
-	# This is a custom terminfo file compiled by the install script.
-	# We set the TERMINFO variable, so that it can be found even when in
-	# sudo/su.
-	export TERMINFO=$HOME/.terminfo
+	export TERM=screen-256color-bce
 fi
 
 if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
@@ -71,3 +67,5 @@ source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
 
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+alias cs=rg

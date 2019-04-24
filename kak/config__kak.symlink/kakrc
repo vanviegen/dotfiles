@@ -2,7 +2,7 @@ def fzf-file -docstring 'invoke fzf to open a file' %{%sh{
 	( # running this async:
 		FILE=`rg --files | fzf-tmux -d 15`
 		if [ -n "$FILE" ]; then
-			echo "eval -client $kak_client %{edit $FILE}" | ~/.dotfiles/bin/kak -p $kak_session
+			echo "eval -client $kak_client %{edit $FILE}" | kak -p $kak_session
 		fi
 	) > /dev/null 2>&1 < /dev/null &
 }}
@@ -11,21 +11,21 @@ def fzf-buffer -docstring 'invoke fzf to select a buffer' %{%sh{
 	( # running this async:
 		BUFFER=`echo ${kak_buflist} | tr : '\n' | fzf-tmux -d 15`
 		if [ -n "$BUFFER" ]; then
-			echo "eval -client $kak_client %{buffer $BUFFER}" | ~/.dotfiles/bin/kak -p $kak_session
+			echo "eval -client $kak_client %{buffer $BUFFER}" | kak -p $kak_session
 		fi
 	) > /dev/null 2>&1 < /dev/null &
 }}
 
 def tmux-vert -docstring 'tmux create vertical split' %{%sh{
-	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
 def tmux-hor -docstring 'tmux create horizontal split' %{%sh{
-	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
 def tmux-win -docstring 'tmux create another window for this kak session' %{%sh{
-	TMUX=${kak_client_env_TMUX:-$TMUX} tmux new-window -c "#{pane_current_path}" "~/.dotfiles/bin/kak -c $kak_session"
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux new-window -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
 def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{

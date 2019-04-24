@@ -33,7 +33,7 @@ if-shell -b '[ "$(echo "$TMUX_VERSION < 2.2" | bc)" = 1 ]' \
   "set -g utf8 on; set -g status-utf8 on; set -g mouse-utf8 on"
 
 # We've installed a custom tic for this
-set -g default-terminal "xterm-screen-256color" 
+set -g default-terminal "screen-256color-bce" 
 
 # Set status bar
 set -g status-bg blue
@@ -177,5 +177,5 @@ bind-key l select-pane -R
 
 unbind e
 # bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "vim + -c 'set nonu' ~/tmux.buffer ; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
-bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "~/.dotfiles/bin/kak ~/tmux.buffer -e 'exec gj'; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
+bind e capture-pane -S -32768 \; save-buffer ~/tmux.buffer \; delete-buffer \; new-window "kak ~/tmux.buffer -e 'exec gj'; DISPLAY=`cat ~/.display` setsid xclip -selection clipboard ~/tmux.buffer ; rm -f ~/tmux.buffer"
 

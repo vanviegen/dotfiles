@@ -5,7 +5,7 @@
 On a debian/ubuntu box, run this:
 
 ```sh
-sudo apt-get install sudo git ruby zsh tmux vim-nox ncurses-bin nocache
+sudo apt-get install sudo git ruby zsh tmux vim-nox ncurses-bin nocache fzf kakoune ripgrep
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 ~/.dotfiles/install
 ```
