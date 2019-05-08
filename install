@@ -14,12 +14,6 @@ if ENV["SHELL"] != zsh
 	`chsh -s #{zsh}`
 end
 
-# Compile custom terminfo
-`tic xterm-screen-256color.terminfo`
-
-# Install vim plugins
-system("/usr/bin/vim -c ':PlugInstall' -c ':q!' -c ':q!'")
-
 # Create symlinks
 linkables = Dir.glob('*/**{.symlink}')
 
@@ -71,3 +65,11 @@ end
 	end
 end
 
+%x(
+	if [ ! -d ~/.nix-profile ] || ! command -v nix-env > /dev/null ; then
+		curl https://nixos.org/nix/install | sh
+	fi
+	. #{home}/.nix-profile/etc/profile.d/nix.sh
+	nix-env -i fzf ripgrep kakoune
+)
+ 

@@ -15,9 +15,8 @@ if [ "$TERM" != "dumb" ]; then
 fi
 
 export LSCOLORS="exfxcxdxbxegedabagacad"
-# we need to override the term here, as dircolors has never heard of xterm-screen-256color
 if ( command -v dircolors > /dev/null 2>&1 ) ; then
-	eval `TERM=xterm dircolors`
+	eval `dircolors`
 fi
 
 setopt AUTO_CD # why would you type 'cd dir' if you could just type 'dir'?
@@ -87,3 +86,7 @@ function zle-line-finish () {
 }
 zle -N zle-line-init
 zle -N zle-line-finish 
+
+. ~/.nix-profile/etc/profile.d/nix.sh
+export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
+

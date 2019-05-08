@@ -1,4 +1,4 @@
-def fzf-file -docstring 'invoke fzf to open a file' %{%sh{
+def fzf-file -docstring 'invoke fzf to open a file' %{nop %sh{
 	( # running this async:
 		FILE=`rg --files | fzf-tmux -d 15`
 		if [ -n "$FILE" ]; then
@@ -7,28 +7,28 @@ def fzf-file -docstring 'invoke fzf to open a file' %{%sh{
 	) > /dev/null 2>&1 < /dev/null &
 }}
 
-def fzf-buffer -docstring 'invoke fzf to select a buffer' %{%sh{
+def fzf-buffer -docstring 'invoke fzf to select a buffer' %{nop %sh{
 	( # running this async:
-		BUFFER=`echo ${kak_buflist} | tr : '\n' | fzf-tmux -d 15`
+		BUFFER=`(eval "set -- $kak_buflist" ; while [ $# -gt 0 ]; do printf "%s\0" "$1" ; shift ; done ) | fzf-tmux -d 15 --read0`
 		if [ -n "$BUFFER" ]; then
 			echo "eval -client $kak_client %{buffer $BUFFER}" | kak -p $kak_session
 		fi
 	) > /dev/null 2>&1 < /dev/null &
 }}
 
-def tmux-vert -docstring 'tmux create vertical split' %{%sh{
+def tmux-vert -docstring 'tmux create vertical split' %{nop %sh{
 	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
-def tmux-hor -docstring 'tmux create horizontal split' %{%sh{
+def tmux-hor -docstring 'tmux create horizontal split' %{nop %sh{
 	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
-def tmux-win -docstring 'tmux create another window for this kak session' %{%sh{
+def tmux-win -docstring 'tmux create another window for this kak session' %{nop %sh{
 	TMUX=${kak_client_env_TMUX:-$TMUX} tmux new-window -c "#{pane_current_path}" "kak -c $kak_session"
 }}
 
-def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
+def run -params 1.. -docstring 'execute arguments as shell command' %{nop %sh{
 	# escape args
 	args=
 	for a in "$@"; do
@@ -40,8 +40,8 @@ def run -params 1.. -docstring 'execute arguments as shell command' %{%sh{
 
 # map insert mode jj to escape
 hook global InsertChar j %{ try %{
-  exec -draft hH <a-k>jj<ret> d
-  exec <esc>
+	exec -draft hH <a-k>jj<ret> d
+	exec <esc>
 }}
 
 map global normal <a-j> 6j
@@ -107,7 +107,7 @@ set global autoinfo command|onkey|normal
 set global ui_options "ncurses_assistant=none"
 
 # show matching brackets
-add-highlighter global show_matching
+addhl global/ show-matching
 
 hook global WinSetOption filetype=python %{
 	expand-tabs
@@ -121,27 +121,24 @@ def expand-tabs %{
 	map global insert <backspace> '<a-;>:insert-bs<ret>'
 
 	hook global InsertChar \t %{
-	    exec -draft h@
+		exec -draft h@
 	}
 
 	def -hidden insert-bs %{
-	    try %{
-	        # delete indentwidth spaces before cursor
-	        exec -draft -no-hooks h %opt{indentwidth}H <a-k>\A<space>+\Z<ret> d
-	    } catch %{
-	        exec <backspace>
-	    }
+		try %{
+			# delete indentwidth spaces before cursor
+			exec -draft -no-hooks h %opt{indentwidth}H <a-k>\A<space>+\Z<ret> d
+		} catch %{
+			exec <backspace>
+		}
 	}
 }
-	        
 
-colorscheme base16
-face Default rgb:d8d8d8,rgb:000000
-face PrimarySelection default+rb
-face PrimaryCursor default+rbBu
-face SecondarySelection default+r
-face SecondaryCursor default+rBu
+
+colorscheme tomorrow-night
+# darker background
+face global Default rgb:d8d8d8,rgb:050505
 
 hook global BufCreate .*[.](phpz) %{	
-    set-option buffer filetype php
+	set-option buffer filetype php
 }

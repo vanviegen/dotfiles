@@ -5,7 +5,7 @@
 On a debian/ubuntu box, run this:
 
 ```sh
-sudo apt-get install sudo git ruby zsh tmux vim-nox ncurses-bin nocache fzf kakoune ripgrep
+sudo apt-get install sudo git ruby zsh tmux nocache
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 ~/.dotfiles/install
 ```
@@ -21,7 +21,7 @@ committing as me. You probably don't want that.
 
 ## updating
 
-In `~/.dotfiles` do a `git pull` followed by an `./install`. The latter will cause new symlinks to be created and stale symlinks to be removed from your home dir. Additionally, it will update any submodules (used for vim extensions).
+In `~/.dotfiles` do a `git pull` followed by an `./install`. The latter will cause new symlinks to be created and stale symlinks to be removed from your home dir. Additionally, it will install Nix and some Nix packages (kakoune, fzf, ripgrep).
 
 ## topical
 
@@ -42,9 +42,6 @@ There's a few special files in the hierarchy.
 - **topic/\*.symlink**: Any files ending in `*.symlink` get symlinked into
   your `$HOME`. This is so you can keep all of those versioned in your dotfiles
   but still keep those autoloaded files in your home directory. These get
-  symlinked in when you run `rake install`.
+  symlinked in when you run `install`.
 
-## thanks
-
-Forked from https://github.com/holman/dotfiles
 
