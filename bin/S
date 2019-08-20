@@ -12,16 +12,20 @@ esac
 
 export HISTFILE="$(eval echo ~${user})/.zsh_history-$USER"
 
-if [ "$#" == 0 ] ; then
-	set -- zsh "$@"
-fi
+# Start shell by default
+if [ "$#" == 0 ] ; then set -- "$SHELL" ; fi
 
+# Resolve command in current user's path
+set -- "`which $1`" "${@:2}"
+
+# Simple case, when running as root
 if [ "$user" = "root" ] ; then
 	exec sudo -E "$@"
 fi
 
+# Run as some other user
 for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
-if [ "$#" = 1 ] ; then
+arg=`if [ "$#" = 1 ] ; then
 	# otherwise, there won't be a controlling terminal (so ctrl-c terms shell)
 	exec sudo -E su $user -p -s "`which $cmd`"
 fi
