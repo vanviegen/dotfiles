@@ -90,3 +90,7 @@ zle -N zle-line-finish
 . ~/.nix-profile/etc/profile.d/nix.sh
 export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
 
+export NVM_DIR="$HOME/.dotfiles/nvm"
+. "$NVM_DIR/nvm.sh"
+
+
