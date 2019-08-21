@@ -1,63 +1,163 @@
 # shortcut to this dotfiles path is $ZSH
-export ZSH=$HOME/.dotfiles
-export PATH="$ZSH/bin:$HOME/.cargo/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
-if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
-	export TERM=screen-256color-bce
+if [ "$ZSH_CONFIGURED" = "" ] ; then
+	export ZSH_CONFIGURED=1
+
+	export ZSH=$HOME/.dotfiles
+	export PATH="$ZSH/bin:$HOME/.cargo/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+
+	if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
+		export TERM=screen-256color-bce
+	fi
+
+	if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
+		# Just about any X terminal nowadays supports 256 colors, but fails to reflect
+		# that fact in its TERM setting. Let's just assume so:
+		export TERM=xterm-256color
+	fi
+
+	if [ "$SSH_CONNECTION" != "" ] ; then
+		echo "$DISPLAY" > ~/.display
+	else
+		rm -f ~/.display
+	fi
+
+	# Vim-style key binding
+	bindkey -v
+
+	# initialize autocomplete here, otherwise functions won't be loaded
+	autoload -U compinit -u
+	compinit -u
+
+	# matches case insensitive for lowercase
+	zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+	# pasting with tabs doesn't perform completion
+	zstyle ':completion:*' insert-tab pending
+
+	zstyle ':completion:*' verbose yes
+	zstyle ':completion:*:descriptions' format '%B%d%b'
+	zstyle ':completion:*:messages' format '%d'
+	zstyle ':completion:*:warnings' format 'No matches for: %d'
+	zstyle ':completion:*' group-name ''
+
+	export PAGER=less
+	export LESS="-iMSx4 -FX -R"
+
+	export FZF_DEFAULT_COMMAND='rg --files'
+
+	export EDITOR='kak'
+
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		export CLICOLOR=1
+	else
+		LS_OPTS="--color=auto"
+	fi
+
+	export LSCOLORS="exfxcxdxbxegedabagacad"
+	if ( command -v dircolors > /dev/null 2>&1 ) ; then
+		eval `dircolors`
+	fi
+
+	. ~/.nix-profile/etc/profile.d/nix.sh
+	export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
+
+	# NVM. As the default init is pretty slow, we'll do the 'use' part lazily, when first calling npm or node
+	export NVM_DIR="$HOME/.dotfiles/nvm"
+	. "$NVM_DIR/nvm.sh" --no-use
+
+	if [ "$TMUX" = "" ] ; then
+		exec tmux new-session -A -s $USER-main
+		exit
+	fi
+
 fi
 
-if [ "$TERM" = "xterm" -o "$TERM" = "rxvt" ] ; then
-	# Just about any X terminal nowadays supports 256 colors, but fails to reflect
-	# that fact in its TERM setting. Let's just assume so:
-	export TERM=xterm-256color
+alias reload!='. ~/.zshrc'
+alias open='xdg-open'
+
+setopt AUTO_CD # why would you type 'cd dir' if you could just type 'dir'?
+setopt AUTO_PUSHD # This makes cd=pushd
+setopt PUSHD_IGNORE_DUPS
+
+setopt LOCAL_OPTIONS # allow functions to have local options
+setopt LOCAL_TRAPS # allow functions to have local traps
+setopt PROMPT_SUBST # parameter expansion for prompt
+
+setopt COMPLETE_IN_WORD
+unsetopt AUTO_MENU # do not choose first option after 2x tab
+setopt AUTO_PARAM_SLASH # complete directories with a trailing /
+setopt COMPLETE_ALIASES # don't expand aliases _before_ completion has finished
+
+if [ "$HISTFILE" = "" ] ; then
+	HISTFILE=~/.zsh_history
+fi
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY # add timestamps to history
+setopt APPEND_HISTORY # adds history
+setopt INC_APPEND_HISTORY # adds history incrementally
+setopt HIST_IGNORE_SPACE # don't add cmds starting with a whitespace to hist
+setopt HIST_IGNORE_ALL_DUPS # don't record dupes in history
+
+bindkey '^R' history-incremental-search-backward
+bindkey "^[[1;5D" backward-word
+bindkey "^[[1;5C" forward-word
+
+
+# To fix special keys, the $terminfo solution is used from: http://zshwiki.org/home/zle/bindkeys
+
+# create a zkbd compatible hash;
+# to add other keys to this hash, see: man 5 terminfo
+typeset -A key
+
+key[Home]=${terminfo[khome]}
+key[End]=${terminfo[kend]}
+key[Insert]=${terminfo[kich1]}
+key[Delete]=${terminfo[kdch1]}
+key[Up]=${terminfo[kcuu1]}
+key[Down]=${terminfo[kcud1]}
+key[Left]=${terminfo[kcub1]}
+key[Right]=${terminfo[kcuf1]}
+key[PageUp]=${terminfo[kpp]}
+key[PageDown]=${terminfo[knp]}
+
+
+# setup key accordingly
+[[ -n "${key[Home]}"    ]]  && bindkey  "${key[Home]}"    beginning-of-line
+[[ -n "${key[End]}"     ]]  && bindkey  "${key[End]}"     end-of-line
+[[ -n "${key[Insert]}"  ]]  && bindkey  "${key[Insert]}"  overwrite-mode
+[[ -n "${key[Delete]}"  ]]  && bindkey  "${key[Delete]}"  delete-char
+[[ -n "${key[Up]}"      ]]  && bindkey  "${key[Up]}"      up-line-or-history
+[[ -n "${key[Down]}"    ]]  && bindkey  "${key[Down]}"    down-line-or-history
+[[ -n "${key[Left]}"    ]]  && bindkey  "${key[Left]}"    backward-char
+[[ -n "${key[Right]}"   ]]  && bindkey  "${key[Right]}"   forward-char
+
+# Finally, make sure the terminal is in application mode, when zle is
+# active. Only then are the values from $terminfo valid.
+function zle-line-init () {
+    echoti smkx
+}
+function zle-line-finish () {
+    echoti rmkx
+}
+zle -N zle-line-init
+zle -N zle-line-finish 
+
+alias node='unalias node ; unalias npm ; nvm use default ; node $@'
+alias npm='unalias node ; unalias npm ; nvm use default ; npm $@'
+alias cs=rg
+if [ "$TERM" != "dumb" ]; then
+	alias ls="ls -F $LS_OPTS"
+	alias l="ls -lAh $LS_OPTS"
+	alias ll="ls -l $LS_OPTS"
+	alias la="ls -A $LS_OPTS"
 fi
 
-if [ "$SSH_CONNECTION" != "" ] ; then
-	echo "$DISPLAY" > ~/.display
-else
-	rm -f ~/.display
-fi
-
-if [ "$TMUX" = "" ] ; then
-	printf "\033k`hostname -s`\033\\"
-	export INSCREEN=$hostid
-	exec tmux -L tmux-$USER attach -d
-	exit
-fi
-
-# Vim-style key binding
-bindkey -v
-
-# source every .zsh file in this rep
-for config_file ($ZSH/**/*.zsh) source $config_file
-
-# use .localrc for SUPER SECRET CRAP that you don't
-# want in your public, versioned repo.
 if [[ -a ~/.localrc ]]
 then
   source ~/.localrc
 fi
-
-# initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit -u
-compinit -u
-
-# matches case insensitive for lowercase
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-
-# pasting with tabs doesn't perform completion
-zstyle ':completion:*' insert-tab pending
-
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*:descriptions' format '%B%d%b'
-zstyle ':completion:*:messages' format '%d'
-zstyle ':completion:*:warnings' format 'No matches for: %d'
-zstyle ':completion:*' group-name ''
-
-export PAGER=less
-export LESS="-iMSx4 -FX -R"
-
-export FZF_DEFAULT_COMMAND='rg --files'
 
 # fzf Auto-completion
 source "$HOME/.dotfiles/fzf/shell/completion.zsh" 2> /dev/null
@@ -65,7 +165,5 @@ source "$HOME/.dotfiles/fzf/shell/completion.zsh" 2> /dev/null
 # zfz Key bindings
 source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
 
+source $HOME/.dotfiles/zsh/prompt.zsh
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-alias cs=rg

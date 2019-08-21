@@ -76,7 +76,7 @@ function precmd() {
 
 # preexec is called just before any command line is executed
 function preexec() {
-	if [ -f ~/.display -a "$SSH_CONNECTION" != "" -a "$INSCREEN" = true ]; then
+	if [ -f ~/.display -a "$SSH_CONNECTION" != "" -a "$TMUX" != "" ]; then
 		export DISPLAY=`cat ~/.display`
 	fi
 	if [ "$TERM" = "screen-256color" ] ; then
