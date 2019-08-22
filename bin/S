@@ -1,33 +1,40 @@
 #!/bin/bash
 
+# Run a process as another user, using sudo. This script attempts to
+# preserve the current user's environment. Usage examples
+#
+#    S
+#		--> start a root shell
+#    S myCmd myArg
+#		--> run 'myCmd myArg' as root
+#    S :frank
+#		--> run a shell as user frank
+#    S :frank myCmd myArg
+#		--> run 'myCmd myArg' as user frank
+
+
 case "$1" in
 	:*)
-		user="`echo "$1" | cut -c 2-`"
+		userName="`echo "$1" | cut -c 2-`"
+		userId=`id -u "$userName"`
+		if [ "$userId" = "" ] ; then
+			exit 1
+		fi
 		shift
 		;;
 	*)
-		user=root
+		userName="root"
+		userId=0
 		;;
 esac
 
-export HISTFILE="$(eval echo ~${user})/.zsh_history-$USER"
+export HISTFILE="$(eval echo ~${userName})/.zsh_history-$USER"
 
-# Start shell by default
-if [ "$#" == 0 ] ; then set -- "$SHELL" ; fi
-
-# Resolve command in current user's path
-set -- "`which $1`" "${@:2}"
-
-# Simple case, when running as root
-if [ "$user" = "root" ] ; then
-	exec sudo -E "$@"
+if [ "$#" == 0 ] ; then
+	export ZSH_RUN="UID=$userId"
+	exec sudo -E zsh
+else
+	for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
+	exec sudo -E zsh -c "UID=$userId ; $cmd"
 fi
-
-# Run as some other user
-for arg in "$@"; do cmd="$cmd`printf %q "$arg"` "; done
-arg=`if [ "$#" = 1 ] ; then
-	# otherwise, there won't be a controlling terminal (so ctrl-c terms shell)
-	exec sudo -E su $user -p -s "`which $cmd`"
-fi
-exec sudo -E su $user -p -c "$cmd"
 
