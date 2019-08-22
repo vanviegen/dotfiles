@@ -70,6 +70,6 @@ end
 		curl https://nixos.org/nix/install | sh
 	fi
 	. #{home}/.nix-profile/etc/profile.d/nix.sh
-	nix-env -f '<nixpkgs>' -iA fzf ripgrep kakoune
+	nix-env -f '<nixpkgs>' -iA fzf ripgrep kakoune tmux
 )
  

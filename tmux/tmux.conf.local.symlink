@@ -179,8 +179,8 @@ tmux_conf_theme_right_separator_sub='|'
 #     - #{uptime_s}
 #     - #{username}
 #     - #{username_ssh}
-tmux_conf_theme_status_left=' ❐ #S | ↑#{?uptime_y, #{uptime_y}y,}#{?uptime_d, #{uptime_d}d,}#{?uptime_h, #{uptime_h}h,}#{?uptime_m, #{uptime_m}m,} '
-tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #{?battery_status, #{battery_status},}#{?battery_bar, #{battery_bar},}#{?battery_percentage, #{battery_percentage},} , %R , %d %b | #{username}#{root} | #{hostname} '
+tmux_conf_theme_status_left=' #{username}#{root} | #h '
+tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized}#{?battery_status, #{battery_status},}#{?battery_percentage, #{battery_percentage},} , %R , %d %b '
 
 # status left style
 tmux_conf_theme_status_left_fg='#000000,#e4e4e4,#e4e4e4'  # black, white , white
@@ -193,13 +193,13 @@ tmux_conf_theme_status_right_bg='#080808,#d70000,#e4e4e4' # dark gray, red, whit
 tmux_conf_theme_status_right_attr='none,none,bold'
 
 # pairing indicator
-tmux_conf_theme_pairing='👓 '          # U+1F453
+tmux_conf_theme_pairing='👓'          # U+1F453
 tmux_conf_theme_pairing_fg='none'
 tmux_conf_theme_pairing_bg='none'
 tmux_conf_theme_pairing_attr='none'
 
 # prefix indicator
-tmux_conf_theme_prefix='⌨ '            # U+2328
+tmux_conf_theme_prefix='⌨'            # U+2328
 tmux_conf_theme_prefix_fg='none'
 tmux_conf_theme_prefix_bg='none'
 tmux_conf_theme_prefix_attr='none'
@@ -317,14 +317,14 @@ unbind up
 unbind down
 unbind left
 unbind right
-bind-key up select-pane -U
-bind-key down select-pane -D
-bind-key left select-pane -L
-bind-key right select-pane -R
-bind-key k select-pane -U
-bind-key j select-pane -D
-bind-key h select-pane -L
-bind-key l select-pane -R
+bind up select-pane -U
+bind down select-pane -D
+bind left select-pane -L
+bind right select-pane -R
+bind k select-pane -U
+bind j select-pane -D
+bind h select-pane -L
+bind l select-pane -R
 
 # urxvt tab like window switching (-n: no prior escape seq)
 bind -n S-down new-window
@@ -336,3 +336,14 @@ bind -n M-right swap-window -t +1
 # kill
 unbind k
 bind k confirm-before "kill-pane"
+
+bind -T root F12 \
+	display-message "Disabled" \;\
+	set prefix2 None \;\
+	set key-table off
+
+bind -T off F12 \
+	display-message "Enabled" \;\
+	set -u prefix2\;\
+	set key-table root
+
