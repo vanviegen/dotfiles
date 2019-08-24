@@ -62,10 +62,6 @@ if [ "$ZSH_CONFIGURED" = "" ] ; then
 	. ~/.nix-profile/etc/profile.d/nix.sh
 	export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
 
-	# NVM. As the default init is pretty slow, we'll do the 'use' part lazily, when first calling npm or node
-	export NVM_DIR="$HOME/.dotfiles/nvm"
-	. "$NVM_DIR/nvm.sh" --no-use
-
 	if [ "$TMUX" = "" ] ; then
 		exec tmux new-session -A -s $USER-main
 		exit
@@ -144,6 +140,9 @@ function zle-line-finish () {
 zle -N zle-line-init
 zle -N zle-line-finish 
 
+# NVM. As the default init is pretty slow, we'll do the 'use' part lazily, when first calling npm or node
+export NVM_DIR="$HOME/.dotfiles/nvm"
+. "$NVM_DIR/nvm.sh" --no-use
 alias node='unalias node ; unalias npm ; nvm use default ; node $@'
 alias npm='unalias node ; unalias npm ; nvm use default ; npm $@'
 alias cs=rg
