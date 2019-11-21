@@ -142,9 +142,9 @@ zle -N zle-line-finish
 
 # NVM. As the default init is pretty slow, we'll do the 'use' part lazily, when first calling npm or node
 export NVM_DIR="$HOME/.dotfiles/nvm"
-. "$NVM_DIR/nvm.sh" --no-use
-alias node='unalias node ; unalias npm ; nvm use default ; node $@'
-alias npm='unalias node ; unalias npm ; nvm use default ; npm $@'
+alias node='unalias node ; unalias node ; . "$NVM_DIR/nvm.sh" ; node $@'
+alias npm='unalias node ; unalias npm ; . "$NVM_DIR/nvm.sh" ; npm $@'
+alias npx='unalias node ; unalias npx ; . "$NVM_DIR/nvm.sh" ; npx $@'
 alias cs=rg
 if [ "$TERM" != "dumb" ]; then
 	alias ls="ls -F $LS_OPTS"
@@ -171,5 +171,4 @@ if [ "$ZSH_RUN" != "" ] ; then
 	eval "$ZSH_RUN" 
 	unset ZSH_RUN
 fi
-
 
