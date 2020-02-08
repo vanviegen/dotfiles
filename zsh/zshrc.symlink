@@ -166,9 +166,12 @@ source "$HOME/.dotfiles/fzf/shell/key-bindings.zsh"
 
 source $HOME/.dotfiles/zsh/prompt.zsh
 
+source /home/frank/.config/broot/launcher/bash/br
+
 # Used by the 'S' script to run command before an interactive session
 if [ "$ZSH_RUN" != "" ] ; then
 	eval "$ZSH_RUN" 
 	unset ZSH_RUN
 fi
+
 
