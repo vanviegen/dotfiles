@@ -4,7 +4,7 @@ if [ "$ZSH_CONFIGURED" = "" ] ; then
 	export ZSH_CONFIGURED=1
 
 	export ZSH=$HOME/.dotfiles
-	export PATH="$ZSH/bin:$HOME/.cargo/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+	export PATH="$ZSH/bin:$HOME/.cargo/bin:$HOME/.local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 	if [ "$TERM" = "screen" -o "$TERM" = "screen-256color" -o "$TERM" = "xterm-screen-256color" ] ; then
 		export TERM=screen-256color-bce
@@ -62,7 +62,7 @@ if [ "$ZSH_CONFIGURED" = "" ] ; then
 	. ~/.nix-profile/etc/profile.d/nix.sh
 	export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
 
-	if [ "$TMUX" = "" ] ; then
+	if [ "$TMUX" = "" -a "$TERM_PROGRAM" != "vscode" ] ; then
 		exec tmux new-session -A -s $USER-main
 		exit
 	fi
