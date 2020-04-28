@@ -11,6 +11,9 @@ set -g status-right '#[fg=colour238,bg=colour235,nobold,nounderscore,noitalics]�
 setw -g window-status-format '#[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]#[fg=colour222] #I  #W #[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]'
 setw -g window-status-current-format '#[fg=colour235,bg=colour238,nobold,nounderscore,noitalics]#[fg=colour222,bg=colour238] #I  #W #[fg=colour238,bg=colour235,nobold,nounderscore,noitalics]'
 
+# Set the TERM variable
+set -g default-terminal "screen-256color-bce"
+
 # Prevent escape delay
 set -s escape-time 0
 
