@@ -25,10 +25,6 @@ git_prompt_info () {
 	echo "${ref#refs/heads/}"
 }
 
-DISABLE_AUTO_TITLE=false
-
-#terminal_title=`print -Pn "\e]2;lala\a"`
-terminal_title=$(print -Pn "dir:\\%~x \ek%~\e\\")
 export PROMPT=$'%0{\033k%~\033\\%}%K{$green}%F{$black} %n %K{$grey}%F{$green} %m %F{$yellow}%~%F{$white}$WITH$(git_dirty) %K{$black}%F{$grey}%F{$white} '
 
 # preexec is called just before any command line is executed
@@ -37,6 +33,15 @@ function preexec() {
 		export DISPLAY=`cat ~/.display`
 	fi
 
-	print -Pn "\ek$1\e\\"
+	# Get the first argument that is not 'ssh' or an environment assignment
+	POS=1
+	while true ; do
+		PROG=`echo $1 | cut -d ' ' -f $POS`
+		[[ "$PROG" != "ssh" && ! "$PROG" =~ "=" && "$PROG" != "" ]] && break
+		POS=$((POS+1))
+	done
+
+	# Set the tmux name
+	print -Pn "\ek$PROG\e\\"
 }
 
