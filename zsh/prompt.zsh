@@ -25,10 +25,15 @@ git_prompt_info () {
 	echo "${ref#refs/heads/}"
 }
 
-export PROMPT=$'%K{$green}%F{$black} %n %K{$grey}%F{$green} %m %F{$yellow}%~$(git_dirty) %K{$black}%F{$grey}%F{$white} '
+DISABLE_AUTO_TITLE=false
+
+#terminal_title=`print -Pn "\e]2;lala\a"`
+terminal_title=$(print -Pn "dir:\\%~x \ek%~\e\\")
+export PROMPT=$'%0{\033k%~\033\\%}%K{$green}%F{$black} %n %K{$grey}%F{$green} %m %F{$yellow}%~$(git_dirty) %K{$black}%F{$grey}%F{$white} '
 
 function precmd() {
-	print -Pn "\e]2;%55<...<%~\a" # plain xterm title ($3 for pwd)
+	#print -Pn "@1\e]2;%55<...<%~\a" # plain xterm title ($3 for pwd)
+#	print -Pn "lll\ek${pwd}\e\\"
 }
 
 # preexec is called just before any command line is executed
@@ -36,6 +41,7 @@ function preexec() {
 	if [ -f ~/.display -a "$SSH_CONNECTION" != "" -a "$TMUX" != "" ]; then
 		export DISPLAY=`cat ~/.display`
 	fi
-	print -Pn "\e]2;$1\a" # plain xterm title ($3 for pwd)
+
+	print -Pn "\ek$1\e\\"
 }
 
