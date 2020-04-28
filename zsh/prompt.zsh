@@ -25,7 +25,7 @@ git_prompt_info () {
 	echo "${ref#refs/heads/}"
 }
 
-export PROMPT=$'%0{\033k%~\033\\%}%K{$green}%F{$black} %n %K{$grey}%F{$green} %m %F{$yellow}%~%F{$white}$WITH$(git_dirty) %K{$black}%F{$grey}%F{$white} '
+export PROMPT=$'%0{\033k%~\033\\%}%K{$grey}%(!.%F{$red}.%F{$green}) %n %F{$yellow}%~%F{$white}$WITH$(git_dirty) %K{$black}%F{$grey}%F{$white} '
 
 # preexec is called just before any command line is executed
 function preexec() {
