@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export WITH="$WITH $@"
+nix-shell '<nixpkgs>' --run zsh -p $@
+

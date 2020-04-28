@@ -140,11 +140,6 @@ function zle-line-finish () {
 zle -N zle-line-init
 zle -N zle-line-finish 
 
-# NVM. As the default init is pretty slow, we'll do the 'use' part lazily, when first calling npm or node
-export NVM_DIR="$HOME/.dotfiles/nvm"
-alias node='unalias node ; unalias node ; . "$NVM_DIR/nvm.sh" ; node $@'
-alias npm='unalias node ; unalias npm ; . "$NVM_DIR/nvm.sh" ; npm $@'
-alias npx='unalias node ; unalias npx ; . "$NVM_DIR/nvm.sh" ; npx $@'
 alias cs=rg
 if [ "$TERM" != "dumb" ]; then
 	alias ls="ls -F $LS_OPTS"
