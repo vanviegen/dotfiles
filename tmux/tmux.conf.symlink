@@ -1,9 +1,9 @@
 # theme
 set -g status-bg 'colour235'
 set -g status-justify 'left'
-set -g status-left-length '100'
+#set -g status-left-length '100'
 set -g status 'on'
-set -g status-right-length '100'
+#set -g status-right-length '100'
 setw -g window-status-separator ''
 
 set -g status-left ''
@@ -73,22 +73,14 @@ unbind k
 bind k confirm-before "kill-pane"
 
 bind -T root C-q \
-	set prefix2 None \;\
+	set prefix None \;\
 	set key-table off \;\
-	set status-left " #h | Reactivate using ctrl-a ctrl-q | " \;\
-	set -g window-status-format "#{pane_current_command}" \;\
-    set window-status-current-format "#{pane_current_command}" \;\
-	set -g window-status-last-style "fg=#8a8a8a" \;\
-	set window-status-current-style "fg=#00afff"
+	set status-left "#[fg=colour232,bg=colour154,nobold,nounderscore,noitalics] off #[fg=colour154,bg=colour232]"
 
 bind -T off C-q \
-	set -u prefix2 \;\
+	set -u prefix \;\
 	set key-table root \;\
-	set -u status-left \;\
-	set -gu window-status-format \;\
-    set -u window-status-current-format \;\
-	set -gu window-status-last-style \;\
-	set -u window-status-current-style
+	set -u status-left
 
 unbind A
 bind A command-prompt "rename-window %%"
