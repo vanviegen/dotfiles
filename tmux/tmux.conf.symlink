@@ -29,9 +29,9 @@ bind r source-file ~/.tmux.conf \; display-message "Config reloaded..."
 
 # split current window
 unbind |
-bind | split-window -h
+bind | split-window -h -c '#{pane_current_path}'
 unbind -
-bind - split-window -v
+bind - split-window -v -c '#{pane_current_path}'
 
 # window navigation
 bind Tab last-window        # move to last active window
@@ -60,8 +60,12 @@ bind j select-pane -D
 bind h select-pane -L
 bind l select-pane -R
 
+# open new window in current path
+unbind c
+bind c new-window -c '#{pane_current_path}' 
+
 # urxvt tab like window switching (-n: no prior escape seq)
-bind -n S-down new-window
+bind -n S-down new-window -c '#{pane_current_path}'
 bind -n S-left prev
 bind -n S-right next
 bind -n M-left swap-window -t -1h
