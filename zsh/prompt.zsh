@@ -2,8 +2,10 @@ green=154
 white=white
 yellow=222
 grey=238
-black=232
-red=9
+black=000
+red=196
+
+reset=`tput sgr0`
 
 git_dirty() {
 	st=$(/usr/bin/git status 2>/dev/null | tail -n 1)
@@ -25,7 +27,7 @@ git_prompt_info () {
 	echo "${ref#refs/heads/}"
 }
 
-export PROMPT=$'%0{\033k%~\033\\%}%K{$grey}%(!.%F{$red}.%F{$green}) %n %F{$yellow}%~%F{$white}$WITH$(git_dirty) %K{$black}%F{$grey}%F{$white} '
+export PROMPT=$'%0{\033k%~\033\\%}%K{$grey}%(!.%F{$red}.%F{$green}) %n %F{$yellow}%~%F{$white}$WITH$(git_dirty) $reset%F{$grey}$reset '
 
 # preexec is called just before any command line is executed
 function preexec() {
