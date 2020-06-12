@@ -5,8 +5,6 @@ grey=238
 black=000
 red=196
 
-reset=`tput sgr0`
-
 git_dirty() {
 	st=$(/usr/bin/git status 2>/dev/null | tail -n 1)
 	if [[ $st == "" ]]
@@ -15,9 +13,9 @@ git_dirty() {
 	else
 		if [[ $st == "nothing to commit, working tree clean" ]]
 		then
-			echo " %F{$green}$(git_prompt_info)"
+			echo " %F{$green}$(git_prompt_info)%f"
 		else
-			echo " %F{$red}$(git_prompt_info)"
+			echo " %F{$red}$(git_prompt_info)%f"
 		fi
 	fi
 }
@@ -27,7 +25,7 @@ git_prompt_info () {
 	echo "${ref#refs/heads/}"
 }
 
-export PROMPT=$'%0{\033k%~\033\\%}%K{$grey}%(!.%F{$red}.%F{$green}) %n %F{$yellow}%~%F{$white}$WITH$(git_dirty) $reset%F{$grey}$reset '
+export PROMPT=$'%0{\033k%~\033\\%}%K{$grey}%(!.%F{$red}.%F{$green}) %n%f %F{$yellow}%~%f%F{$white}$WITH$(git_dirty) %f%k%F{$grey}%f '
 
 # preexec is called just before any command line is executed
 function preexec() {
