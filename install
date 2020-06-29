@@ -67,9 +67,8 @@ end
 
 %x(
 	if [ ! -d ~/.nix-profile ] || ! command -v nix-env > /dev/null ; then
-		curl https://nixos.org/nix/install | sh
+		curl -L https://nixos.org/nix/install | sh
 	fi
 	. #{home}/.nix-profile/etc/profile.d/nix.sh
 	nix-env -f '<nixpkgs>' -iA fzf ripgrep kakoune tmux broot
-	)
- 
+)
