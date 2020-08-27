@@ -5,7 +5,7 @@
 On a debian/ubuntu box, run this:
 
 ```sh
-sudo apt-get install sudo git ruby zsh tmux nocache
+sudo apt-get install sudo git ruby zsh curl xz-utils nocache
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles
 ~/.dotfiles/install
 ```

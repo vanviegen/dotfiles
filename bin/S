@@ -29,6 +29,7 @@ case "$1" in
 esac
 
 export HISTFILE="$(eval echo ~${userName})/.zsh_history-$USER"
+export XDG_RUNTIME_DIR=
 
 if [ "$#" == 0 ] ; then
 	export ZSH_RUN="UID=$userId"
