@@ -88,7 +88,7 @@ map global user e ":wa<ret>:run e "
 map global user w "<a-i>w:grep<ret>"
 
 # copy the selection to the system clipboard, pasted with ctrl-(shift-)v
-map global user c "<a-|>if ( command -v pbcopy > /dev/null ) ; then pbcopy ; else xclip -selection clipboard ; fi<ret>"
+map global user c "<a-|>if ( command -v pbcopy > /dev/null ) ; then pbcopy ; elif ( command -v xsel > /dev/null ) ; then xsel -b ; else xclip -selection clipboard ; fi<ret>"
 
 # use tabs
 set global tabstop 4
