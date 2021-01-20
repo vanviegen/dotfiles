@@ -59,7 +59,11 @@ if [ "$ZSH_CONFIGURED" = "" ] ; then
 		eval `dircolors`
 	fi
 
-	. ~/.nix-profile/etc/profile.d/nix.sh
+	if [ -f /etc/profile.d/nix.sh ] ; then
+		. /etc/profile.d/nix.sh
+	else
+		. $HOME/.nix-profile/etc/profile.d/nix.sh
+	fi
 	export LOCALE_ARCHIVE_2_27=`nix-build --no-out-link "<nixpkgs>" -A glibcLocales`/lib/locale/locale-archive
 
 	if [ "$TMUX" = "" -a "$TERM_PROGRAM" != "vscode" ] ; then
