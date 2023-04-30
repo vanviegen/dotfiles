@@ -1,0 +1,14 @@
+#!/bin/sh
+
+bin="$(which -a hx | tail -n +2 | head -n 1 )"
+if test -n "$bin"; then
+	echo $bin
+	exec "$bin" "$@"
+elif command -v helix > /dev/null; then
+	exec "$(which helix)" "$@"
+elif command -v kak > /dev/null; then
+	exec "$(which kak)" "$@"
+else
+	echo "No suitable editor found (hx, helix, kak)"
+	exit 1
+fi

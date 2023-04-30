@@ -1,0 +1,8 @@
+if test -z "$IN_FISH"; then
+    export IN_FISH=true
+    if test -e "$HOME/.nix-profile/etc/profile.d/nix.sh"; then
+        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
+
+    SHELL="$(which fish)" exec "$(which fish)"
+fi
