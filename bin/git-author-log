@@ -1,0 +1,75 @@
+#!/usr/bin/env php
+<?php
+
+$prog = array_shift($argv);
+
+if (count($argv)<1) {
+	fwrite(STDERR, "Usage: $prog <directory>...\n");
+	exit(1);
+}
+
+$aliasFile = getenv("HOME")."/.git-author-log.alias";
+$alias = [];
+foreach(explode("\n", file_get_contents($aliasFile)) as $line) {
+	$line = explode(":", $line, 2);
+	if (!isset($line[1])) continue;
+	$alias[trim($line[0])] = trim($line[1]);
+}
+
+$cmd = [];
+foreach($argv as $x) {
+	$cmd[] = "git --git-dir='$x'/.git log --pretty=format:'%ai|%H|%an <%ae>|$x' --abbrev-commit";
+}
+
+$authors = [];
+
+$cmd = "( " . implode(" ; ", $cmd) . " ) | sort -r";
+foreach(explode("\n", shell_exec($cmd)) as $line) {
+	if (empty($line)) continue;
+	list($date,$sha,$author,$dir) = explode("|", $line);
+	if (array_key_exists($author, $alias)) {
+		if ($alias[$author]) $author = $alias[$author];
+	}
+	else {
+		$alias[$author] = "";
+	}
+	if (!array_key_exists($author, $authors)) $authors[$author] = [];
+	$authors[$author][] = [$dir, $sha];
+}
+
+ksort($authors);
+
+$aliasData = "";
+foreach($alias as $k=>$v) $aliasData .= "$k: $v\n";
+file_put_contents($aliasFile, $aliasData);
+
+while(true) {
+	$id = 0;
+	$ids = [];
+	foreach($authors as $author => $patches) {
+		$ids[++$id] = $patches;
+		print "$id. $author: ". count($patches)."\n";
+	}
+	print "Q. Quit\n";
+
+	$in = strtolower(trim(fgets(STDIN)));
+	if ($in==="q") break;
+	
+	$patches = @$ids[$in];
+	if (!$patches) continue;
+
+	$cmd = [];
+	foreach($patches as $patch) {
+		$cmd[] = "git --git-dir='{$patch[0]}'/.git show --color=always -w -M --diff-algorithm=histogram --word-diff=color {$patch[1]} -- . ':(exclude,glob)build' ':(exclude).idea' ':(exclude).gradle' ':(exclude)local.properties'; echo ''";
+	}
+	$cmd = "( ".implode(";", $cmd)." ) | less -r";
+	$descs = array (
+		0 => array ("file", "php://stdin", "r"),
+		1 => array ("file", "php://stdout", "w"),
+		2 => array ("file", "php://stderr", "w")
+	);
+	$proc = proc_open ($cmd, $descs, $fp);
+	proc_close($proc);
+}
+
+

@@ -1,0 +1,147 @@
+def fzf-file -docstring 'invoke fzf to open a file' %{nop %sh{
+	( # running this async:
+		FILE=`rg --files | fzf-tmux -d 15`
+		if [ -n "$FILE" ]; then
+			echo "eval -client $kak_client %{edit $FILE}" | kak -p $kak_session
+		fi
+	) > /dev/null 2>&1 < /dev/null &
+}}
+
+def fzf-buffer -docstring 'invoke fzf to select a buffer' %{nop %sh{
+	( # running this async:
+		BUFFER=`(eval "set -- $kak_buflist" ; while [ $# -gt 0 ]; do printf "%s\0" "$1" ; shift ; done ) | fzf-tmux -d 15 --read0`
+		if [ -n "$BUFFER" ]; then
+			echo "eval -client $kak_client %{buffer $BUFFER}" | kak -p $kak_session
+		fi
+	) > /dev/null 2>&1 < /dev/null &
+}}
+
+def tmux-vert -docstring 'tmux create vertical split' %{nop %sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -c "#{pane_current_path}" "kak -c $kak_session"
+}}
+
+def tmux-hor -docstring 'tmux create horizontal split' %{nop %sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -h -c "#{pane_current_path}" "kak -c $kak_session"
+}}
+
+def tmux-win -docstring 'tmux create another window for this kak session' %{nop %sh{
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux new-window -c "#{pane_current_path}" "kak -c $kak_session"
+}}
+
+def run -params 1.. -docstring 'execute arguments as shell command' %{nop %sh{
+	# escape args
+	args=
+	for a in "$@"; do
+		a=`echo "$a" | sed 's/"/\\"/g' | sed "s/'/'\\\\\\''/g"`
+		args="$args'$a' "
+	done
+	TMUX=${kak_client_env_TMUX:-$TMUX} tmux split-window -v -d -c "#{pane_current_path}" -l 7 "if ( ! $args ) ; then tmux resize-pane -U 14 ; read ; fi"
+}}
+
+# map insert mode jj to escape
+hook global InsertChar j %{ try %{
+	exec -draft hH <a-k>jj<ret> d
+	exec <esc>
+}}
+
+map global normal <a-j> 6j
+map global normal <a-k> 6k
+map global normal <a-J> 6J
+map global normal <a-K> 6K
+
+# open file using fzf
+map global user o :fzf-file<ret>
+map global normal <c-p> :fzf-file<ret>
+
+# save and close current buffer
+map global user x ":try w ; db<ret>"
+
+# (un)comment lines
+map global user u :comment-line<ret>
+
+# switch buffer using fzf
+map global user b :fzf-buffer<ret>
+map global normal <c-b> :fzf-buffer<ret>
+
+# quit window
+map global user q :q<ret>
+
+# search all files
+map global user g %{:grep %{}<left>}
+
+# vertical split
+map global user v :tmux-vert<ret>
+
+# horizontal split
+map global user h :tmux-hor<ret>
+
+# new tmux window
+map global user n :tmux-win<ret>
+
+# run a shell command
+map global user r ":wa<ret>:run "
+
+# run a shell command prefixed with the 'e' dispatcher
+map global user e ":wa<ret>:run e "
+
+# select the word under the cursor and search all files for it
+map global user w "<a-i>w:grep<ret>"
+
+# copy the selection to the system clipboard, pasted with ctrl-(shift-)v
+map global user c "<a-|>if ( command -v pbcopy > /dev/null ) ; then pbcopy ; elif ( command -v xsel > /dev/null ) ; then xsel -b ; else xclip -selection clipboard ; fi<ret>"
+
+# use tabs
+set global tabstop 4
+set global indentwidth 0
+
+# use ripgrep for file search
+set global grepcmd 'rg --no-heading --line-number --color never'
+
+# scroll when cursor gets 3 lines or 10 columns near the screen border
+set global scrolloff 3,10
+
+# narrate everything we're doing - comment this out once you're comfortable with kakoune
+set global autoinfo command|onkey|normal 
+
+# no need for clippy
+set global ui_options "ncurses_assistant=none"
+
+# show matching brackets
+addhl global/ show-matching
+
+# soft wrapping
+addhl global/ wrap -word -indent -marker …
+
+hook global WinSetOption filetype=python %{
+	expand-tabs
+}
+hook global WinSetOption filetype=nim %{
+	expand-tabs
+}
+
+def expand-tabs %{
+	set buffer indentwidth 4
+	map global insert <backspace> '<a-;>:insert-bs<ret>'
+
+	hook global InsertChar \t %{
+		exec -draft h@
+	}
+
+	def -hidden insert-bs %{
+		try %{
+			# delete indentwidth spaces before cursor
+			exec -draft -no-hooks h %opt{indentwidth}H <a-k>\A<space>+\Z<ret> d
+		} catch %{
+			exec <backspace>
+		}
+	}
+}
+
+
+colorscheme tomorrow-night
+# darker background
+face global Default rgb:d8d8d8,rgb:050505
+
+hook global BufCreate .*[.](phpz) %{	
+	set-option buffer filetype php
+}

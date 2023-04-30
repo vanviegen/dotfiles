@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+if ARGV.length != 2
+	print <<EOD
+syntax: git find-common <file1> <file2>
+
+Finds the two most recent commits for which <file1> and <file2> were equal.
+The two files don't need to be in the same repository, and their
+repositories don't need to share ancestors.
+
+EOD
+	exit 1
+end
+
+def getCommits(fn)
+	savedDir = Dir.pwd
+
+	Dir.chdir File.dirname(fn)
+	relative = File.basename(fn)
+	fn = Dir.pwd.split '/'
+	while not File.exists?('.git') do
+		throw "no .git found for: #{relative}" if fn.empty?
+		Dir.chdir '..'
+		relative = fn.pop()+'/'+relative
+	end
+
+	# Find all commits that are ancestors of changes to fhe file.
+	tmps = ["!HEAD"] + `git log --follow --name-only "--pretty=format:!%P" -- "#{relative}"`.split("\n")
+
+	# For each of these ancestors, get the sha1 of the file.
+	shas = []
+	commits = []
+	files = []
+	tmps.each { |tmp|
+		tmp.strip!
+		if tmp[0]=='!'
+			sha = `git ls-tree -l "#{tmp[1..-1]}" -- "#{relative}" | cut -d ' ' -f 3`.strip()
+			next if sha==''
+			files.push relative
+			commits.push tmp[1..-1]
+			shas.push sha
+		elsif tmp!=''
+			relative = tmp
+		end
+	}
+
+	Dir.chdir savedDir
+	
+	return commits,shas,files
+end
+
+cs1,ss1,fs1 = getCommits ARGV[0]
+cs2,ss2,fs2 = getCommits ARGV[1]
+
+ss1.each_with_index { |s,n1|
+	n2 = ss2.index(s)
+	if n2
+		print "#{cs1[n1]} #{fs1[n1]}\n#{cs2[n2]} #{fs2[n2]}\n"
+		exit 0
+	end
+}
+
+print "n/a\n"
+exit 1
+

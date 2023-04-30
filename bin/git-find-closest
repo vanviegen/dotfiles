@@ -1,0 +1,47 @@
+#!/bin/sh
+
+set -e
+
+prev=9999999
+best=9999999
+diverge=0
+
+
+if [ "$1" = "" ] ; then
+	echo "Find the commit in the current git repository that is closest to the files in the specified directory."
+	echo ""
+	echo "syntax: git find-closest DIRECTORY [PATH]"
+	exit 1
+fi
+
+branch=`git symbolic-ref HEAD`
+git "--work-tree=$1" checkout -q --orphan _findClosest
+git "--work-tree=$1" add .
+git "--work-tree=$1" commit -qam "git find-closest reference commit"
+reference=`git rev-parse HEAD`
+git symbolic-ref HEAD "$branch"
+git branch -qD _findClosest
+git reset
+
+for REV in $(git rev-list HEAD); do 
+    lines=`git diff -U0 "$REV" $reference -- "$2" | wc -l`
+	echo "$REV: $lines"
+	if [ $lines -gt $prev ] ; then
+		diverge=$((diverge+1))
+		if [ $diverge -gt 10 ] ; then
+			break
+		fi
+	fi
+	if [ $lines -lt $best ] ; then
+		diverge=0
+		best=$lines
+		bestCommit=$REV
+	fi
+	prev=$lines
+done
+
+echo ""
+echo ""
+echo "reference:    $reference"
+echo "most similar: $bestCommit"
+

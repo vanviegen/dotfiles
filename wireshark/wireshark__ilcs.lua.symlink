@@ -1,0 +1,494 @@
+do
+	local Part = {}
+
+	function Part.new(tvb, start, _end, bytes)
+		if not bytes then bytes = tvb:range():bytes() end
+		if not start then start = 0 end
+		if not _end then _end = tvb:len() end
+		local obj = {t = tvb, s = start, e = _end, b = bytes}
+		setmetatable(obj, { __index = Part});
+		return obj
+	end
+
+	function Part:range() -- returns a TvbRange
+		if self.s >= self.e then
+			if self.s > self.e then
+				print "attempting to fetch range for invalid part"
+			end
+			return self.t:range(0, 0)
+		end
+		return self.t:range(self.s, self.e - self.s)
+	end
+	
+	function Part:str()
+		return self:range():string()
+	end
+
+	function Part:uint()
+		return tonumber(self:str())
+	end
+	
+	function Part:combine(other)
+		return Part.new(self.t, math.min(self.s,other.s), math.max(self.e,other.e), self.b)
+	end
+	
+	function Part:fetchHead(cnt)
+		local copy = self:clone()
+		copy.e = copy.s + cnt
+		self.s = copy.e
+		return copy
+	end
+
+	function Part:fetchPart(char,tail)
+		-- tail==false: never return a tail
+		-- tail==true: always return a tail
+		-- tail==nil: return a tail once, if it's not empty
+		local bytes = self.b
+		local p = self.s
+		local e = self.e
+		if (p > e and tail ~= true) then
+			print "attempting to fetch part from invalid part"
+			return nil
+		end
+		while p < e do
+			if char==bytes:get_index(p) then
+				local os = self.s
+				self.s = p+1
+				return Part.new(self.t, os, p, self.b)
+			end
+			p = p + 1
+		end
+		if tail==false or (tail==nil and self.e<=self.s) then
+			return nil
+		end
+		local os = self.s
+		self.s = e + 1 -- invalidate the string
+		return Part.new(self.t, os, self.e, self.b)
+	end
+
+	function Part:clone()
+		return Part.new(self.t, self.s, self.e, self.b)
+	end
+	
+	function addslashes(s)
+		s = string.gsub(s, "(['\"\\])", "\\%1")
+		return (string.gsub(s, "%z", "\\0"))
+	end
+
+	function dump(o)
+		if type(o) == 'table' then
+			local s = '{ '
+			for k,v in pairs(o) do
+				if type(k) ~= 'number' then k = '"'..k..'"' end
+				s = s .. '['..k..'] = ' .. dump(v) .. ','
+			end
+			return s .. '} '
+		else
+			return tostring(o)
+		end
+	end
+
+	function parseRequestMessage(msgtree,msg,browserInfo)
+		local cmd = msg:fetchHead(1)
+		msgtree:add(cmd:range(), "Command code: "..cmd:str())
+		cmd = cmd:str()
+
+		if cmd=='M' or cmd=='I' then
+			msgtree:set_text(cmd=='M' and "Send message" or "Send signed message")
+			local rpc = msg:fetchPart(2,true)
+			local cluster = msg:fetchPart(2,true)
+			local rp = rpc:fetchPart(3)
+			local domain = rp:fetchPart(string.byte('|',1),false)
+			if domain then
+				msgtree:add(domain:range(), "RPC domain: "..domain:str())
+			end
+			msgtree:add(rp:range(), "RPC method: "..rp:str())
+			msgtree:append_text(" '".. rp:str() .. "'")
+
+			local acnt = 0
+			while true do
+				local arg = rpc:fetchPart(3)
+				if not arg or arg:str()=='' then break end
+				acnt = acnt + 1
+				local argCopy = arg:clone()
+				local argType = arg:fetchHead(1)
+				local isCallback = argType:str()~='j'
+				msgtree:add(argCopy:range(), "Argument "..acnt..": "..(isCallback and "["..arg:str().."]" or arg:str()))
+				if isCallback then
+					browserInfo[arg:str()] = rp:str()..'#'..acnt
+				end
+			end
+
+			if cluster:str()~='' then
+				msgtree:add(cluster:range(), "Cluster: "..cluster:str())
+			end
+		elseif cmd=='C' then
+			msgtree:set_text("Cancel subscription")
+		elseif cmd=='D' then
+			msgtree:set_text("End tab")
+		elseif cmd=='P' then
+			msgtree:set_text("Ping")
+		else
+			msgtree:set_text("Unknown command")
+		end
+	end
+
+	function getCallbackStr(browserInfo, refStr)
+		local descr = browserInfo[refStr]
+		local cb = '['..refStr..']'
+		return descr and descr..' '..cb or cb
+	end
+
+
+
+	local ilcs = Proto("ilcs","Implicit Link Comet Stream")
+	local defaultCallbacks = { ['0']='Reload', ['1']='Eval', ['-2']='Acknowledge upto: ', ['-3']='Increment: ', ['-4']='Decrement: ' }
+
+	local browsers, idportGuids, browserTmps, httpConnCont, httpConns
+
+	function ilcs.init()
+		browsers = {}
+		idportGuids = {}
+		browserTmps = 0
+
+		httpConnCount = 0
+		httpConns = {}
+	end
+
+	-- create a function to dissect it
+	function ilcs.dissector(tvb,pinfo,tree)
+		if tvb:len()<5 or tvb(0,3):string() ~= "ilc" then
+			return 0
+		end
+		
+		local data = Part.new(tvb)
+		local dataRange = data:range()
+
+		local headers = data:fetchPart(1)
+		local headersRange = headers:range()
+		local magic = headers:fetchHead(4)
+
+		local response
+		if magic:str()=='ilcs' then
+			response = true
+		elseif magic:str()=='ilcb' then
+			response = false
+		else
+			return 0
+		end
+
+		local version = headers:fetchPart(2)
+		local ver = version:str()
+		if ver=='' then
+			ver = '1'
+		elseif ver~='1' and ver~='2' then
+			return 0
+		end
+		
+		local descr = response and "ILCS response" or "ILCS request"
+		pinfo.cols.protocol = "ILCS"
+		pinfo.cols.info = descr
+
+		local ilcstree = tree:add(ilcs, dataRange, descr)
+		headertree = ilcstree:add(headersRange, "Headers")
+		headertree:add(magic:range(),"Magic bytes")
+		headertree:add(version:range(),"Protocol version: "..ver)
+
+
+		if (not response) and ver=='1' then
+			local flags = headers:fetchPart(2)
+			headertree:add(flags:range(), "Requesting timeout: " .. (flags:uint()>0 and (flags:str().." seconds") or "server-defined"))
+		end
+
+		local idport = { (tostring(pinfo.src).."/"..tostring(pinfo.src_port)), (tostring(pinfo.dst).."/"..tostring(pinfo.dst_port)) }
+		idport = response and idport[1]..idport[2] or idport[2]..idport[1]
+		if not httpConns[idport] then
+			httpConnCount = httpConnCount + 1
+			httpConns[idport] = httpConnCount
+		end
+		descr = descr .. ", conn=" .. httpConns[idport]
+
+		local browserName
+
+		if response and idportGuids[idport] then
+			-- guid-style responses don't have a browser id
+			browserName = idportGuids[idport]
+			descr = descr .. ", browser=" .. browserName
+		else
+			local browserId = headers:fetchPart(2)
+			if not browserId or browserId:str()=='reload' then
+				descr = descr .. ", reload!"
+				ilcstree:set_text(descr)
+				pinfo.cols.info = descr
+				return true
+			end
+			headertree:add(browserId:range(), "Browser id: "..browserId:str())
+
+			if browserId:str():len()==32 then
+				-- guid-style request, no seperate secret
+				browserName = browserId:str()
+				idportGuids[idport] = browserName
+				descr = descr .. ", browser=" .. browserName
+			elseif browserId:uint() and browserId:uint()>0 then
+				-- legacy
+				descr = descr .. ", browser=" .. browserId:str()
+				local securityCode = headers:fetchPart(2)
+				headertree:add(securityCode:range(), "Security code: "..securityCode:str())
+				browserName = browserId:str()..':'..securityCode:str()
+			else
+				-- legacy
+				descr = descr .. ", new browser"
+				browserTmps = browserTmps + 1
+				browserName = idport
+			end
+
+			if browsers[idport] then
+				browsers[browserName] = browsers[idport]
+				browsers[idport] = null
+			end
+		end
+
+		if not browsers[browserName] then
+			browsers[browserName] = {}
+			print("new browser info '"..browserName.."'")
+		else
+			print("existing browser info '"..browserName.."'")
+		end
+		local browserInfo = browsers[browserName]
+
+		if ver=='2' then
+			if response then
+				local followup = headers:fetchPart(2,true)
+				fus = followup:str()
+				headertree:add(followup:range(), "Follow-up: "..(fus=='R' and "reconnect to stall" or (fus=='A' and "reconnect for active requests" or (fus=='E' and "sync lost, reload" or (fus=='D' and "nothing to listen for" or "handled by tab "..fus)))))
+				pvList = ''
+				while true do
+					local pvReply = data:fetchPart(1)
+					if not pvReply or pvReply:str()=='' then break end
+					local pvRange = pvReply:range()
+
+					local mType = pvReply:fetchHead(1)
+
+					local pv = pvReply:fetchPart(2)
+					local pvtree = ilcstree:add(pvRange, 'Tmp')
+					
+					local respSeq = pvReply:fetchPart(2,true)
+
+					--pvtree:add(mType:range(), "Type: "..(mType:str()=='M' and "messages" or "unknown"))
+
+					local cCnt = 0
+					while true do
+						local ref = pvReply:fetchPart(2,true)
+						if not ref or ref:str()=='' then break end
+						cCnt = cCnt+1
+						
+						local msg = pvReply:fetchPart(2,true)
+						local msgCopy = msg:clone()
+
+						local addArgs = true
+						local respond = false
+						local refNum = ref:uint()
+						if refNum and refNum<10 then
+							-- reserved number
+							mdescr = defaultCallbacks[ref:str()] or 'Unknown internal '..ref:str()
+							if refNum==-3 or refNum==-4 then
+								local aboutCb = msg:fetchPart(4)
+								if aboutCb then
+									mdescr = mdescr .. getCallbackStr(browserInfo, aboutCb:str())
+									addArgs = false
+								end
+							elseif refNum==-2 then
+								local ackSeq = msg:fetchPart(4)
+								mdescr = mdescr .. (ackSeq and ackSeq:str() or '?')
+								addArgs = false
+							end
+						else
+							mdescr = 'Callback: '..getCallbackStr(browserInfo, ref:str())
+						end
+								
+						local msgtree = pvtree:add(ref:combine(msgCopy):range(), mdescr)
+
+						if addArgs then
+							local isJson = false
+							if msg:clone():fetchHead(1):str() == "\005" then
+								msg:fetchHead(1)
+								isJson = true
+							end
+
+							local acnt = 0
+							while true do
+								local arg = msg:fetchPart(4)
+								if not arg then break end
+
+								acnt = acnt + 1
+								
+								local argStr = arg:str()
+								if not isJson then
+									argStr = addslashes(argStr)
+								end
+								msgtree:add(arg:range(), 'Argument '..acnt..': '..argStr)
+							end
+
+							msgtree:set_text(mdescr..' with '..acnt..' argument(s)')
+						end
+					end
+					pvtree:set_text("Tab "..pv:str()..": "..cCnt.." command(s), seq="..(respSeq:str() or '?'))
+					pvList = (pvList=='' and pv:str() or pvList..','..pv:str())
+				end
+				descr = descr .. ", tab(s)="..pvList
+			else
+				local pv = headers:fetchPart(2,true)
+				headertree:add(pv:range(), "Tab: "..pv:str())
+					
+				descr = descr .. ", tab="..pv:str()
+				
+				local reqSeq = headers:fetchPart(2,true)
+				headertree:add(reqSeq:range(), "Request seq: "..reqSeq:str())
+				
+				local respAck = headers:fetchPart(2,true)
+				headertree:add(respAck:range(), "Response ack: "..respAck:str())
+					
+				local flags = headers:fetchPart(2,true)
+				local flagText = "none"
+				if flags and flags:uint() then
+					mode = flags:uint() % 4
+					if mode==1 then
+						flagText = "no-response"
+						descr = descr .. ", no response"
+					elseif mode==2 then
+						flagText = "no-stall"
+						descr = descr .. ", no stall"
+					end
+				end
+				headertree:add(flags:range(), "Flags: "..flagText)
+			
+				while true do
+					local msg = data:fetchPart(1)
+					if not msg then break end
+					
+					local msgtree = ilcstree:add(msg:range(),'Tmp')
+					parseRequestMessage(msgtree,msg,browserInfo)
+				end
+			end
+		else
+			local ack = headers:fetchPart(2)
+			headertree:add(ack:range(), "Acknowledging upto #"..ack:str())
+			if ack:uint()>0 then
+				descr = descr .. ", ack=" .. ack:str()
+			end
+
+			if response then
+				local reconnect = headers:fetchPart(2,true)
+				headertree:add(reconnect:range(), "Reconnect: "..(reconnect:str()=='R' and "yes" or "no"))
+			else
+				local ver = headers:fetchPart(2,true)
+				headertree:add(ver:range(), "Protocol version: "..(ver:str()=='' and ver:str() or "not specified"))
+
+				local mask = headers:fetchPart(2,true)
+				headertree:add(mask:range(), "Requesting ip mask: "..mask:str().." bits")
+			end
+
+			local firstSeq, lastSeq
+
+			while true do
+				local msg = data:fetchPart(1)
+				if not msg or msg:str()=='' then break end
+
+				local msgtree = ilcstree:add(msg:range(),'Tmp')
+
+				local seq = msg:fetchPart(2)
+				msgtree:add(seq:range(), "Sequence number: "..seq:str())
+				firstSeq = firstSeq or seq:str()
+				lastSeq = seq:str()
+
+				local pv = msg:fetchPart(2)
+
+				if pv:str()=='P' then
+					msgtree:add(pv:range(), "Command code: "..pv:str())
+					msgtree:set_text("Ping")
+				else
+					msgtree:add(pv:range(), "Tab id: "..pv:str())
+
+					if response then
+						msgtree:set_text("Callback")
+
+						local cb = msg:fetchPart(2)
+						local cbinfo = browserInfo[cb:str()] or defaultCallbacks[cb:str()]
+						msgtree:add(cb:range(), "Responding to: "..(cbinfo and cbinfo..' ['..cb:str()..']' or cb:str()))
+						msgtree:append_text(", target="..(cbinfo or cb:str()))
+
+						local rc = msg:fetchHead(1)
+						local rcval = rc:str()
+						if rcval=='+' then rcval=1 elseif rcval=='-' then rcval=-1 else rcval=tonumber(rcval) or 0 end
+						rcval = (rcval>0 and '+'..rcval or rcval)
+						msgtree:add(rc:range(), "Reference count delta: "..rcval)
+
+						local invocations = 0
+						while true do
+							local data = msg:fetchPart(3)
+							if not data then break end
+							local dataCopy = data:clone()
+
+							local args = {}
+							invocations = invocations + 1
+
+							while true do
+								local arg = data:fetchPart(4)
+								if not arg then break end
+								
+								local argCopy = arg:clone()
+								if arg:fetchHead(1):str()=="\005" then
+									-- json argument
+									table.insert(args,arg:str())
+								else
+									-- string argument
+									table.insert(argCopy,'"'..addslashes(argCopy:str())..'"')
+								end
+							end
+
+							msgtree:add(dataCopy:range(), "Invocation: "..table.concat(args,', '))
+						end
+						if invocations>0 then msgtree:append_text(", invocations="..invocations) end
+						if rcval~=0 then msgtree:append_text(", ref "..rcval) end
+					else
+						parseRequestMessage(msgtree, msg, browserInfo)
+					end
+					msgtree:append_text(", tab=" .. (pv and pv:str() or "unknown"))
+				end
+
+				msgtree:append_text(", seq="..seq:str())
+			end
+
+			if firstSeq then
+				descr = descr .. ", seq=" .. (firstSeq==lastSeq and firstSeq or firstSeq..".."..lastSeq)
+			end
+		end
+		
+		ilcstree:set_text(descr)
+		pinfo.cols.info = descr
+
+		return true
+	end
+
+	local mtdt = DissectorTable.get("media_type")
+	-- local original_xml = mtdt:get_dissector("application/xml")
+
+	mtdt:add("application/xml",ilcs)
+	mtdt:add("application/x-ilcs",ilcs)
+
+	local hpdt = DissectorTable.get("http.port")
+	hpdt:add(80,ilcs)
+	hpdt:add(28717,ilcs)
+	hpdt:add(28718,ilcs)
+	hpdt:add(28719,ilcs)
+	hpdt:add(20000,ilcs)
+	hpdt:add(20001,ilcs)
+	local wsdt = DissectorTable.get("ws.port")
+	wsdt:add(80,ilcs)
+	wsdt:add(28717,ilcs)
+	wsdt:add(28718,ilcs)
+	wsdt:add(28719,ilcs)
+	wsdt:add(20000,ilcs)
+	wsdt:add(20001,ilcs)
+end
+

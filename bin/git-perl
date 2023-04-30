@@ -1,0 +1,55 @@
+#!/bin/sh
+
+dry=false
+if [ "$1" = "-d" ] ; then
+	dry=true
+	shift
+fi
+
+
+if [ "$#" != 1 ] ; then
+	echo "syntax: git perl [-d] PERL_EXPRESSION\n\nThe perl expression will be applied to all files not ignored by git.\nChanges are displayed and a git-style undo is provided.\n\nOPTIONS:\n  -d   Dry run, no files are modified.\n\nEXAMPLES:\n  git perl s/ToDo/Done/g\n  git perl s/x(.)x/y\\1y/g"
+	exit 1
+fi
+
+if [ $dry = "false" ] ; then
+	org=`git rev-parse HEAD`
+	git add -A
+	git commit -q -m "Backup commit before git perl $1 $2"
+	backup=`git rev-parse HEAD`
+	git reset -q $org
+fi
+
+tmpFile="/tmp/git-perl-tmp.$$"
+logFile="/tmp/git-perl-log.$$"
+git-ls-code | while read -r a ; do
+	if [ -f "$a" ] ; then
+		if ( ! cat "$a" | perl -pe "$1" > $tmpFile ) ; then
+			echo "aborting"
+			break
+		fi
+		if ! cmp -s "$a" $tmpFile ; then
+			git diff --color --no-index -- "$a" $tmpFile | tail -n +1 >> $logFile
+			if [ $dry != "true" ] ; then
+				cat $tmpFile > "$a" # don't change file permissions
+			fi
+		fi
+	fi
+done
+rm -f $tmpFile
+
+pager="`git config --get core.pager`"
+if [ "$pager" = "" ] ; then
+	pager="less -FXRS"
+fi
+if [ -f $logFile ] ; then
+	cat $logFile | $pager
+	rm $logFile
+
+	if [ $dry = "false" ] ; then
+		echo "undo: git reset --hard $backup ; git reset -q HEAD^"
+	fi
+else
+	echo "no changes"
+fi
+

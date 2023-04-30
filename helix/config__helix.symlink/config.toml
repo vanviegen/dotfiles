@@ -1,0 +1,4 @@
+theme = "github_dark_high_contrast"
+
+[editor.soft-wrap]
+enable = true

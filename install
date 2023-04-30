@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# Change working directory to script directory
+cd "$(dirname "$0")"
+if [ "$(pwd)" != "$HOME/.dotfiles" ] ; then
+	echo "Cowardly refusing to proceed as the install script is not running from $HOME/.dotfiles."
+	exit 1
+fi
+
+declare -A targets
+
+if [ "$1" != "--uninstall" ] ; then
+
+	# Install packages, if needed
+	if command -v pacman &> /dev/null ; then
+		 # Arch/Manjaro
+		packages="sudo git fish curl xz fzf ripgrep tmux broot helix"
+		if ! pacman -Q $packages &>/dev/null; then
+			sudo pacman -S --needed $packages
+		fi
+	else
+		# Debian/Ubuntu
+		packages="sudo apt install -y sudo git fish curl xz-utils fzf ripgrep tmux broot kakoune"
+		if ! dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -q "^i"; then
+			sudo apt install $packages
+		fi
+	fi
+
+	# Set the shell
+	fish="$(grep /fish /etc/shells | tail -n 1)"
+	if [ "$SHELL" != "$fish" ]; then
+		chsh -s "$fish"
+	fi
+
+	# Create symlinks
+	linkables=(*/**.symlink)
+	skip_all=false
+	overwrite_all=false
+	backup_all=false
+
+	for linkable in "${linkables[@]}"; do
+		overwrite=false
+		backup=false
+
+		target=".$(basename "${linkable%.symlink}" | sed 's/__/\//g')"
+		target="$HOME/$target"
+		targets["$target"]=true
+		linkable="$(realpath "$(pwd)/$linkable")"
+
+		if [ -e "$target" ] || [ -L "$target" ]; then
+			if [ -L "$target" ] && [ "$(readlink "$target")" = "$linkable" ]; then
+				continue
+			fi
+			if ! "$skip_all" && ! "$overwrite_all" && ! "$backup_all"; then
+				read -p "File already exists: $target, what do you want to do? [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all >> " choice
+				case "$choice" in
+					o) overwrite=true;;
+					b) backup=true;;
+					O) overwrite_all=true;;
+					B) backup_all=true;;
+					S) skip_all=true;;
+					s) continue;;
+				esac
+			fi
+			if "$overwrite" || "$overwrite_all"; then
+				rm -rf "$target"
+			fi
+			if "$backup" || "$backup_all"; then
+				mv "$target" "$target.backup"
+			fi
+		else
+			mkdir -p "$(dirname "$target")"
+		fi
+
+		echo "linking $target"
+		ln -s "$linkable" "$target"
+	done
+fi
+
+for file in "$HOME/".* "$HOME/".*/**; do
+	if [ -L "$file" ]; then
+		link="$(readlink "$file")"
+		if [[ "$link" == "$(pwd)/"* ]] && [ ! "${targets[$file]}" ]; then
+			echo "unlinking $file"
+			rm "$file"
+		fi
+	fi
+done
+

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+nice ionice -c 3 "$@"
+

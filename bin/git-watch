@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ "$1" = "--run" ] ; then
+	shift
+	run=yes
+fi
+
+printf "\033k#[bg=yellow]building\033\\"
+if ( "$@" ) ; then
+	printf "\033kokay\033\\"
+else
+	printf "\033k#[bg=red]FAILED\033\\"
+fi
+echo
+echo
+
+if [ -z "$run" ] ; then
+	while true; do
+		git ls-code | entr $0 --run "$@"
+	done
+fi
+
