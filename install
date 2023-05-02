@@ -32,7 +32,7 @@ if [ "$1" != "--uninstall" ] ; then
 		source /etc/profile.d/nix.sh
 
 		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
-		nix-env -f '<nixpkgs>' -iA fzf broot helix fish
+		nix-channel --update && nix-env -f '<nixpkgs>' -iA fzf broot helix fish
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
