@@ -23,18 +23,18 @@ switch "$argv[1]"
 		;;
 end
 
-# Set $HOME. We're preserving all other env vars.
+# Set $HOME. We're trying to preserve all other env vars.
 set -x HOME (eval echo ~$userName)
-if test "$HOME" = "~$userName" -o "$HOME" = "/"
+if test "$HOME" = "~$userName" -o "$HOME" = "/" -o ! -d "$HOME"
 	set -x HOME "/tmp/sudo-$USER-$userName"
 end
 
 if test (count $argv) = 0
 	# Start an interactive fish shell
-	exec sudo -E su -s $SHELL --preserve-environment $userName
+	exec sudo -E su -s /bin/sh --pty --preserve-environment -c "exec $SHELL -C 'set -x PATH $PATH'" $userName
 else
 	# Run 
-	set cmd ""
+	set cmd "set -x PATH $PATH; "
 	for arg in $argv
 		set cmd "$cmd"(string escape -- $arg)" "
 	end
