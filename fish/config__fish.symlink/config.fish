@@ -48,5 +48,7 @@ set -x EDITOR hx
 set -x PAGER less
 set -x LESS "-iMSx4 -FX -R"
 set -x FZF_DEFAULT_COMMAND 'rg --files'
+set -x COLORTERM truecolor
+
 alias open 'xdg-open'
 alias cs 'rg'
