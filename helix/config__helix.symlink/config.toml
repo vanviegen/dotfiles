@@ -2,3 +2,12 @@ theme = "github_dark_high_contrast"
 
 [editor.soft-wrap]
 enable = true
+
+[editor.indent-guides]
+render = true
+
+[editor]
+color-modes = true
+cursorline = true
+auto-pairs = false
+
