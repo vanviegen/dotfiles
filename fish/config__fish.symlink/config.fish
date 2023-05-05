@@ -16,13 +16,14 @@ if status is-interactive
         end
 
         # Get the first argument that is not 'ssh' or an environment assignment
-        set args (string split ' ' $argv[1])
+        set args (string split -- ' ' $argv[1])
         set index 1
         while test $index -le (count $args)
             set name $args[$index]
             if test "$name" = "ssh"
             or test -z "$name"
-            or string match '*=*' "$name"
+            or string match -q -- '*=*' "$name"
+            or string match -q -- '-*' "$name"
 	            set index (expr $index + 1)
 		    else
                 break
