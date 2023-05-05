@@ -1,4 +1,4 @@
 #!/bin/sh
 
-nice ionice -c 3 "$@"
+systemd-run --scope --property=MemoryLimit=500M -- nice ionice -c 3 "$@"
 
