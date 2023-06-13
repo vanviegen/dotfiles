@@ -29,10 +29,11 @@ if [ "$1" != "--uninstall" ] ; then
 		if ! command -v nix-env &> /dev/null; then
 			curl -sL https://nixos.org/nix/install | sh -s -- --daemon
 		fi
-		source /etc/profile.d/nix.sh
+		source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
-		nix-channel --update && nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix fish
+		sudo nix-channel --update || exit 1
+		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix fish
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes

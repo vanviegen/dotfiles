@@ -1,7 +1,7 @@
 if test -z "$IN_FISH" -a -n "$PS1"; then
     export IN_FISH=true
-    if test -e "$HOME/.nix-profile/etc/profile.d/nix.sh"; then
-        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    if test -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"; then
+        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 
     fi
 
     SHELL="$(which fish)" exec "$(which fish)"
