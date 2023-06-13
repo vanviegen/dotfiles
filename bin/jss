@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ "$#" != 1 ] ; then
-	echo "syntax: jss NAME\n\nJavascript Search. Find definitions of NAME in the current git tree."
-	exit 1
-fi
-
-cs "\bfunction $1\b|\b$1 *="
-

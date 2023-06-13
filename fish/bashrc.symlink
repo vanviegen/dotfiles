@@ -6,3 +6,5 @@ if test -z "$IN_FISH" -a -n "$PS1"; then
 
     SHELL="$(which fish)" exec "$(which fish)"
 fi
+
+source /home/frank/.config/broot/launcher/bash/br
