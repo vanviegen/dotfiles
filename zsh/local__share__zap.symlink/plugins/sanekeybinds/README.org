@@ -1,0 +1,9 @@
+#+title: Sanekeybinds
+#+author: Penguin
+#+date: 6/4/23
+
+* About
+
+This zsh script adds a bunch of default keybindings like ctrl+arrow keys, ctrl+delete, alt+delete, etc.
+
+source: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/6101106916147b1716ff2d5de4a53260e7607bae/lib/key-bindings.zsh

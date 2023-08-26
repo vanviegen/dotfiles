@@ -14,13 +14,13 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git fish curl xz fzf ripgrep tmux broot helix"
+		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel exa"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	else
 		# Debian/Ubuntu
-		packages="sudo apt install -y sudo git curl xz-utils fzf ripgrep"
+		packages="sudo apt install -y sudo git curl xz-utils fzf ripgrep zsh wl-clipboard xsel"
 		if ! dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -q "^i"; then
 			sudo apt install $packages
 		fi
@@ -33,14 +33,11 @@ if [ "$1" != "--uninstall" ] ; then
 
 		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
 		sudo nix-channel --update || exit 1
-		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix fish
+		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix exa
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
 	git remote set-url --push origin git@github.com:vanviegen/dotfiles.git
-
-	# Copy the fish universal variables file from the repo
-	cp -f fish/config__fish.symlink/fish_variables.template fish/config__fish.symlink/fish_variables
 
 	# Create symlinks
 	linkables=(*/**.symlink)

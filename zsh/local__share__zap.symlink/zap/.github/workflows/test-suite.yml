@@ -1,0 +1,50 @@
+name: test-suite
+
+on:
+  pull_request:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        branch:
+          - master
+          - release-v1
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - name: Install ZSH
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install zsh
+      - name: ZSH lint per file
+        shell: zsh {0}
+        run: |
+          for file in ${{ github.workspace }}/**/*.zsh; do
+            echo "Now linting $file"...
+            zsh -n "$file"
+            echo "Success! 🎉"
+          done
+      - name: Install Test - branch "${{ matrix.branch }}"
+        shell: zsh {0}
+        run: |
+          # Reset Zap installation if, for any reason, it was cached
+          [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/zap" ]] && rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/zap" || :
+          # Init
+          zsh ${{ github.workspace }}/install.zsh --branch ${{ matrix.branch }}
+          source "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh"
+          # Test Environment Variable
+          [[ -d "$ZAP_DIR" ]]
+          # Test Plugin Installation
+          plug "wintermi/zsh-lsd"
+          git -C "${ZAP_DIR}/plugins/zsh-lsd/" status || exit 1

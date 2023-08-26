@@ -4,12 +4,11 @@
 
 These are the configuration files and an install script that I like to use on every Linux computer I have access to. It features:
 
-- The `fish` shell, configured with a nice prompt and `fisher` for installing additional plugins.
+- The `zsh` shell, configured with a comfortable set of plugins using the lightweight `zap` plugin manager.
 - Autostarting `tmux` terminal multiplexer. Common keys are: `ctrl-a c` (create window), `ctrl-a n` (next window), `ctrl-a p` (previous window), `ctrl-a |` (vertical split), `ctrl-a -` (horizontal split), `ctrl-a <arrow>` (move to split).
 - `helix`, a modern modal editor (https://helix-editor.com/)
 - `br`, a nice tool to navigate directories (https://github.com/Canop/broot)
 - `rg <term>` for doing a ripgrep text search in the current directory and all subdirectories.
-- `S <cmd>` to run a command as root. Or `S :<user> <cmd>` to run a command as a certain user. You need to be in `/etc/sudoers` for this.
 - Various other configurations and scripts you'll probably never need. :-)
 
 ## Installing
@@ -20,7 +19,7 @@ On a Debian/Ubuntu/Manjaro/Arch box, run:
 git clone https://github.com/vanviegen/dotfiles.git ~/.dotfiles && ~/.dotfiles/install
 ```
 
-This will download the repository to `~/.dotfiles`, and create symlinks from your home dir pointing at files in the `~/.dotfiles` dir. It will also ask your OS package manager to install a couple of packages, if they aren't installed yet. If your default shell isn't set to `fish` yet, it'll ask for your password in order to set it. For this change to take effect, you'll need to start a new login session (i.e. logout of your window manager).
+This will download the repository to `~/.dotfiles`, and create symlinks from your home dir pointing at files in the `~/.dotfiles` dir. It will also ask your OS package manager to install a couple of packages, if they aren't installed yet.
 
 ## Updating
 
