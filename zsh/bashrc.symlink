@@ -1,0 +1,4 @@
+if test -z "$IN_FISH" -a -n "$PS1"; then
+    export IN_FISH=true
+    SHELL="$(which zsh)" exec "$(which zsh)"
+fi
