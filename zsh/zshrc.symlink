@@ -7,7 +7,8 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && $- == *i* ]]; then
     fi
 fi
 
-export PATH="$HOME/.dotfiles/bin:$PATH"
+private "DOT=$HOME/.dotfiles"
+export PATH="$DOT/bin:$PATH"
 
 # Configuration for various tools
 export COLORTERM=truecolor
@@ -51,36 +52,34 @@ function br {
     fi
 }
 
-# Load our package manager
-source ~/.dotfiles/zsh/znap/znap.zsh
-
 # Have agnoster hide our user name when it's "frank"
 export DEFAULT_USER=frank
 # Use the agnoster prompt
-znap prompt agnoster/agnoster-zsh-theme
+setopt promptsubst
+source "$DOT/zsh/agnoster/agnoster-zsh-theme/agnoster.zsh-theme"
 
 # Have fzf-tab use tmux popup windows
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 # Use fzf-tab for completions
-znap source Aloxaf/fzf-tab
+source "$DOT"/zsh/Aloxaf/fzf-tab/*.plugin.zsh
 
 # Use fzf for history search
-znap source joshskidmore/zsh-fzf-history-search
+source "$DOT"/zsh/joshskidmore/zsh-fzf-history-search/*.plugin.zsh
 
 # Use exa for commands like `ls`, `ll` and `la`
-znap source zap-zsh/exa
+source "$DOT"/zsh/zap-zsh/exa/*.plugin.zsh
 
 # Syntax highlighting
-znap source zdharma-continuum/fast-syntax-highlighting
+source "$DOT"/zsh/zdharma-continuum/fast-syntax-highlighting/*.plugin.zsh
 
 # Use esc+esc to prepend sudo/sudoedit
-znap source zap-zsh/sudo
+source "$DOT"/zsh/zap-zsh/sudo/*.plugin.zsh
 
 # Fix keys like home and ctrl-left, and add some nice shortcuts like ctrl-x ctrl-e to edit command in editor
-znap source embeddedpenguin/sanekeybinds
+source "$DOT"/zsh/embeddedpenguin/sanekeybinds/*.plugin.zsh
 
 # Auto complete commands from history
-znap source zsh-users/zsh-autosuggestions
+source "$DOT"/zsh/zsh-users/zsh-autosuggestions/*.plugin.zsh
 
 # Configure nix
 if test -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"; then
