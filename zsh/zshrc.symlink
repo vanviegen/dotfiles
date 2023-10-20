@@ -79,9 +79,6 @@ plug agnoster/agnoster-zsh-theme
 # Use fzf for history search
 plug joshskidmore/zsh-fzf-history-search
 
-# Use exa for commands like `ls`, `ll` and `la`
-plug zap-zsh/exa
-
 # Syntax highlighting
 plug zdharma-continuum/fast-syntax-highlighting
 
@@ -93,3 +90,15 @@ plug embeddedpenguin/sanekeybinds
 
 # Auto complete commands from history
 plug zsh-users/zsh-autosuggestions
+
+
+
+eza_params="--git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale"
+alias ls="eza $eza_params"
+alias l="eza --git-ignore $eza_params"
+alias ll="eza --all --header --long $eza_params"
+alias llm="eza --all --header --long --sort=modified $eza_params"
+alias la="eza -lbhHigUmuSa"
+alias lx="eza -lbhHigUmuSa@"
+alias lt="eza --tree $eza_params"
+alias tree="eza --tree $eza_params"

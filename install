@@ -14,14 +14,14 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel exa"
+		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel eza"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	else
 		# Debian/Ubuntu
-		packages="sudo apt install -y sudo git curl xz-utils ripgrep zsh wl-clipboard xsel"
-		if ! dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -q "^i"; then
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel"
+		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -vq "^i"  ; then
 			sudo apt install $packages
 		fi
 
@@ -32,8 +32,8 @@ if [ "$1" != "--uninstall" ] ; then
 		source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
-		sudo nix-channel --update || exit 1
-		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix exa fzf
+		sudo /nix/var/nix/profiles/default/bin/nix-channel --update || exit 1
+		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix eza fzf
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
