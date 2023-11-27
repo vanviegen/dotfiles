@@ -78,11 +78,11 @@ plug zap-zsh/sudo
 plug embeddedpenguin/sanekeybinds
 
 # Show autocomplate suggestions without prompting
-plug marlonrichert/zsh-autocomplete
+#plug marlonrichert/zsh-autocomplete
 
 # Make Tab go straight to the menu and cycle there
-bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
-bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
+#bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
+#bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
 
 # Auto-activate python environment (poetry, virtualenv, conda)
 plug se-jaeger/zsh-activate-py-environment
