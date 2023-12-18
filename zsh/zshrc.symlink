@@ -84,9 +84,6 @@ plug embeddedpenguin/sanekeybinds
 #bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
 #bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
 
-# Auto-activate python environment (poetry, virtualenv, conda)
-plug se-jaeger/zsh-activate-py-environment
-
 # Fancy `cat` replacement
 plug fdellwing/zsh-bat
 
