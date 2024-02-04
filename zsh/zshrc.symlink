@@ -88,14 +88,12 @@ plug embeddedpenguin/sanekeybinds
 plug zdharma-continuum/fast-syntax-highlighting
 
 # Use eza instead of ls and the like
-eza_params="--git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale all"
-alias ls="eza $eza_params"
-alias l="eza --git-ignore $eza_params"
-alias ll="eza --all --header --long $eza_params"
-alias llm="eza --all --header --long --sort=modified $eza_params"
+eza_params="--git --icons --classify --time-style=long-iso --group --color-scale all"
+alias l="eza --git-ignore --group-directories-first $eza_params"
+alias ll="eza --all --header --long --group-directories-first $eza_params"
+alias lt="eza --all --header --long --sort=modified $eza_params"
 alias la="eza -lbhHigUmuSa"
 alias lx="eza -lbhHigUmuSa@"
-alias lt="eza --tree $eza_params"
-alias tree="eza --tree $eza_params"
+alias ltree="eza --tree --group-directories-first $eza_params"
 
 source ~/.dotfiles/zsh/hishtory.zsh
