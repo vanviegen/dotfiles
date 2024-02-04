@@ -14,13 +14,13 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel eza bat"
+		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel eza"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	else
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel bat"
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel"
 		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -vq "^i"  ; then
 			sudo apt install $packages
 		fi
