@@ -92,8 +92,12 @@ eza_params="--git --icons --classify --time-style=long-iso --group --color-scale
 alias l="eza --git-ignore --group-directories-first $eza_params"
 alias ll="eza --all --header --long --group-directories-first $eza_params"
 alias lt="eza --all --header --long --sort=modified $eza_params"
-alias la="eza -lbhHigUmuSa"
-alias lx="eza -lbhHigUmuSa@"
+alias la="eza -lbhHigUmuSaB@"
 alias ltree="eza --tree --group-directories-first $eza_params"
 
+# Syncing history and fancy ctrl-r
 source ~/.dotfiles/zsh/hishtory.zsh
+
+if [ -e ~/Documents/keys/openai.key ] ; then
+    export OPENAI_KEY=`cat ~/Documents/keys/openai.key`
+fi
