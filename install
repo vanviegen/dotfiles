@@ -94,3 +94,8 @@ for file in "$HOME/".* "$HOME/".*/**; do
 	fi
 done
 
+if ! [ -e ~/.hishtory/.hishtory.config ] ; then
+	echo -n "Enter hishtory key (or leave empty to create a new key): "
+	read -r KEY
+	"$HOME/.dotfiles/bin/hishtory" init $KEY
+fi
