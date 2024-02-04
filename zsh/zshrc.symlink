@@ -84,9 +84,6 @@ plug embeddedpenguin/sanekeybinds
 #bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
 #bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
 
-# Fancy `cat` replacement
-plug fdellwing/zsh-bat
-
 # Syntax highlighting
 plug zdharma-continuum/fast-syntax-highlighting
 
