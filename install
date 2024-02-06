@@ -14,7 +14,7 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel eza"
+		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
@@ -33,7 +33,7 @@ if [ "$1" != "--uninstall" ] ; then
 
 		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
 		sudo /nix/var/nix/profiles/default/bin/nix-channel --update || exit 1
-		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix eza fzf
+		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix fzf
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
