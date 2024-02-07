@@ -13,7 +13,7 @@ sys.path.append(cache_dir)
 try:
     from openai import OpenAI
 except ImportError:
-    print(f"Installing openai library...")
+    print("Installing openai library...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--cache-dir", cache_dir, "--target", cache_dir, "openai"])
     from openai import OpenAI
 
@@ -21,7 +21,7 @@ except ImportError:
 try:
     import pyperclip
 except ImportError:
-    print(f"Installing pyperclip library...")
+    print("Installing pyperclip library...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--cache-dir", cache_dir, "--target", cache_dir, "pyperclip"])
     import pyperclip
 
@@ -52,7 +52,7 @@ text = response.choices[0].message.content
 def found_code_block(m):
     pyperclip.copy(m.group(2))
     return f"```{m.group(1)}\n\033[92m{m.group(2)}\033[0m\n```"
-text = re.sub("^```(.*)\n([\w\W]*)\n```", found_code_block, text)
+text = re.sub(r"^```(.*)\n([\w\W]*)\n```", found_code_block, text)
 
 # Show result
 print(text)
