@@ -87,6 +87,40 @@ plug embeddedpenguin/sanekeybinds
 # Syntax highlighting
 plug zdharma-continuum/fast-syntax-highlighting
 
+# Set the tmux title to current program/dir, based on https://github.com/pawel-slowik/zsh-term-title
+function term_set_title() {
+    printf '\033k%s\033\\' ${1//[^[:print:]]/}
+}
+function term_title_precmd() {
+    local dir='%~'
+    term_set_title ${(%)dir}
+}
+function term_title_preexec() {
+    local job_text job_key
+    job_text="$1"
+    # Since ~4.3.5, patch:
+    # "users/11818: allow non-numeric keys for job status parameters"
+    # it is possible to use the `fg ...` or `%...` description as a key
+    # in $jobtexts.
+    case $1 in
+    		%*) job_key=$1 ;;
+    		fg) job_key=%+ ;;
+    		fg*) job_key=${(Q)${(z)1}[2,-1]} ;;
+    		*) job_key='' ;;
+    esac
+    if [[ -n $job_key ]] then
+        job_text=${jobtexts[$job_key]} 2> /dev/null
+        if [[ -z $job_text ]] then
+        		# job lookup failed - use the original command
+        		job_text="$1"
+        fi
+    fi
+    term_set_title $job_text
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd term_title_precmd
+add-zsh-hook preexec term_title_preexec
+
 # Use eza instead of ls and the like
 eza_params="--git --icons --classify --time-style=long-iso --group --color-scale all"
 alias l="eza --git-ignore --group-directories-first $eza_params"
