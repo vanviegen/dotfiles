@@ -1,0 +1,3 @@
+#!/bin/sh
+for a in /proc/[0-9]* ; do if [ "$(readlink $a/cwd)" = "$PWD" -a "$a" != "/proc/$$" ] ; then readlink $a/exe ; kill `echo "$a" | cut -d / -f 3` ; fi ; done
+
