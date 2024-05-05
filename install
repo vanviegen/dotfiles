@@ -31,7 +31,7 @@ if [ "$1" != "--uninstall" ] ; then
 				wget -nv "$2" -O "xbin/$1" && chmod a+x "xbin/$1"
 			fi
 		}
-		installBin hx https://github.com/helix-editor/helix/releases/download/24.03/helix-24.03-x86_64.AppImage
+		installBin helix-appimage https://github.com/helix-editor/helix/releases/download/24.03/helix-24.03-x86_64.AppImage
 		installBin broot https://dystroy.org/broot/download/x86_64-unknown-linux-musl/broot
 	fi
 

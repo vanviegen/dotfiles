@@ -5,6 +5,8 @@ if test -n "$bin"; then
 	exec "$bin" "$@"
 elif command -v helix > /dev/null; then
 	exec "$(which helix)" "$@"
+elif command -v helix-appimage > /dev/null; then
+	LD_LIBRARY_PATH=~/.dotfiles/helix/ exec "$(which helix)" "$@"
 elif command -v kak > /dev/null; then
 	exec "$(which kak)" "$@"
 else
