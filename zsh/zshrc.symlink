@@ -71,8 +71,19 @@ export DEFAULT_USER=frank
 setopt promptsubst
 plug agnoster/agnoster-zsh-theme
 
-# Use esc+esc to prepend sudo/sudoedit
-plug zap-zsh/sudo
+# Use esc+esc to prepend 'S ' for sudo
+toggle_prefix() {
+    if [[ "$BUFFER" == S\ * ]]; then
+        CURSOR=$((CURSOR > 2 ? CURSOR - 2 : 0))
+        BUFFER="${BUFFER:2}"
+    else
+        BUFFER="S $BUFFER"
+        CURSOR+=2
+    fi
+}
+zle -N toggle_prefix
+bindkey -M viins '\e\e' toggle_prefix
+bindkey -M emacs '\e\e' toggle_prefix
 
 # Fix keys like home and ctrl-left, and add some nice shortcuts like ctrl-x ctrl-e to edit command in editor
 plug embeddedpenguin/sanekeybinds
