@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SUING="`dirname $0`"/..
 export SUING="`realpath $SUING`"
@@ -6,5 +6,6 @@ export ZDOTDIR=$SUING/zsh/start-env
 if [ "$#" -eq 0 ] ; then
   exec zsh -i
 else
-  echo "$@" | exec zsh -si
+  cmd=$(printf "%q " "$@")
+  exec zsh -i -c "$cmd"
 fi
