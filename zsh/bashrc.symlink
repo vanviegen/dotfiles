@@ -1,6 +1,5 @@
 if test -z "$IN_FISH" -a -n "$PS1"; then
     export IN_FISH=true
-    export PATH="$HOME/.nix-profile/bin:$PATH"
     ZSH="$(which zsh)"
     if [ "$ZSH" = "" ] ; then
         echo zsh cannot be found in path: $PATH

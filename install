@@ -14,26 +14,25 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz fzf ripgrep tmux broot helix wl-clipboard xsel"
+		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	else
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel"
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux"
 		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -vq "^i"  ; then
 			sudo apt install $packages
 		fi
 
-		# Install Nix, if needed
-		if ! command -v nix-env &> /dev/null; then
-			curl -sL https://nixos.org/nix/install | sh -s -- --daemon
-		fi
-		source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-
-		# Install some Nix packages that are not available/up-to-date on Debian/Ubuntu
-		sudo /nix/var/nix/profiles/default/bin/nix-channel --update || exit 1
-		nix-env -iA nixpkgs.nix && nix-env -f '<nixpkgs>' -iA tmux broot helix fzf
+		installBin()
+		{
+			if [ ! -e "xbin/$1" ] ; then
+				wget -nv "$2" -O "xbin/$1" && chmod a+x "xbin/$1"
+			fi
+		}
+		installBin hx https://github.com/helix-editor/helix/releases/download/24.03/helix-24.03-x86_64.AppImage
+		installBin broot https://dystroy.org/broot/download/x86_64-unknown-linux-musl/broot
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
@@ -82,6 +81,12 @@ if [ "$1" != "--uninstall" ] ; then
 		echo "linking $target"
 		ln -s "$linkable" "$target"
 	done
+
+	if ! [ -e ~/.hishtory/.hishtory.config ] ; then
+		echo -n "Enter hishtory key (or leave empty to create a new key): "
+		read -r KEY
+		"$HOME/.dotfiles/bin/hishtory" init $KEY
+	fi
 fi
 
 for file in "$HOME/".* "$HOME/".*/**; do
@@ -94,8 +99,3 @@ for file in "$HOME/".* "$HOME/".*/**; do
 	fi
 done
 
-if ! [ -e ~/.hishtory/.hishtory.config ] ; then
-	echo -n "Enter hishtory key (or leave empty to create a new key): "
-	read -r KEY
-	"$HOME/.dotfiles/bin/hishtory" init $KEY
-fi

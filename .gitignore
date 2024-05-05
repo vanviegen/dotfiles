@@ -3,3 +3,4 @@
 *.swp
 *.zwc
 zsh/local__share__zap.symlink/plugins/**/.git
+xbin
