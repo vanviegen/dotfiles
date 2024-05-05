@@ -25,14 +25,14 @@ if [ "$1" != "--uninstall" ] ; then
 			sudo apt install $packages
 		fi
 
-		installBin()
-		{
-			if [ ! -e "xbin/$1" ] ; then
-				wget -nv "$2" -O "xbin/$1" && chmod a+x "xbin/$1"
-			fi
-		}
-		installBin hx https://github.com/helix-editor/helix/releases/download/24.03/helix-24.03-x86_64.AppImage
-		installBin broot https://dystroy.org/broot/download/x86_64-unknown-linux-musl/broot
+		if [ ! -e "xbin/broot" ] ; then
+			wget -nv "https://dystroy.org/broot/download/x86_64-unknown-linux-musl/broot" -O "xbin/broot" && chmod a+x "xbin/broot"
+		fi
+		
+		if [ ! -e "xbin/hx" ] ; then
+			wget "https://github.com/zydou/helix/releases/download/v24.03/helix-v24.03-x86_64-unknown-linux-gnu.tar.xz" -O - | tar xvJ --directory=xbin --strip-components=1
+			chmod a+x bin/hx
+		fi
 	fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
