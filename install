@@ -20,8 +20,8 @@ if [ "$1" != "--uninstall" ] ; then
 		fi
 	else
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux"
-		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>/dev/null | grep -vq "^i"  ; then
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse"
+		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>&1 | grep -vq "^ii"  ; then
 			sudo apt install $packages
 		fi
 
@@ -82,6 +82,9 @@ if [ "$1" != "--uninstall" ] ; then
 		ln -s "$linkable" "$target"
 	done
 
+	chmod -R a+rX .
+	chmod a+x,o-r ..
+	
 	if ! [ -e ~/.hishtory/.hishtory.config ] ; then
 		echo -n "Enter hishtory key (or leave empty to create a new key): "
 		read -r KEY

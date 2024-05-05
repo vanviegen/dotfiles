@@ -1,0 +1,10 @@
+#!/bin/sh
+
+SUING="`dirname $0`"/..
+export SUING="`realpath $SUING`"
+export ZDOTDIR=$SUING/zsh/start-env
+if [ "$#" -eq 0 ] ; then
+  exec zsh -i
+else
+  echo "$@" | exec zsh -si
+fi

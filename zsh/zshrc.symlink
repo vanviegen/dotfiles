@@ -1,5 +1,5 @@
 # Start tmux instead if we're not already in tmux, we're not in vscode and it's an interactive session
-if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && $- == *i* ]]; then
+if [[ -z "$TMUX" && -z "$SUING" && "$TERM_PROGRAM" != "vscode" && $- == *i* ]]; then
     if command -v tmux > /dev/null; then
         exec tmux new-session -A -s $USER-main
     else
@@ -7,7 +7,11 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && $- == *i* ]]; then
     fi
 fi
 
-private "DOT=$HOME/.dotfiles"
+if [[ -z "$SUING" ]] ; then
+    private "DOT=$HOME/.dotfiles"
+else
+    private "DOT=$SUING"
+fi
 export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
 
 # Configuration for various tools
@@ -18,7 +22,6 @@ export PAGER=less
 export EDITOR=hx
 alias open=xdg-open
 alias cs=rg
-alias S=sudo
 
 # History config
 SAVEHIST=10000
@@ -58,7 +61,9 @@ autoload -Uz compinit
 compinit
 
 # Load our package manager, zap
-source "$HOME/.local/share/zap/zap/zap.zsh"
+export XDG_DATA_HOME="$DOT/../.local/share"
+source "$XDG_DATA_HOME/zap/zap/zap.zsh"
+export XDG_DATA_HOME=
 
 # Have agnoster hide our user name when it's "frank"
 export DEFAULT_USER=frank
@@ -91,7 +96,10 @@ alias la="eza -lbhHigUmuSaB@"
 alias ltree="eza --tree --group-directories-first $eza_params"
 
 # Syncing history and fancy ctrl-r
-source ~/.dotfiles/zsh/hishtory.zsh
+if ! [ -e ~/.hishtory/.hishtory.config ] ; then
+	HISHTORY_OFFLINE=true "$DOT/bin/hishtory" init
+fi
+source "$DOT/zsh/hishtory.zsh"
 
 if [ -e ~/Documents/keys/openai.key ] ; then
     export OPENAI_KEY=`cat ~/Documents/keys/openai.key`

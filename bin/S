@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "${1#*:}" != "$1" ]; then # First arg starts with :
+	TARGET_USER="${1#:}"
+	shift
+else
+	TARGET_USER=root
+fi
+
+sudo -u $TARGET_USER ~/.dotfiles/bin/start-env "$@"
