@@ -58,7 +58,8 @@ function br {
 
 # Load and initialise completion system
 autoload -Uz compinit
-compinit
+# When sudoing, we don't want this file to be created in the original user's home directory
+compinit -d ~/.cache/zcompdump
 
 # Load our package manager, zap
 export XDG_DATA_HOME="$DOT/../.local/share"

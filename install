@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# When sudoing, we don't want this file to be created in the original user's home directory
-compinit -d ~/.cache/zcompdump
-
 # Change working directory to script directory
 cd "$(dirname "$0")"
 if [ "$(pwd)" != "$HOME/.dotfiles" ] ; then
