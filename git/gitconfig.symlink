@@ -19,6 +19,7 @@
 	promote = !$ZSH/bin/git-promote
 	wtf     = !$ZSH/bin/git-wtf
 	mr = !sh -c 'git fetch --force $1 merge-requests/$2/head:mr-$1-$2 && git checkout mr-$1-$2' -
+	pr = !sh -c 'git fetch --force $1 pull/$2/head:pr-$1-$2 && git checkout pr-$1-$2' -
 
 [difftool]
 	tool = kdiff3
