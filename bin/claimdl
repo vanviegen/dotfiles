@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ $# != 1 ] ; then
+    echo "Moves the most recent file from ~/Downloads to the current directory, optionally giving it a new base name. The new extension is derived from the file contents."
+    echo "Usage: $0 (TARGET_NAME | '-')"
+    exit 1
+fi
+
+source=~/Downloads/"`/bin/ls ~/Downloads -t | head -n 1`"
+base="$1"
+if [ "$base" = "-" ] ; then
+    base="`echo "${source##*/}" | sed 's/\.[^.]*$//'`"
+fi
+ext="`file --mime-type -b "$source" | awk -F'/' '{print $2}' | sed 's|jpeg|jpg|;s|x-||'`"
+
+echo mv "$source" "$base.$ext"
+if [ -e "$base.$ext" ] ; then
+    echo "Refusing, as target exists."
+    exit 1
+fi
+
+mv "$source" "$base.$ext"
