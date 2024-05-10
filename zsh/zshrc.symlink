@@ -13,6 +13,9 @@ else
     private "DOT=$SUING"
 fi
 export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
+if [[ $EUID -eq 0 ]]; then # user is root
+  export PATH="$PATH:/sbin:/usr/sbin"
+fi
 
 # Configuration for various tools
 export COLORTERM=truecolor
@@ -140,6 +143,26 @@ alias ll="eza --all --header --long --group-directories-first $eza_params"
 alias lt="eza --all --header --long --sort=modified $eza_params"
 alias la="eza -lbhHigUmuSaB@"
 alias ltree="eza --tree --group-directories-first $eza_params"
+
+# Completion for S (sudo) commands
+_S() {
+  if [[ $words[2] == :* ]]; then
+    if (( CURRENT == 2 )); then
+        local -a users
+        users=($(cut -d: -f1 /etc/passwd))
+        compset -P ':'
+        _describe 'user' users
+    else
+        _arguments \
+            '1:first-arg' \
+            '*::rest:->rest'
+        _command
+    fi
+  else
+    _command
+  fi
+}
+compdef _S S
 
 # Syncing history and fancy ctrl-r
 if ! [ -e ~/.hishtory/.hishtory.config ] ; then
