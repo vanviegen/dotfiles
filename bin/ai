@@ -26,7 +26,7 @@ except ImportError:
     import pyperclip
 
 # Configure openAI
-openai = OpenAI(api_key=os.environ["OPENAI_KEY"])
+openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # Get a prompt from the user
 prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else input("Prompt? ")
@@ -50,7 +50,10 @@ text = response.choices[0].message.content
 
 # Highlight any code block and copy it to the clipboard
 def found_code_block(m):
-    pyperclip.copy(m.group(2))
+    try:
+        pyperclip.copy(m.group(2))
+    except pyperclip.PyperclipException:
+        pass
     return f"```{m.group(1)}\n\033[92m{m.group(2)}\033[0m\n```"
 text = re.sub(r"^```(.*)\n([\w\W]*)\n```", found_code_block, text)
 

@@ -102,3 +102,9 @@ for file in "$HOME/".* "$HOME/".*/**; do
 	fi
 done
 
+if [ ! -d llm/bin ] ; then
+		mkdir -p llm
+		python -m venv llm
+fi
+
+llm/bin/pip install llm | grep -v "already satisfied"

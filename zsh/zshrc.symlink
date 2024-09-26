@@ -171,5 +171,5 @@ fi
 source "$DOT/zsh/hishtory.zsh"
 
 if [ -e ~/Documents/keys/openai.key ] ; then
-    export OPENAI_KEY=`cat ~/Documents/keys/openai.key`
+    export OPENAI_API_KEY=`cat ~/Documents/keys/openai.key`
 fi
