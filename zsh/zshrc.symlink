@@ -164,11 +164,8 @@ _S() {
 }
 compdef _S S
 
-# Syncing history and fancy ctrl-r
-if ! [ -e ~/.hishtory/.hishtory.config ] ; then
-	HISHTORY_OFFLINE=true "$DOT/bin/hishtory" init
-fi
-source "$DOT/zsh/hishtory.zsh"
+# Use fzf for history search
+source <(fzf --zsh)
 
 if [ -e ~/Documents/keys/openai.key ] ; then
     export OPENAI_API_KEY=`cat ~/Documents/keys/openai.key`
