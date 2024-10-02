@@ -14,13 +14,13 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel"
+		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel fzf"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
-	else
+	elif command -v apt &> /dev/null ; then
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse"
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse fzf"
 		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>&1 | grep -vq "^ii"  ; then
 			sudo apt install $packages
 		fi
@@ -33,7 +33,14 @@ if [ "$1" != "--uninstall" ] ; then
 			wget "https://github.com/zydou/helix/releases/download/v24.03/helix-v24.03-x86_64-unknown-linux-gnu.tar.xz" -O - | tar xvJ --directory=xbin --strip-components=1
 			chmod a+x bin/hx
 		fi
-	fi
+	else
+		# Bluefin? OSX?
+		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf; do
+		    cmd="${a##*:}"
+		    pkg="${a%%:*}"
+		    command -v "$cmd" > /dev/null || echo "$pkg"
+		done | HOMEBREW_NO_ENV_HINTS=1 xargs -r brew install
+  fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
 	git remote set-url --push origin git@github.com:vanviegen/dotfiles.git
@@ -107,4 +114,4 @@ if [ ! -d llm/bin ] ; then
 		python -m venv llm
 fi
 
-llm/bin/pip install llm | grep -v "already satisfied"
+llm/bin/pip install --disable-pip-version-check llm | grep -v "already satisfied"
