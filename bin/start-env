@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SUING="`dirname $0`"/..
 export SUING="`realpath $SUING`"
