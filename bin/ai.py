@@ -97,6 +97,11 @@ else:
         response = request("https://api.openai.com/v1/chat/completions", data, headers)
         text = response['choices'][0]['message']['content']
         
+# Write query and response to a file
+messages.append({"role": "assistant", "content": text})
+with open(LAST_QUERY_FILE, "w") as f:
+    json.dump(messages, f)
+
 # Highlight any code block and copy it to the clipboard
 def found_code_block(m):
     try:
@@ -104,13 +109,8 @@ def found_code_block(m):
     except pyperclip.PyperclipException:
         pass
     return f"```{m.group(1)}\n\033[92m{m.group(2)}\033[0m\n```"
-text = re.sub(r"^```(.*)\n([\w\W]*)\n```", found_code_block, text)
+text = re.sub(r"^```(.*)\n([\s\S]*?)\n```", found_code_block, text, flags=re.MULTILINE)
 
 # Show result
 print("\r\033[K" + text)
-
-# Write query and response to a file
-messages.append({"role": "assistant", "content": text})
-with open(LAST_QUERY_FILE, "w") as f:
-    json.dump(messages, f)
 
