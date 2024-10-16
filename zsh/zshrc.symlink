@@ -107,7 +107,14 @@ plug zdharma-continuum/fast-syntax-highlighting
 
 # Set the tmux title to current program/dir, based on https://github.com/pawel-slowik/zsh-term-title
 function term_set_title() {
-    printf '\033k%s\033\\' ${1//[^[:print:]]/}
+    local max_length=20
+    local title="${1//[^[:print:]]/}"
+
+    if [[ ${#title} -gt $max_length ]]; then
+        title="${title:0:$max_length}.."
+    fi
+
+    printf '\033k%s\033\\' "$title"
 }
 function term_title_precmd() {
     local dir='%~'
