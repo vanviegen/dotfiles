@@ -105,9 +105,9 @@ for file in "$HOME/".* "$HOME/".*/**; do
 	fi
 done
 
-if [ ! -d llm/bin ] ; then
-		mkdir -p llm
-		python3 -m venv llm
+if [ ! -d ~/.cache/ai-venv ] ; then
+		mkdir -p ~/.cache/ai-venv
+		python3 -m venv ~/.cache/ai-venv
 fi
 
-llm/bin/pip install --disable-pip-version-check llm | grep -v "already satisfied"
+~/.cache/ai-venv/bin/pip install --disable-pip-version-check openai pyperclip | grep -v "already satisfied"

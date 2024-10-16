@@ -1,61 +1,10 @@
-#!/bin/env python3
-import subprocess
-import sys
-import os
-import re
+#!/bin/sh
 
-# Create a virtual environment in the user's cache directory
-cache_dir = os.path.join(os.path.expanduser('~'), '.cache', 'chatgpython')
-os.makedirs(cache_dir, exist_ok=True)
-sys.path.append(cache_dir)
+VENV="$HOME/.cache/ai-venv-1"
 
-# Load openai library, installing it first if required
-try:
-    from openai import OpenAI
-except ImportError:
-    print("Installing openai library...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--cache-dir", cache_dir, "--target", cache_dir, "openai"])
-    from openai import OpenAI
+if [ ! -d "$VENV" ] ; then
+  python3 -m venv "$VENV"
+  "$VENV/bin/pip" install openai pyperclip prompt-toolkit
+fi
 
-# Load pyperclip library, installing it first if required
-try:
-    import pyperclip
-except ImportError:
-    print("Installing pyperclip library...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--cache-dir", cache_dir, "--target", cache_dir, "pyperclip"])
-    import pyperclip
-
-# Configure openAI
-openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
-# Get a prompt from the user
-prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else input("Prompt? ")
-if not prompt:
-    exit()
-
-# Add stdin data to the prompt
-if not sys.stdin.isatty():
-    data = sys.stdin.read()
-    prompt += f"\n\n```{data.rstrip()}\n```"
-
-# Get a response from openAI
-response = openai.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "You are a command-line virtual assistant. The user can ask you questions about any topic, to which you will provide a short but precise answer. If the user asks you to write code, make sure to put the output in a code block with the proper language marker. Assume `zsh` script as the default programming language. Python can be used for cases where shell scripting is impractical. Don't repeat the question in your reply. Don't summarize at the end of your reply. Just a code block is fine, if the code speaks for itself."},
-        {"role": "user", "content": prompt}
-    ],
-)
-text = response.choices[0].message.content
-
-# Highlight any code block and copy it to the clipboard
-def found_code_block(m):
-    try:
-        pyperclip.copy(m.group(2))
-    except pyperclip.PyperclipException:
-        pass
-    return f"```{m.group(1)}\n\033[92m{m.group(2)}\033[0m\n```"
-text = re.sub(r"^```(.*)\n([\w\W]*)\n```", found_code_block, text)
-
-# Show result
-print(text)
+"$VENV/bin/python" "$DOT/bin/ai.py" "$@"

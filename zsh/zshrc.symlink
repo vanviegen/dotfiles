@@ -8,9 +8,9 @@ if [[ -z "$TMUX" && -z "$SUING" && "$TERM_PROGRAM" != "vscode" && $- == *i* ]]; 
 fi
 
 if [[ -z "$SUING" ]] ; then
-    private "DOT=$HOME/.dotfiles"
+    export "DOT=$HOME/.dotfiles"
 else
-    private "DOT=$SUING"
+    export "DOT=$SUING"
 fi
 export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
 if [[ $EUID -eq 0 ]]; then # user is root
