@@ -170,3 +170,7 @@ source <(fzf --zsh)
 if [ -e ~/Documents/keys/openai.key ] ; then
     export OPENAI_API_KEY=`cat ~/Documents/keys/openai.key`
 fi
+
+if [ -e ~/Documents/keys/anthropic.key ] ; then
+    export ANTHROPIC_API_KEY=`cat ~/Documents/keys/anthropic.key`
+fi
