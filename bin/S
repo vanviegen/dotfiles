@@ -7,4 +7,6 @@ else
 	TARGET_USER=root
 fi
 
+echo "$PATH" > ~/.sudo-path.tmp
+chmod a+r ~/.sudo-path.tmp
 sudo -u $TARGET_USER ~/.dotfiles/bin/start-env "$@"

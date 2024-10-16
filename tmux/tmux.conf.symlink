@@ -10,7 +10,7 @@ set -g status-right ''
 setw -g window-status-format '#[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]#[fg=blue] #W #[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]'
 setw -g window-status-current-format '#[fg=colour235,bg=colour238,nobold,nounderscore,noitalics]#[fg=blue,bg=colour238] #W #[fg=colour238,bg=colour235,nobold,nounderscore,noitalics]'
 
-# Our fish config will take care of setting window names
+# Our shell config will take care of setting window names
 set -g automatic-rename off
 set -g allow-rename on
 

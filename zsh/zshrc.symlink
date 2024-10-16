@@ -9,10 +9,13 @@ fi
 
 if [[ -z "$SUING" ]] ; then
     export "DOT=$HOME/.dotfiles"
+    export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
 else
     export "DOT=$SUING"
+    if [ -f $SUING/../.sudo-path.tmp ] ; then
+      export PATH=$(cat $SUING/../.sudo-path.tmp)
+    fi
 fi
-export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
 if [[ $EUID -eq 0 ]]; then # user is root
   export PATH="$PATH:/sbin:/usr/sbin"
 fi

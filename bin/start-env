@@ -3,6 +3,11 @@
 SUING="`dirname $0`"/..
 export SUING="`realpath $SUING`"
 export ZDOTDIR=$SUING/zsh/start-env
+
+if [ -f $SUING/../.sudo-path.tmp ] ; then
+  export PATH=$(cat $SUING/../.sudo-path.tmp)
+fi
+
 if [ "$#" -eq 0 ] ; then
   exec zsh -i
 else
