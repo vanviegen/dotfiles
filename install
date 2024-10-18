@@ -35,6 +35,12 @@ if [ "$1" != "--uninstall" ] ; then
 		fi
 	elif command -v nix-env &> /dev/null ; then
 		nix-env -f '<nixpkgs>' -iA tmux broot helix fzf ripgrep xz helix zsh curl xsel python3
+	elif command -v dnf &> /dev/null ; then
+		for package in git zsh curl xz ripgrep tmux helix xsel fzf ; do
+			if ! dnf list installed "$package" &>/dev/null; then
+				sudo dnf install -y "$package"
+			fi
+		done
 	else
 		# Bluefin? OSX?
 		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf; do
@@ -105,9 +111,3 @@ for file in "$HOME/".* "$HOME/".*/**; do
 	fi
 done
 
-if [ ! -d ~/.cache/ai-venv ] ; then
-		mkdir -p ~/.cache/ai-venv
-		python3 -m venv ~/.cache/ai-venv
-fi
-
-~/.cache/ai-venv/bin/pip install --disable-pip-version-check openai pyperclip | grep -v "already satisfied"
