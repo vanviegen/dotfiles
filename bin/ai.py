@@ -35,7 +35,7 @@ parser.add_argument('-k', '--key', type=str, help="Set the LLM API key. Default 
 args, query = parser.parse_known_args()
 
 # Get a prompt from the user
-if len(query) > 0 or args.repeat or args.last:
+if len(query) > 0 or args.repeat or args.last or not sys.stdin.isatty():
     prompt = " ".join(query) 
     # Add stdin data to the prompt
     if not sys.stdin.isatty():

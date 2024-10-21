@@ -14,13 +14,13 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel fzf"
+		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel fzf eza"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	elif command -v apt &> /dev/null ; then
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse fzf"
+		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse fzf eza"
 		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>&1 | grep -vq "^ii"  ; then
 			sudo apt install $packages
 		fi
@@ -34,9 +34,9 @@ if [ "$1" != "--uninstall" ] ; then
 			chmod a+x bin/hx
 		fi
 	elif command -v nix-env &> /dev/null ; then
-		nix-env -f '<nixpkgs>' -iA tmux broot helix fzf ripgrep xz helix zsh curl xsel python3
+		nix-env -f '<nixpkgs>' -iA tmux broot helix fzf ripgrep xz helix zsh curl xsel python3 eza
 	elif command -v dnf &> /dev/null ; then
-		for package in git zsh curl xz ripgrep tmux helix xsel fzf ; do
+		for package in git zsh curl xz ripgrep tmux helix xsel fzf eza ; do
 			if ! dnf list installed "$package" &>/dev/null; then
 				sudo dnf install -y "$package"
 			fi
