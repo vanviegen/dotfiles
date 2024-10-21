@@ -1,85 +1,70 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env python3
 
-require 'optparse'
-require 'shellwords'
-$cnt = 20
-$human = true
-$onefs = false
-$apparent = false
-$aggr = false
-OptionParser.new do |o|
-	o.on('-n', '--number COUNT', Integer, 'Number of items to show') { |a| $cnt = a }
-	o.on('-c', '--computer', 'Computer-readable output') { |a| $human = !a }
-	o.on('-x', '--one-file-system', 'Skip directories on different file systems') { |a| $onefs = a }
-	o.on('-a', '--apparent-size', 'Print apparent sizes, rather than disk usage; although the apparent size is usually smaller, it may be larger due to holes in (sparse) files, internal fragmentation, indirect blocks, and the like') { |a| $apparent = a }
-	o.on('-A', '--aggregate', 'Show aggregate sizes') { |a| $aggr = a }
-	o.parse!
-end
+import argparse
+import subprocess
+import os
 
+parser = argparse.ArgumentParser(description='Show disk usage for the top directories/files.')
+parser.add_argument('-n', '--number', type=int, default=20, help='Number of items to show')
+parser.add_argument('-c', '--computer', action='store_true', help='Computer-readable output')
+parser.add_argument('-x', '--one-file-system', action='store_true', help='Skip directories on different file systems')
+parser.add_argument('-a', '--apparent-size', action='store_true', help='Print apparent sizes, rather than disk usage')
+parser.add_argument('-A', '--aggregate', action='store_true', help='Show aggregate sizes')
+parser.add_argument('dirs', nargs='*', default=['.'], help='Directories to analyze')
+args = parser.parse_args()
 
-dirs = ARGV.length>0 ? ARGV : ['.']
+du_command = ['du', '-B', '1', '-a']
+if args.apparent_size:
+    du_command.append('--apparent-size')
+if args.one_file_system:
+    du_command.append('-x')
+du_command.extend(args.dirs)
+
+process = subprocess.Popen(du_command, stdout=subprocess.PIPE, universal_newlines=True)
 items = []
-IO.popen("du -B 1 -a " + ($apparent?'--apparent-size ':'') + ($onefs?'-x ':'') + dirs.map { |d| Shellwords.escape(d) }.join(' ')) do |data|
-	data.each_line do |line|
-		line = line.force_encoding("iso-8859-1").strip.split "\t"
-		items.push [line[0].to_i, line[1]]
-	end
-end
+for line in process.stdout:
+    size, path = line.strip().split('\t', 1)
+    items.append((int(size), path))
+process.wait()
 
-items.sort!
-
+items.sort()
 result = {}
-items.reverse_each do |item|
-	# We're taking one extra result here, in case item is a child of the
-	# currently worst result, which it should replace.
-	break if result.length > $cnt and item[0] < result.sort_by{|x|x[1][0]}[-$cnt-1][1][0]
-	result[item[1]] = [item[0],item[0]]
-	
-	path = item[1].split '/'
-	loop do
-		path.pop
-		break if path.length==0
-		parent = path.join '/'
-		if result[parent] or result[parent=parent+'/']
-			result[parent][0] -= item[0]
-			break
-		end
-	end
-end
+for size, path in reversed(items):
+    if len(result) > args.number and size < sorted(result.values(), key=lambda x: x[0])[-args.number-1][0]:
+        break
+    result[path] = [size, size]
 
-result = result.sort_by{|x|x[1][0]}
-result = result.slice([0,result.length-$cnt].max..-1)
+    path_parts = path.split(os.sep)
+    while path_parts:
+        path_parts.pop()
+        parent = os.sep.join(path_parts)
+        if parent in result or parent + os.sep in result:
+            result[parent][0] -= size
+            break
 
-if $aggr
-	result = result.map{|x| [x[0],x[1][1]] }
-	result = result.sort_by { |x| x[1] }
-else
-	result = result.map{|x| [x[0],x[1][0]] }
-end
+result = sorted(result.items(), key=lambda x: x[1][0])
+result = result[max(0, len(result) - args.number):]
 
-minSize = result[0][1]
-maxSize = result[-1][1]
+if args.aggregate:
+    result = sorted((path, total) for path, (_, total) in result)
+else:
+    result = sorted((path, current) for path, (current, _) in result)
 
-result.sort!
+if args.computer:
+    for path, size in result:
+        print(f"{size} {path}")
+else:
+    mult = 1
+    unit = ''
+    min_size = min(size for _path, size in result)
+    for next_unit in "KMGT":
+        if min_size * mult < 1024 * 0.7:
+            break
+        mult /= 1024
+        unit = next_unit
 
-mult = false
-if $human
-	if minSize*(mult=1.0/1024/1024/1024)>=0.7
-		$human = 'G'
-	elsif minSize*(mult=1.0/1024/1024)>=0.7
-		$human = 'M'
-	elsif minSize*(mult=1.0/1024)>=0.7
-		$human = 'K'
-	else
-		$human = ''
-		mult = false
-	end
-else
-	$human = ''
-end
-sizeLen = (mult ? (maxSize*mult).round : maxSize).to_s.length
-
-result.each { |item|
-	print (mult ? (item[1]*mult).round : item[1]).to_s.rjust(sizeLen)+$human+'  '+item[0]+"\n"
-}
-
+    max_size = max(size for _path, size in result)
+    max_size_width = len(str(round(max_size * mult)))
+    for path, size in result:
+        formatted_size = str(round(size * mult)).rjust(max_size_width)
+        print(f"{formatted_size}{unit}  {path}")
