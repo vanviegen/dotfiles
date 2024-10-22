@@ -37,14 +37,16 @@ args, query = parser.parse_known_args()
 # Get a prompt from the user
 if len(query) > 0 or args.repeat or args.last:
     prompt = " ".join(query) 
+    # Add stdin data to the prompt
+    if not sys.stdin.isatty():
+        data = sys.stdin.read()
+        prompt += f"\n\n```\n{data.rstrip()}\n```"
+elif not sys.stdin.isatty():
+    prompt = sys.stdin.read()
 else:
     print("Type query and press alt-enter:")
     prompt = prompt_toolkit.prompt("> ", prompt_continuation="> ", multiline=True).rstrip()
 
-# Add stdin data to the prompt
-if not sys.stdin.isatty():
-    data = sys.stdin.read()
-    prompt += f"\n\n```\n{data.rstrip()}\n```"
 
 if not prompt and not args.repeat and not args.last:
     exit()
@@ -73,7 +75,7 @@ else:
         messages.append({"role": "user", "content": prompt})
         
     # Model aliases and model specific tweaks
-    model = {"4o": "gpt-4o", "4o-mini": "gpt-4o-mini", "4om": "gpt-4o-mini", "o1m": "o1-mini", "o1": "o1-preview", "sonnet": "claude-3-5-sonnet-20240620", "s": "claude-3-5-sonnet-20240620", "haiku": "claude-3-haiku-20240307", "h": "claude-3-haiku-20240307"}.get(args.model, args.model)
+    model = {"4o": "gpt-4o", "4o-mini": "gpt-4o-mini", "4om": "gpt-4o-mini", "o1m": "o1-mini", "o1": "o1-preview", "sonnet": "claude-3-5-sonnet-20241022", "s": "claude-3-5-sonnet-20241022", "haiku": "claude-3-haiku-20241022", "h": "claude-3-haiku-20241022"}.get(args.model, args.model)
     if model.startswith("o1") or model.startswith("claude-"):
         for message in messages:
             if message['role'] == 'system':
