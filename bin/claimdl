@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 if [ $# != 1 ] ; then
     echo "Moves the most recent file from ~/Downloads to the current directory, optionally giving it a new base name. The new extension is derived from the file contents."
@@ -6,7 +6,7 @@ if [ $# != 1 ] ; then
     exit 1
 fi
 
-source=~/Downloads/"`/bin/ls ~/Downloads -t | head -n 1`"
+source=~/Downloads/"`ls ~/Downloads -t | head -n 1`"
 base="$1"
 if [ "$base" = "-" ] ; then
     base="`echo "${source##*/}" | sed 's/\.[^.]*$//'`"
