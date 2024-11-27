@@ -34,7 +34,11 @@ if [ "$1" != "--uninstall" ] ; then
 			chmod a+x bin/hx
 		fi
 	elif command -v nix-env &> /dev/null ; then
-		nix-env -f '<nixpkgs>' -iA tmux broot helix fzf ripgrep xz helix zsh curl xsel python3 eza
+		for pkg in tmux broot fzf ripgrep xz helix zsh curl xsel python3 eza ; do
+			if ! (nix-env -q $pkg >/dev/null 2>&1 || command -v $pkg >/dev/null 2>&1); then
+				nix-env -iA -f '<nixpkgs>' $pkg
+			fi
+		done
 	elif command -v dnf &> /dev/null ; then
 		for package in git zsh curl xz ripgrep tmux helix xsel fzf eza ; do
 			if ! dnf list installed "$package" &>/dev/null; then
@@ -43,12 +47,12 @@ if [ "$1" != "--uninstall" ] ; then
 		done
 	else
 		# Bluefin? OSX?
-		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf; do
+		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf ; do
 		    cmd="${a##*:}"
 		    pkg="${a%%:*}"
 		    command -v "$cmd" > /dev/null || echo "$pkg"
 		done | HOMEBREW_NO_ENV_HINTS=1 xargs -r brew install
-  fi
+    fi
 
 	# Set the ssh-git URL for this repo, to allow pushing changes
 	git remote set-url --push origin git@github.com:vanviegen/dotfiles.git
