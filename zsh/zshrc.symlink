@@ -148,7 +148,7 @@ add-zsh-hook preexec term_title_preexec
 
 # Use eza instead of ls and the like
 eza_params="--git --icons --classify --time-style=long-iso --group --color-scale all"
-alias l="eza --git-ignore --group-directories-first $eza_params"
+alias l="eza --group-directories-first $eza_params"
 alias ll="eza --all --header --long --group-directories-first $eza_params"
 alias lt="eza --all --header --long --sort=modified $eza_params"
 alias la="eza -lbhHigUmuSaB@"
