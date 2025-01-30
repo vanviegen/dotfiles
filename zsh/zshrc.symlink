@@ -9,7 +9,7 @@ fi
 
 if [[ -z "$SUING" ]] ; then
     export "DOT=$HOME/.dotfiles"
-    export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$PATH"
+    export PATH="$DOT/bin:$DOT/xbin:$HOME/.local/bin:$HOME/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 else
     export "DOT=$SUING"
     if [ -f $SUING/../.sudo-path.tmp ] ; then
@@ -65,7 +65,7 @@ function br {
 # Load and initialise completion system
 autoload -Uz compinit
 # When sudoing, we don't want this file to be created in the original user's home directory
-compinit -d ~/.cache/zcompdump
+compinit -i -d ~/.cache/zcompdump
 
 # Load our package manager, zap
 export XDG_DATA_HOME="$DOT/../.local/share"
