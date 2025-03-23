@@ -177,6 +177,24 @@ compdef _S S
 # Use fzf for history search
 source <(fzf --zsh)
 
+# Create aliases for all flatpak commands that are not in the PATH as well
+while IFS=$'\t' read -r app_id name _; do
+    local alias_name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    if ! command -v "$alias_name" &>/dev/null; then
+        alias "$alias_name"="flatpak run $app_id"
+    fi
+done < <(flatpak list --app --columns=application,name,version)
+
+# Fix completion for arguments to flatpak applications
+_flatpak_run_with_file_completion() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+  _arguments -C \
+    '1: :_flatpak_applications' \
+    '*: :_files'
+}
+compdef _flatpak_run_with_file_completion flatpak
+
 if [ -e ~/Documents/keys/openai.key ] ; then
     export OPENAI_API_KEY=`cat ~/Documents/keys/openai.key`
 fi
