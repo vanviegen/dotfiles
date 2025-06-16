@@ -175,15 +175,37 @@ _S() {
 compdef _S S
 
 # Use fzf for history search
-source <(fzf --zsh)
+FZF_DEFAULT_OPTS="--color=fg:1,fg+:2 --bind=tab:accept" 
+source <(fzf-tmux --zsh)
+
+# Tab completion
+# disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+# preview directory's content with eza when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+# To make fzf-tab follow FZF_DEFAULT_OPTS.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+# switch group using `<` and `>`
+zstyle ':fzf-tab:*' switch-group '<' '>'
+# use tmux popups for previews
+zstyle ':fzf-tab:*' fzf-command fzf-tmux
+plug Aloxaf/fzf-tab
+
 
 # Create aliases for all flatpak commands that are not in the PATH as well
-while IFS=$'\t' read -r app_id name _; do
-    local alias_name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+while IFS=$'\t' read -r app_id ; do
+    local alias_name=$(echo "$app_id" | awk -F. '{print tolower($NF)}')
     if ! command -v "$alias_name" &>/dev/null; then
         alias "$alias_name"="flatpak run $app_id"
     fi
-done < <(flatpak list --app --columns=application,name,version)
+done < <(flatpak list --app --columns=application)
 
 # Fix completion for arguments to flatpak applications
 _flatpak_run_with_file_completion() {

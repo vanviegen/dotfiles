@@ -94,3 +94,5 @@ bind A command-prompt "rename-window %%"
 set -g pane-active-border-style fg=blue
 set -g pane-border-style fg=colour235
 set -g message-style bg=#aa0099,fg=white,bold
+
+run-shell ~/.dotfiles/tmux/tmux-yank/yank.tmux

@@ -75,7 +75,7 @@ else:
         messages.append({"role": "user", "content": prompt})
         
     # Model aliases and model specific tweaks
-    model = {"4o": "gpt-4o", "4o-mini": "gpt-4o-mini", "4om": "gpt-4o-mini", "o1m": "o1-mini", "o1": "o1-preview", "sonnet": "claude-3-5-sonnet-20241022", "s": "claude-3-5-sonnet-20241022", "haiku": "claude-3-haiku-20241022", "h": "claude-3-haiku-20241022"}.get(args.model, args.model)
+    model = {"4o": "gpt-4o", "4o-mini": "gpt-4o-mini", "4om": "gpt-4o-mini", "o1m": "o1-mini", "o1": "o1-preview", "sonnet": "claude-3-7-sonnet-latest", "s": "claude-3-7-sonnet-latest", "haiku": "claude-3.5-haiku-latest", "h": "claude-3.5-haiku-latest"}.get(args.model, args.model)
     if model.startswith("o1") or model.startswith("claude-"):
         for message in messages:
             if message['role'] == 'system':

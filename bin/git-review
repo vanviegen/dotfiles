@@ -1,17 +1,41 @@
 #!/bin/sh
 
+if [ "$1" = "" ]; then
+  echo "Usage: $0 <branch-pattern-or-PR-number>"
+  exit 1
+fi
+
+# Check if input is a PR number
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+  # Handle GitHub PR
+  PR_NUM=$1
+  REMOTE_NAME="origin"  # Or whatever your GitHub remote is called
+  
+  # Fetch the PR
+  git fetch $REMOTE_NAME pull/$PR_NUM/head:pr-$PR_NUM
+  
+  if [ $? -ne 0 ]; then
+    echo "Failed to fetch PR #$PR_NUM"
+    exit 1
+  fi
+  
+  # Checkout and rebase
+  git checkout -B tmp pr-$PR_NUM && git rebase master && git diff master
+  exit 0
+fi
+
+# Original branch logic
 git remote update -p > /dev/null
 x=$(git branch -ar --no-merged | grep -E "$1")
 if [ $(echo "$x" | wc -l) -gt 1 ] ; then
-	echo "More than one matching branch:"
-	echo $x
-	exit 1
+   echo "More than one matching branch:"
+   echo "$x"
+   exit 1
 fi
 if [ "$x" = "" ] ; then
-	echo "No matching branch"
-	exit 1
+   echo "No matching branch"
+   exit 1
 fi
 
-echo $x
+echo "$x"
 git checkout -B tmp $x && git rebase master && git diff master
-
