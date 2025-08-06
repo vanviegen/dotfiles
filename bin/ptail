@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+
+if [[ $# -ne 1 ]]; then
+    echo "Continuously tail a file even when it's deleted and recreated"
+    echo "Usage: $0 <file_path>" >&2
+    exit 1
+fi
+
+FILE_PATH="$1"
+
+cleanup() {
+    [[ -n $TAIL_PID ]] && kill $TAIL_PID 2>/dev/null
+    exit 0
+}
+
+trap cleanup INT TERM
+
+while true; do
+    # Wait for file to exist
+    if [[ -f "$FILE_PATH" ]]; then
+        tail -f "$FILE_PATH" &
+        TAIL_PID=$!
+                
+        # Wait for deletes/moves on parent dir, until the tailed file is gone
+        # Detect deletes on the file itself appears to be unreliable
+        PARENT_DIR="$(dirname "$FILE_PATH")"
+        while [[ -f "$FILE_PATH" ]]; do
+            inotifywait -e delete_self -e move_self -e delete -e move "$PARENT_DIR" > /dev/null 2>&1
+        done
+        
+        kill $TAIL_PID 2> /dev/null
+        unset TAIL_PID
+        echo ----------------------------------
+    fi
+    sleep 0.1
+done

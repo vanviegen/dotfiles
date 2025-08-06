@@ -41,7 +41,7 @@ if [ "$1" != "--uninstall" ] ; then
 		done
 	elif command -v brew &> /dev/null ; then
 		# Bluefin? OSX?
-		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf eza ; do
+		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf eza inotify-tools ; do
 		    cmd="${a##*:}"
 		    pkg="${a%%:*}"
 		    command -v "$cmd" > /dev/null || echo "$pkg"
