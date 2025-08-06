@@ -23,14 +23,14 @@ def request(url, data, headers):
 parser = argparse.ArgumentParser(
     prog="ai",
     description="Ask an LLM for help on the command line.",
-    epilog="Additional query arguments can be passed anywhere in the command. These arguments will be used as the query. If there is no query, the user is pronpted.",
+    epilog="Additional query arguments can be passed anywhere in the command. These arguments will be used as the query. If there is no query, the user is prompted.",
 )
 parser.add_argument('-m', '--model', type=str, default='sonnet', help="Set the model name (default: 'sonnet').")
 parser.add_argument('-c', '--continue', dest='_continue', action='store_true', help="Continue the previous conversation.")
 parser.add_argument('-f', '--file', action='append', default=[], help="Pass file(s) to the LLM. Can be used multiple times.")
 parser.add_argument('-r', '--repeat', action='store_true', help="Repeat the previous query.")
 parser.add_argument('-l', '--last', action='store_true', help="Show the last response again.")
-parser.add_argument('-k', '--key', type=str, help="Set the LLM API key. Default to using OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable.")
+parser.add_argument('-k', '--key', type=str, help="Set the OpenRouter API key. Default to using OPENROUTER_API_KEY environment variable.")
 
 args, query = parser.parse_known_args()
 
@@ -75,29 +75,38 @@ else:
         messages.append({"role": "user", "content": prompt})
         
     # Model aliases and model specific tweaks
-    model = {"4o": "gpt-4o", "4o-mini": "gpt-4o-mini", "4om": "gpt-4o-mini", "o1m": "o1-mini", "o1": "o1-preview", "sonnet": "claude-3-7-sonnet-latest", "s": "claude-3-7-sonnet-latest", "haiku": "claude-3.5-haiku-latest", "h": "claude-3.5-haiku-latest"}.get(args.model, args.model)
-    if model.startswith("o1") or model.startswith("claude-"):
+    model = {
+        "sonnet": "anthropic/claude-sonnet-4",
+        "s": "anthropic/claude-sonnet-4",
+        "gemini": "google/gemini-2.5-pro",
+        "g": "google/gemini-2.5-pro",
+        "qwen": "qwen/qwen3-30b-a3b",
+        "q": "qwen/qwen3-30b-a3b",
+        "gpt": "openai/gpt-4.1",
+        "4": "openai/gpt-4.1"
+    }.get(args.model, args.model)
+    
+    # Remove system messages for models that don't support them
+    if model.startswith("anthropic/") or model.startswith("openai/o1"):
         for message in messages:
             if message['role'] == 'system':
                 message['role'] = 'user'
 
-    # Get a response from the LLM
+    # Get a response from OpenRouter
     print(f"Querying {model}...", end="", flush=True)
-    headers = {'Content-Type': 'application/json',}
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {args.key or os.environ["OPENROUTER_API_KEY"]}',
+        'HTTP-Referer': 'https://github.com/vanviegen/dotfiles',
+        'X-Title': 'AI CLI Tool'
+    }
     data = {
         'model': model,
         'messages': messages,
     }
-    if model.startswith("claude-"):
-        data['max_tokens'] = 4096
-        headers['anthropic-version'] = '2023-06-01'
-        headers['x-api-key'] = args.key or os.environ["ANTHROPIC_API_KEY"]
-        response = request("https://api.anthropic.com/v1/messages", data, headers)
-        text = response['content'][0]['text']
-    else:
-        headers['Authorization'] = 'Bearer ' + (args.key or os.environ["OPENAI_API_KEY"])
-        response = request("https://api.openai.com/v1/chat/completions", data, headers)
-        text = response['choices'][0]['message']['content']
+    
+    response = request("https://openrouter.ai/api/v1/chat/completions", data, headers)
+    text = response['choices'][0]['message']['content']
         
 # Write query and response to a file
 messages.append({"role": "assistant", "content": text})
