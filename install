@@ -14,13 +14,13 @@ if [ "$1" != "--uninstall" ] ; then
 	# Install packages, if needed
 	if command -v pacman &> /dev/null ; then
 		 # Arch/Manjaro
-		packages="sudo git zsh curl xz ripgrep tmux broot helix wl-clipboard xsel fzf eza"
+		packages="sudo git fish curl xz ripgrep tmux broot helix wl-clipboard xsel fzf eza"
 		if ! pacman -Q $packages &>/dev/null; then
 			sudo pacman -S --needed $packages
 		fi
 	elif command -v apt &> /dev/null ; then
 		# Debian/Ubuntu
-		packages="git curl xz-utils ripgrep zsh wl-clipboard xsel tmux fuse fzf eza"
+		packages="git curl xz-utils ripgrep fish wl-clipboard xsel tmux fuse fzf eza"
 		if dpkg-query -Wf'${db:Status-abbrev}\n' $packages 2>&1 | grep -vq "^ii"  ; then
 			sudo apt install $packages
 		fi
@@ -34,20 +34,20 @@ if [ "$1" != "--uninstall" ] ; then
 			chmod a+x bin/hx
 		fi
 	elif command -v nix-env &> /dev/null ; then
-		for pkg in tmux broot fzf ripgrep xz helix zsh curl xsel python3 eza ; do
+		for pkg in tmux broot fzf ripgrep xz helix fish curl xsel python3 eza ; do
 			if ! (nix-env -q $pkg >/dev/null 2>&1 || command -v $pkg >/dev/null 2>&1); then
 				nix-env -iA -f '<nixpkgs>' $pkg
 			fi
 		done
 	elif command -v brew &> /dev/null ; then
 		# Bluefin? OSX?
-		for a in git zsh curl xz ripgrep:rg tmux broot helix:hx xsel fzf eza inotify-tools ; do
+		for a in git fish curl xz ripgrep:rg tmux broot helix:hx xsel fzf eza inotify-tools ; do
 		    cmd="${a##*:}"
 		    pkg="${a%%:*}"
 		    command -v "$cmd" > /dev/null || echo "$pkg"
 		done | HOMEBREW_NO_ENV_HINTS=1 xargs -r brew install
 	elif command -v dnf &> /dev/null ; then
-		for package in git zsh curl xz ripgrep tmux helix xsel fzf eza ; do
+		for package in git fish curl xz ripgrep tmux helix xsel fzf eza ; do
 			if ! dnf list installed "$package" &>/dev/null; then
 				sudo dnf install -y "$package"
 			fi

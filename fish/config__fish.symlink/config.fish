@@ -1,0 +1,153 @@
+if status is-interactive
+    # Commands to run in interactive sessions can go here
+
+    # Start tmux instead if we're not already in tmux, we're not in vscode and it's an interactive session
+    if not set -q TMUX; and not set -q SUING; and not string match -q "vscode" $TERM_PROGRAM
+        if command -v tmux >/dev/null
+            exec tmux new-session -A -s $USER-main
+        else
+            echo "Failed to start tmux"
+        end
+    end
+
+    if not set -q SUING
+        set -gx DOT $HOME/.dotfiles
+        set -gx PATH $DOT/bin $DOT/xbin $HOME/.local/bin $HOME/.linuxbrew/bin /home/linuxbrew/.linuxbrew/bin $PATH
+    else
+        set -gx DOT $SUING/.dotfiles
+        if test -f $SUING/.sudo-path.tmp
+            set -gx PATH (cat $SUING/.sudo-path.tmp)
+        end
+    end
+    if test $EUID -eq 0
+        set -gx PATH $PATH /sbin /usr/sbin
+    end
+
+    # Configuration for various tools
+    set -gx COLORTERM truecolor
+    set -gx FZF_DEFAULT_COMMAND 'rg --files'
+    set -gx LESS '-iMSx4 -FX -R'
+    set -gx PAGER less
+    set -gx EDITOR hx
+    set -gx LS_COLORS "di=38;2;0;153;153:ln=38;2;0;166;178:so=38;2;255;116;0:pi=38;2;255;116;0:ex=38;2;0;153;153:bd=38;2;255;116;0:cd=38;2;255;116;0:su=38;2;255;116;0:sg=38;2;255;116;0:tw=38;2;255;116;0:ow=38;2;255;116;0:*.tar=38;2;255;116;0:*.tgz=38;2;255;116;0:*.arc=38;2;255;116;0:*.arj=38;2;255;116;0:*.taz=38;2;255;116;0:*.lha=38;2;255;116;0:*.lz4=38;2;255;116;0:*.lzh=38;2;255;116;0:*.lzma=38;2;255;116;0:*.tlz=38;2;255;116;0:*.txz=38;2;255;116;0:*.tzo=38;2;255;116;0:*.t7z=38;2;255;116;0:*.zip=38;2;255;116;0:*.z=38;2;255;116;0:*.dz=38;2;255;116;0:*.gz=38;2;255;116;0:*.lrz=38;2;255;116;0:*.lz=38;2;255;116;0:*.lzo=38;2;255;116;0:*.xz=38;2;255;116;0:*.zst=38;2;255;116;0:*.tzst=38;2;255;116;0:*.bz2=38;2;255;116;0:*.bz=38;2;255;116;0:*.tbz=38;2;255;116;0:*.tbz2=38;2;255;116;0:*.tz=38;2;255;116;0:*.deb=38;2;255;116;0:*.rpm=38;2;255;116;0:*.jar=38;2;255;116;0:*.war=38;2;255;116;0:*.ear=38;2;255;116;0:*.sar=38;2;255;116;0:*.rar=38;2;255;116;0:*.alz=38;2;255;116;0:*.ace=38;2;255;116;0:*.zoo=38;2;255;116;0:*.cpio=38;2;255;116;0:*.7z=38;2;255;116;0:*.rz=38;2;255;116;0:*.cab=38;2;255;116;0:*.wim=38;2;255;116;0:*.swm=38;2;255;116;0:*.dwm=38;2;255;116;0:*.esd=38;2;255;116;0:*.jpg=38;2;92;204;204:*.jpeg=38;2;92;204;204:*.mjpg=38;2;92;204;204:*.mjpeg=38;2;92;204;204:*.gif=38;2;92;204;204:*.bmp=38;2;92;204;204:*.pbm=38;2;92;204;204:*.pgm=38;2;92;204;204:*.ppm=38;2;92;204;204:*.tga=38;2;92;204;204:*.xbm=38;2;92;204;204:*.xpm=38;2;92;204;204:*.tif=38;2;92;204;204:*.tiff=38;2;92;204;204:*.png=38;2;92;204;204:*.svg=38;2;92;204;204:*.svgz=38;2;92;204;204:*.mng=38;2;92;204;204:*.pcx=38;2;92;204;204:*.mov=38;2;92;204;204:*.mpg=38;2;92;204;204:*.mpeg=38;2;92;204;204:*.m2v=38;2;92;204;204:*.mkv=38;2;92;204;204:*.webm=38;2;92;204;204:*.ogm=38;2;92;204;204:*.mp4=38;2;92;204;204:*.m4v=38;2;92;204;204:*.mp4v=38;2;92;204;204:*.vob=38;2;92;204;204:*.qt=38;2;92;204;204:*.nuv=38;2;92;204;204:*.wmv=38;2;92;204;204:*.asf=38;2;92;204;204:*.rm=38;2;92;204;204:*.rmvb=38;2;92;204;204:*.flc=38;2;92;204;204:*.avi=38;2;92;204;204:*.fli=38;2;92;204;204:*.flv=38;2;92;204;204:*.gl=38;2;92;204;204:*.dl=38;2;92;204;204:*.xcf=38;2;92;204;204:*.xwd=38;2;92;204;204:*.yuv=38;2;92;204;204:*.cgm=38;2;92;204;204:*.emf=38;2;92;204;204:*.ogv=38;2;92;204;204:*.ogx=38;2;92;204;204:*.aac=38;2;51;204;204:*.au=38;2;51;204;204:*.flac=38;2;51;204;204:*.m4a=38;2;51;204;204:*.mid=38;2;51;204;204:*.midi=38;2;51;204;204:*.mka=38;2;51;204;204:*.mp3=38;2;51;204;204:*.mpc=38;2;51;204;204:*.ogg=38;2;51;204;204:*.ra=38;2;51;204;204:*.wav=38;2;51;204;204:*.oga=38;2;51;204;204:*.opus=38;2;51;204;204:*.spx=38;2;51;204;204:*.xspf=38;2;51;204;204:"
+    alias open xdg-open
+    alias cs rg
+
+    # Disable prompt shortening (just /var/home instead of /v/h)
+    set -g fish_prompt_pwd_dir_length 0
+
+    # Custom prompt function
+    function fish_prompt
+        echo
+        if set -q SSH_CLIENT; or set -q SSH_TTY
+            set_color $fish_color_host
+            echo -n (hostname)
+            set_color normal
+            echo -n @
+        end
+        if set -q SUING
+            if test $EUID -eq 0
+                set_color $fish_color_error
+            else
+                set_color yellow
+            end
+        else
+            set_color $fish_color_cwd
+        end
+        echo -n (prompt_pwd)
+        set_color normal
+        echo -n '> '
+    end
+
+    # This function starts broot and executes the command it produces, if any.
+    function br
+        set -l cmd_file (mktemp)
+        if broot --outcmd $cmd_file $argv
+            set -l cmd (cat $cmd_file)
+            rm -f $cmd_file
+            eval $cmd
+        else
+            set -l code $status
+            rm -f $cmd_file
+            return $code
+        end
+    end
+
+    # Set the tmux title to current program/dir
+    function term_set_title
+        set -l max_length 20
+        set -l title (string replace -r -a '[^[:print:]]' '' $argv[1])
+        if test (string length $title) -gt $max_length
+            set title (string sub -l $max_length $title)..
+        end
+        if set -q SUING
+            set title (whoami)@$title
+        end
+        printf '\033k%s\033\\' $title
+    end
+    function fish_title
+        if set -q argv[1]
+            # preexec: set to command
+            term_set_title $argv[1]
+        else
+            # precmd: set to pwd
+            term_set_title (prompt_pwd)
+        end
+    end
+
+    # Use esc+esc to prepend 'sudo ' for sudo
+    function toggle_prefix
+        if string match -q 'sudo *' $BUFFER
+            set CURSOR (math max 0, (math $CURSOR - 5))
+            set BUFFER (string sub -s 6 $BUFFER)
+        else
+            set BUFFER "sudo $BUFFER"
+            set CURSOR (math $CURSOR + 5)
+        end
+    end
+    bind \e\e toggle_prefix
+
+    # Use eza instead of ls and the like
+    set eza_params --git --icons --classify --time-style=long-iso --group --color-scale all
+    alias l "eza --group-directories-first $eza_params"
+    alias ll "eza --all --header --long --group-directories-first $eza_params"
+    alias lt "eza --all --header --long --sort=modified $eza_params"
+    alias la "eza -lbhHigUmuSaB@"
+    alias t "eza --tree --group-directories-first $eza_params"
+
+    # Use fzf for history search
+    set -gx FZF_DEFAULT_OPTS "--color=fg:1,fg+:2 --bind=tab:accept"
+    fzf --fish | source
+
+    # Create aliases for all flatpak commands that are not in the PATH
+    for app_id in (flatpak list --app --columns=application)
+        if test -n "$app_id"
+            set alias_name (string lower (string split . $app_id)[-1])
+            if not command -v $alias_name >/dev/null
+                alias $alias_name "flatpak run $app_id"
+            end
+        end
+    end
+
+    # Expand .., ..., etc to the appropriate number of cd ../
+    function multicd
+        echo cd (string repeat -n (math (string length -- $argv[1]) - 1) ../)
+    end
+    abbr --add dotdot --regex '^\.\.+$' --function multicd
+
+    # Completion for flatpak
+    complete -c flatpak -a "(flatpak list --app --columns=application)" -f
+    complete -c flatpak -n "__fish_seen_subcommand_from run" -a "(flatpak list --app --columns=application)" -f
+
+    if test -e ~/Documents/keys/openai.key
+        set -gx OPENAI_API_KEY (cat ~/Documents/keys/openai.key)
+    end
+
+    if test -e ~/Documents/keys/openrouter.key
+        set -gx OPENROUTER_API_KEY (cat ~/Documents/keys/openrouter.key)
+    end
+
+    if test -f "$HOME/.cargo/env.fish"
+        source "$HOME/.cargo/env.fish"
+    end
+end

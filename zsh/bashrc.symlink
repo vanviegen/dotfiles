@@ -1,9 +1,0 @@
-if test -z "$IN_ZSH" -a -n "$PS1"; then
-    export IN_ZSH=true
-    ZSH="$(which zsh)"
-    if [ "$ZSH" = "" ] ; then
-        echo zsh cannot be found in path: $PATH
-    else
-        SHELL="$(which zsh)" exec "$(which zsh)"
-    fi
-fi

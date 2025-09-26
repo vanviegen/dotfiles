@@ -1,0 +1,9 @@
+if test -z "$IN_ZSH" -a -n "$PS1"; then
+    export IN_ZSH=true
+    FISH="$(which fish)"
+    if [ "$FISH" = "" ] ; then
+        echo fish cannot be found in path: $PATH
+    else
+        SHELL="$FISH" exec "$FISH"
+    fi
+fi

@@ -4,7 +4,7 @@
 
 These are the configuration files and an install script that I like to use on every Linux computer I have access to. It features:
 
-- The `zsh` shell, configured with a comfortable set of plugins using the lightweight `zap` plugin manager.
+- The `fish` shell, with a light config and some convenient aliases.
 - Autostarting `tmux` terminal multiplexer. Common keys are: `ctrl-a c` (create window), `ctrl-a n` (next window), `ctrl-a p` (previous window), `ctrl-a |` (vertical split), `ctrl-a -` (horizontal split), `ctrl-a <arrow>` (move to split).
 - `helix`, a modern modal editor (https://helix-editor.com/)
 - `br`, a nice tool to navigate directories (https://github.com/Canop/broot)

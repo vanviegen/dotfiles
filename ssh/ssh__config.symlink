@@ -3,6 +3,10 @@ ControlPath /tmp/ssh_mux_%h_%p_%r
 ForwardX11 yes
 GSSAPIAuthentication no
 # DevPod Start bun.devpod
+Host iffy.vanviegen.net
+  HostName iffy.vanviegen.net
+  User frank
+
 Host bun.devpod
   ForwardAgent yes
   LogLevel error
