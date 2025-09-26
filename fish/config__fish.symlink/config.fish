@@ -2,7 +2,7 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 
     # Start tmux instead if we're not already in tmux, we're not in vscode and it's an interactive session
-    if not set -q TMUX; and not set -q SUING; and not string match -q "vscode" $TERM_PROGRAM
+    if not set -q TMUX; and not set -q SUING; and not string match -q vscode $TERM_PROGRAM
         if command -v tmux >/dev/null
             exec tmux new-session -A -s $USER-main
         else
@@ -15,8 +15,8 @@ if status is-interactive
         set -gx PATH $DOT/bin $DOT/xbin $HOME/.local/bin $HOME/.linuxbrew/bin /home/linuxbrew/.linuxbrew/bin $PATH
     else
         set -gx DOT $SUING/.dotfiles
-        if test -f $SUING/.sudo-path.tmp
-            set -gx PATH (cat $SUING/.sudo-path.tmp)
+        if test -f $SUING/.sudo-env.tmp
+            source $SUING/.sudo-env.tmp
         end
     end
     if test $EUID -eq 0
@@ -33,6 +33,9 @@ if status is-interactive
     alias open xdg-open
     alias cs rg
 
+    # Disable the friendly welcome message
+    set fish_greeting
+
     # Disable prompt shortening (just /var/home instead of /v/h)
     set -g fish_prompt_pwd_dir_length 0
 
@@ -40,14 +43,14 @@ if status is-interactive
     function fish_prompt
         echo
         if set -q SSH_CLIENT; or set -q SSH_TTY
-            set_color $fish_color_host
+            set_color $fish_color_host_remote
             echo -n (hostname)
             set_color normal
-            echo -n @
+            echo -n :
         end
         if set -q SUING
             if test $EUID -eq 0
-                set_color $fish_color_error
+                set_color $fish_color_cwd_root
             else
                 set_color yellow
             end
@@ -116,15 +119,19 @@ if status is-interactive
     alias t "eza --tree --group-directories-first $eza_params"
 
     # Use fzf for history search
-    set -gx FZF_DEFAULT_OPTS "--color=fg:1,fg+:2 --bind=tab:accept"
-    fzf --fish | source
+    if command -v fzf >/dev/null
+        set -gx FZF_DEFAULT_OPTS "--color=fg:1,fg+:2 --bind=tab:accept"
+        fzf --fish 2>/dev/null | source
+    end
 
-    # Create aliases for all flatpak commands that are not in the PATH
-    for app_id in (flatpak list --app --columns=application)
-        if test -n "$app_id"
-            set alias_name (string lower (string split . $app_id)[-1])
-            if not command -v $alias_name >/dev/null
-                alias $alias_name "flatpak run $app_id"
+    if command -v flatpak >/dev/null
+        # Create aliases for all flatpak commands that are not in the PATH
+        for app_id in (flatpak list --app --columns=application)
+            if test -n "$app_id"
+                set alias_name (string lower (string split . $app_id)[-1])
+                if not command -v $alias_name >/dev/null
+                    alias $alias_name "flatpak run $app_id"
+                end
             end
         end
     end

@@ -7,6 +7,9 @@ else
 	TARGET_USER=root
 fi
 
-echo "$PATH" > ~/.sudo-path.tmp
-chmod a+r ~/.sudo-path.tmp
+rm -f ~/.sudo-env.tmp
+for X in PATH SSH_CLIENT SSH_CONNECTION SSH_TTY ; do
+	echo "set -gx $X '$(eval "echo \$$X")'" >> ~/.sudo-env.tmp
+done
+
 sudo -u $TARGET_USER ~/.dotfiles/bin/start-env "$@"

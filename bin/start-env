@@ -4,9 +4,6 @@ SUING="`dirname $0`"/../..
 export SUING="`realpath $SUING`"
 
 export XDG_CONFIG_HOME="$SUING/.config"
-if [ -f $SUING/.sudo-path.tmp ] ; then
-  export PATH=$(cat $SUING/.sudo-path.tmp)
-fi
 
 export SHELL=$(which fish)
 
