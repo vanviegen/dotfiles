@@ -157,4 +157,8 @@ if status is-interactive
     if test -f "$HOME/.cargo/env.fish"
         source "$HOME/.cargo/env.fish"
     end
+
+    # Enable VSCode shell integration if in VSCode terminal
+    string match -q "$TERM_PROGRAM" "vscode" and
+    . (code --locate-shell-integration-path fish)
 end
