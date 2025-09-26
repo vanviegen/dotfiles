@@ -9,7 +9,10 @@ fi
 
 rm -f ~/.sudo-env.tmp
 for X in PATH SSH_CLIENT SSH_CONNECTION SSH_TTY ; do
-	echo "set -gx $X '$(eval "echo \$$X")'" >> ~/.sudo-env.tmp
+	V="$(eval "echo \$$X")"
+	if [ "$V" != "" ] ; then
+		echo "set -gx $X '$V'" >> ~/.sudo-env.tmp
+	fi
 done
 
 sudo -u $TARGET_USER ~/.dotfiles/bin/start-env "$@"

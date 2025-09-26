@@ -15,8 +15,10 @@ if status is-interactive
         set -gx PATH $DOT/bin $DOT/xbin $HOME/.local/bin $HOME/.linuxbrew/bin /home/linuxbrew/.linuxbrew/bin $PATH
     else
         set -gx DOT $SUING/.dotfiles
-        if test -f $SUING/.sudo-env.tmp
-            source $SUING/.sudo-env.tmp
+        set f $SUING/.sudo-env.tmp
+        if test -f $f
+            source $f
+            rm $f
         end
     end
     if test $EUID -eq 0
@@ -41,25 +43,44 @@ if status is-interactive
 
     # Custom prompt function
     function fish_prompt
+
         echo
         if set -q SSH_CLIENT; or set -q SSH_TTY
-            set_color $fish_color_host_remote
-            echo -n (hostname)
-            set_color normal
-            echo -n :
+            set ssh 1
         end
+
         if set -q SUING
-            if test $EUID -eq 0
-                set_color $fish_color_cwd_root
+            set_color -b 5f00d7 # purple background
+            set_color white
+            echo -n " "(whoami)
+            set_color 5f00d7 # purple now as foreground
+            if set -q ssh
+                set_color -b $fish_color_host_remote
             else
-                set_color yellow
+                set_color -b 009999 # cyan background
             end
-        else
-            set_color $fish_color_cwd
+            echo -n ""
         end
-        echo -n (prompt_pwd)
+
+        if set -q ssh
+            set_color black
+            set_color -b $fish_color_host_remote
+            echo -n " "(hostname)
+            set_color -b 009999
+            set_color $fish_color_host_remote
+            echo -n ""
+        end
+
+        set_color -b 009999 # cyan background
+        set_color 000000 # full black text
+
+        echo -n " "(prompt_pwd)
+
+        set_color normal # resets both fg and bg
+        set_color 009999 # set fg to what was the bg color
+
+        echo -n " "
         set_color normal
-        echo -n '> '
     end
 
     # This function starts broot and executes the command it produces, if any.
@@ -98,25 +119,16 @@ if status is-interactive
         end
     end
 
-    # Use esc+esc to prepend 'sudo ' for sudo
-    function toggle_prefix
-        if string match -q 'sudo *' $BUFFER
-            set CURSOR (math max 0, (math $CURSOR - 5))
-            set BUFFER (string sub -s 6 $BUFFER)
-        else
-            set BUFFER "sudo $BUFFER"
-            set CURSOR (math $CURSOR + 5)
-        end
+    # Aliases for eza
+    if command -v eza >/dev/null
+        set eza_params --git --icons --classify --time-style=long-iso --group --color-scale all
+        alias ls eza
+        alias l "eza --group-directories-first $eza_params"
+        alias ll "eza --all --header --long --group-directories-first $eza_params"
+        alias lt "eza --all --header --long --sort=modified $eza_params"
+        alias la "eza -lbhHigUmuSaB@"
+        alias t "eza --tree --group-directories-first $eza_params"
     end
-    bind \e\e toggle_prefix
-
-    # Use eza instead of ls and the like
-    set eza_params --git --icons --classify --time-style=long-iso --group --color-scale all
-    alias l "eza --group-directories-first $eza_params"
-    alias ll "eza --all --header --long --group-directories-first $eza_params"
-    alias lt "eza --all --header --long --sort=modified $eza_params"
-    alias la "eza -lbhHigUmuSaB@"
-    alias t "eza --tree --group-directories-first $eza_params"
 
     # Use fzf for history search
     if command -v fzf >/dev/null
@@ -159,6 +171,7 @@ if status is-interactive
     end
 
     # Enable VSCode shell integration if in VSCode terminal
-    string match -q "$TERM_PROGRAM" "vscode" and
-    . (code --locate-shell-integration-path fish)
+    if string match -q "$TERM_PROGRAM" vscode
+        . (code --locate-shell-integration-path fish)
+    end
 end
