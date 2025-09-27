@@ -41,45 +41,91 @@ if status is-interactive
     # Disable prompt shortening (just /var/home instead of /v/h)
     set -g fish_prompt_pwd_dir_length 0
 
+    # Git helper functions
+    function in-git-repo
+        git rev-parse --is-inside-work-tree >/dev/null 2>&1
+    end
+
+    function git-branch-name-and-repo-status
+        set -l branch (git branch --show-current 2>/dev/null)
+        if test -z "$branch"
+            set branch (git rev-parse --short HEAD 2>/dev/null)
+        end
+        
+        set -l status_icons ""
+        
+        # Check for staged changes
+        if not git diff-index --quiet --cached HEAD -- 2>/dev/null
+            set status_icons "$status_icons+"  # staged changes
+        end
+        
+        # Check for unstaged modifications (working tree vs index)
+        if not git diff-files --quiet 2>/dev/null
+            set status_icons "$status_icons!"  # modified files
+        end
+        
+        # Check for untracked files
+        if test (count (git ls-files --others --exclude-standard 2>/dev/null)) -gt 0
+            set status_icons "$status_icons?"  # untracked files
+        end
+        
+        # If no changes, show clean status
+        if test -z "$status_icons"
+            set status_icons "✓"  # clean
+        end
+        
+        echo -n "$branch $status_icons"
+    end
+
     # Custom prompt function
     function fish_prompt
 
         echo
-        if set -q SSH_CLIENT; or set -q SSH_TTY
-            set ssh 1
-        end
+
+        set_color black
 
         if set -q SUING
             set_color -b 5f00d7 # purple background
-            set_color white
-            echo -n " "(whoami)
-            set_color 5f00d7 # purple now as foreground
-            if set -q ssh
-                set_color -b $fish_color_host_remote
-            else
-                set_color -b 009999 # cyan background
-            end
             echo -n ""
+
+            set_color white
+            echo -n " "(whoami)" "
+
+            set_color 5f00d7 # purple now as foreground
         end
 
-        if set -q ssh
-            set_color black
+        if set -q SSH_CLIENT; or set -q SSH_TTY
             set_color -b $fish_color_host_remote
-            echo -n " "(hostname)
-            set_color -b 009999
-            set_color $fish_color_host_remote
             echo -n ""
+
+            set_color black
+            echo -n " "(hostname)" "
+
+            set_color $fish_color_host_remote # now as fg color
         end
 
         set_color -b 009999 # cyan background
+        echo -n ""
+
         set_color 000000 # full black text
+        echo -n " "(prompt_pwd)" "
 
-        echo -n " "(prompt_pwd)
+        set_color 009999 # now as fg color
 
-        set_color normal # resets both fg and bg
-        set_color 009999 # set fg to what was the bg color
+        # TODO: add git branch and status
+        if in-git-repo
+            set_color -b 444444 # gray background
+            echo -n ""
 
+            set_color 009999
+            echo -n " "(git-branch-name-and-repo-status)" "
+
+            set_color 444444 # now as fg color
+        end
+
+        set_color -b black
         echo -n " "
+
         set_color normal
     end
 
