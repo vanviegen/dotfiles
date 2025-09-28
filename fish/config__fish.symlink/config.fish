@@ -140,8 +140,14 @@ if status is-interactive
     function term_set_title
         set -l max_length 20
         set -l title (string replace -r -a '[^[:print:]]' '' $argv[1])
+        set -l align $argv[2]  # optional alignment parameter
+        
         if test (string length $title) -gt $max_length
-            set title (string sub -l $max_length $title)..
+            if test "$align" = "right"
+                set title …(string sub -s (math (string length $title) - $max_length + 3) $title)
+            else
+                set title (string sub -l $max_length $title)…
+            end
         end
         if set -q SUING
             set title (whoami)@$title
@@ -154,7 +160,7 @@ if status is-interactive
             term_set_title $argv[1]
         else
             # precmd: set to pwd
-            term_set_title (prompt_pwd)
+            term_set_title (prompt_pwd) right
         end
     end
 
