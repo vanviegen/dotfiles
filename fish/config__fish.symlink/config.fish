@@ -38,6 +38,9 @@ if status is-interactive
     # Disable prompt shortening (just /var/home instead of /v/h)
     set -g fish_prompt_pwd_dir_length 0
 
+    # Use alt-s to toggle 'S' prefix
+    bind alt-s 'fish_commandline_prepend S'
+
     # Git helper functions
     function in-git-repo
         git rev-parse --is-inside-work-tree >/dev/null 2>&1
