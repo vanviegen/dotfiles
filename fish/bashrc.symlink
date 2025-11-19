@@ -1,4 +1,4 @@
-if test -z "$IN_FISH" -a -n "$PS1"; then
+if test -z "$IN_FISH" -a -n "$PS1" -a -z "$ANTIGRAVITY_AGENT"; then
     export IN_FISH=true
     FISH="$(which fish)"
     if [ "$FISH" = "" ] ; then

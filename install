@@ -49,7 +49,7 @@ if [ "$1" != "--uninstall" ] ; then
 	elif command -v dnf &> /dev/null ; then
 		for package in git fish curl xz ripgrep tmux helix xsel fzf eza ; do
 			if ! dnf list installed "$package" &>/dev/null; then
-				sudo dnf install -y "$package"
+				sudo dnf install --skip-unavailable -y "$package"
 			fi
 		done
 	else

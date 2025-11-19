@@ -210,7 +210,7 @@ if status is-interactive
     end
 
     # Enable VSCode shell integration if in VSCode terminal
-    if string match -q "$TERM_PROGRAM" vscode
+    if string match -q "$TERM_PROGRAM" vscode; and type -q code
         . (code --locate-shell-integration-path fish)
     end
 end
