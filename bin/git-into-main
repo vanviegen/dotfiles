@@ -1,0 +1,6 @@
+#!/bin/sh
+current_branch=$(git branch --show-current)
+git rebase main || exit 1
+git switch main || exit 1
+git merge --ff-only "$current_branch" || exit 1
+git branch -d "$current_branch"

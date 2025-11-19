@@ -31,6 +31,7 @@ if status is-interactive
     set -gx EDITOR hx
     set -gx LS_COLORS "di=38;2;0;153;153:ln=38;2;0;166;178:so=38;2;255;116;0:pi=38;2;255;116;0:ex=38;2;0;153;153:bd=38;2;255;116;0:cd=38;2;255;116;0:su=38;2;255;116;0:sg=38;2;255;116;0:tw=38;2;255;116;0:ow=38;2;255;116;0:*.tar=38;2;255;116;0:*.tgz=38;2;255;116;0:*.arc=38;2;255;116;0:*.arj=38;2;255;116;0:*.taz=38;2;255;116;0:*.lha=38;2;255;116;0:*.lz4=38;2;255;116;0:*.lzh=38;2;255;116;0:*.lzma=38;2;255;116;0:*.tlz=38;2;255;116;0:*.txz=38;2;255;116;0:*.tzo=38;2;255;116;0:*.t7z=38;2;255;116;0:*.zip=38;2;255;116;0:*.z=38;2;255;116;0:*.dz=38;2;255;116;0:*.gz=38;2;255;116;0:*.lrz=38;2;255;116;0:*.lz=38;2;255;116;0:*.lzo=38;2;255;116;0:*.xz=38;2;255;116;0:*.zst=38;2;255;116;0:*.tzst=38;2;255;116;0:*.bz2=38;2;255;116;0:*.bz=38;2;255;116;0:*.tbz=38;2;255;116;0:*.tbz2=38;2;255;116;0:*.tz=38;2;255;116;0:*.deb=38;2;255;116;0:*.rpm=38;2;255;116;0:*.jar=38;2;255;116;0:*.war=38;2;255;116;0:*.ear=38;2;255;116;0:*.sar=38;2;255;116;0:*.rar=38;2;255;116;0:*.alz=38;2;255;116;0:*.ace=38;2;255;116;0:*.zoo=38;2;255;116;0:*.cpio=38;2;255;116;0:*.7z=38;2;255;116;0:*.rz=38;2;255;116;0:*.cab=38;2;255;116;0:*.wim=38;2;255;116;0:*.swm=38;2;255;116;0:*.dwm=38;2;255;116;0:*.esd=38;2;255;116;0:*.jpg=38;2;92;204;204:*.jpeg=38;2;92;204;204:*.mjpg=38;2;92;204;204:*.mjpeg=38;2;92;204;204:*.gif=38;2;92;204;204:*.bmp=38;2;92;204;204:*.pbm=38;2;92;204;204:*.pgm=38;2;92;204;204:*.ppm=38;2;92;204;204:*.tga=38;2;92;204;204:*.xbm=38;2;92;204;204:*.xpm=38;2;92;204;204:*.tif=38;2;92;204;204:*.tiff=38;2;92;204;204:*.png=38;2;92;204;204:*.svg=38;2;92;204;204:*.svgz=38;2;92;204;204:*.mng=38;2;92;204;204:*.pcx=38;2;92;204;204:*.mov=38;2;92;204;204:*.mpg=38;2;92;204;204:*.mpeg=38;2;92;204;204:*.m2v=38;2;92;204;204:*.mkv=38;2;92;204;204:*.webm=38;2;92;204;204:*.ogm=38;2;92;204;204:*.mp4=38;2;92;204;204:*.m4v=38;2;92;204;204:*.mp4v=38;2;92;204;204:*.vob=38;2;92;204;204:*.qt=38;2;92;204;204:*.nuv=38;2;92;204;204:*.wmv=38;2;92;204;204:*.asf=38;2;92;204;204:*.rm=38;2;92;204;204:*.rmvb=38;2;92;204;204:*.flc=38;2;92;204;204:*.avi=38;2;92;204;204:*.fli=38;2;92;204;204:*.flv=38;2;92;204;204:*.gl=38;2;92;204;204:*.dl=38;2;92;204;204:*.xcf=38;2;92;204;204:*.xwd=38;2;92;204;204:*.yuv=38;2;92;204;204:*.cgm=38;2;92;204;204:*.emf=38;2;92;204;204:*.ogv=38;2;92;204;204:*.ogx=38;2;92;204;204:*.aac=38;2;51;204;204:*.au=38;2;51;204;204:*.flac=38;2;51;204;204:*.m4a=38;2;51;204;204:*.mid=38;2;51;204;204:*.midi=38;2;51;204;204:*.mka=38;2;51;204;204:*.mp3=38;2;51;204;204:*.mpc=38;2;51;204;204:*.ogg=38;2;51;204;204:*.ra=38;2;51;204;204:*.wav=38;2;51;204;204:*.oga=38;2;51;204;204:*.opus=38;2;51;204;204:*.spx=38;2;51;204;204:*.xspf=38;2;51;204;204:"
     alias open xdg-open
+    alias cs rg
 
     # Disable the friendly welcome message
     set fish_greeting
@@ -51,29 +52,29 @@ if status is-interactive
         if test -z "$branch"
             set branch (git rev-parse --short HEAD 2>/dev/null)
         end
-        
+
         set -l status_icons ""
-        
+
         # Check for staged changes
         if not git diff-index --quiet --cached HEAD -- 2>/dev/null
-            set status_icons "$status_icons+"  # staged changes
+            set status_icons "$status_icons+" # staged changes
         end
-        
+
         # Check for unstaged modifications (working tree vs index)
         if not git diff-files --quiet 2>/dev/null
-            set status_icons "$status_icons!"  # modified files
+            set status_icons "$status_icons!" # modified files
         end
-        
+
         # Check for untracked files
         if test (count (git ls-files --others --exclude-standard 2>/dev/null)) -gt 0
-            set status_icons "$status_icons?"  # untracked files
+            set status_icons "$status_icons?" # untracked files
         end
-        
+
         # If no changes, show clean status
         if test -z "$status_icons"
-            set status_icons "✓"  # clean
+            set status_icons "✓" # clean
         end
-        
+
         echo -n "$branch $status_icons"
     end
 
@@ -143,10 +144,10 @@ if status is-interactive
     function term_set_title
         set -l max_length 20
         set -l title (string replace -r -a '[^[:print:]]' '' $argv[1])
-        set -l align $argv[2]  # optional alignment parameter
-        
+        set -l align $argv[2] # optional alignment parameter
+
         if test (string length $title) -gt $max_length
-            if test "$align" = "right"
+            if test "$align" = right
                 set title …(string sub -s (math (string length $title) - $max_length + 3) $title)
             else
                 set title (string sub -l $max_length $title)…
