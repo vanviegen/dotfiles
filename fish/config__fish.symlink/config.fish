@@ -70,6 +70,12 @@ if status is-interactive
             set status_icons "$status_icons?" # untracked files
         end
 
+        # Check for stashes
+        set -l stash_count (git stash list 2>/dev/null | count)
+        if test $stash_count -gt 0
+            set status_icons "$status_icons"(string repeat -n $stash_count "s")
+        end
+
         # If no changes, show clean status
         if test -z "$status_icons"
             set status_icons "✓" # clean
