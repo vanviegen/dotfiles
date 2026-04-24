@@ -1,0 +1,13 @@
+case $- in
+	*i*)
+		if [ -z "$IN_ZSH_DOTFILES" ] && [ -z "$ANTIGRAVITY_AGENT" ]; then
+			export IN_ZSH_DOTFILES=true
+			ZSH_BIN="$(command -v zsh)"
+			if [ -z "$ZSH_BIN" ]; then
+				echo "zsh cannot be found in path: $PATH"
+			else
+				SHELL="$ZSH_BIN" exec "$ZSH_BIN" -i
+			fi
+		fi
+	;;
+esac

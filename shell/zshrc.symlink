@@ -1,0 +1,547 @@
+autoload -Uz add-zsh-hook compinit colors down-line-or-beginning-search up-line-or-beginning-search
+zmodload zsh/complist
+
+colors
+bindkey -e
+stty -ixon 2>/dev/null
+
+setopt auto_cd
+setopt complete_in_word
+setopt extended_glob
+setopt extended_history
+setopt hist_ignore_all_dups
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+setopt inc_append_history
+setopt interactive_comments
+setopt no_beep
+setopt prompt_subst
+setopt share_history
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+
+if [[ -n $SUING ]]; then
+	export DOT="$SUING/.dotfiles"
+	sudo_env_file="$SUING/.sudo-env.tmp"
+	if [[ -f $sudo_env_file ]]; then
+		. "$sudo_env_file"
+		rm -f "$sudo_env_file"
+	fi
+else
+	export DOT="$HOME/.dotfiles"
+fi
+
+export ZSH="$DOT"
+export SHELL="$(command -v zsh)"
+
+typeset -U path PATH
+path=("$DOT/bin" "$DOT/xbin" "$HOME/.local/bin" "$HOME/.linuxbrew/bin" "/home/linuxbrew/.linuxbrew/bin" $path)
+if (( EUID == 0 )); then
+	path+=("/sbin" "/usr/sbin")
+fi
+export PATH
+
+export COLORTERM=truecolor
+export EDITOR=hx
+export FZF_DEFAULT_COMMAND='rg --files'
+export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:+$FZF_DEFAULT_OPTS }--height=45% --layout=reverse --border=rounded --multi --color=fg:#b3b3b3,bg:#111111,hl:#ff7400,fg+:#ffffff,bg+:#303030,hl+:#5ccccc,info:#5ccccc,prompt:#009999,pointer:#ff7400,marker:#ff7400,spinner:#009999,header:#808080"
+export LESS='-iMSx4 -FX -R'
+export LS_COLORS='di=38;2;0;153;153:ln=38;2;0;166;178:so=38;2;255;116;0:pi=38;2;255;116;0:ex=38;2;0;153;153:bd=38;2;255;116;0:cd=38;2;255;116;0:su=38;2;255;116;0:sg=38;2;255;116;0:tw=38;2;255;116;0:ow=38;2;255;116;0:*.tar=38;2;255;116;0:*.tgz=38;2;255;116;0:*.arc=38;2;255;116;0:*.arj=38;2;255;116;0:*.taz=38;2;255;116;0:*.lha=38;2;255;116;0:*.lz4=38;2;255;116;0:*.lzh=38;2;255;116;0:*.lzma=38;2;255;116;0:*.tlz=38;2;255;116;0:*.txz=38;2;255;116;0:*.tzo=38;2;255;116;0:*.t7z=38;2;255;116;0:*.zip=38;2;255;116;0:*.z=38;2;255;116;0:*.dz=38;2;255;116;0:*.gz=38;2;255;116;0:*.lrz=38;2;255;116;0:*.lz=38;2;255;116;0:*.lzo=38;2;255;116;0:*.xz=38;2;255;116;0:*.zst=38;2;255;116;0:*.tzst=38;2;255;116;0:*.bz2=38;2;255;116;0:*.bz=38;2;255;116;0:*.tbz=38;2;255;116;0:*.tbz2=38;2;255;116;0:*.tz=38;2;255;116;0:*.deb=38;2;255;116;0:*.rpm=38;2;255;116;0:*.jar=38;2;255;116;0:*.war=38;2;255;116;0:*.ear=38;2;255;116;0:*.sar=38;2;255;116;0:*.rar=38;2;255;116;0:*.alz=38;2;255;116;0:*.ace=38;2;255;116;0:*.zoo=38;2;255;116;0:*.cpio=38;2;255;116;0:*.7z=38;2;255;116;0:*.rz=38;2;255;116;0:*.cab=38;2;255;116;0:*.wim=38;2;255;116;0:*.swm=38;2;255;116;0:*.dwm=38;2;255;116;0:*.esd=38;2;255;116;0:*.jpg=38;2;92;204;204:*.jpeg=38;2;92;204;204:*.mjpg=38;2;92;204;204:*.mjpeg=38;2;92;204;204:*.gif=38;2;92;204;204:*.bmp=38;2;92;204;204:*.pbm=38;2;92;204;204:*.pgm=38;2;92;204;204:*.ppm=38;2;92;204;204:*.tga=38;2;92;204;204:*.xbm=38;2;92;204;204:*.xpm=38;2;92;204;204:*.tif=38;2;92;204;204:*.tiff=38;2;92;204;204:*.png=38;2;92;204;204:*.svg=38;2;92;204;204:*.svgz=38;2;92;204;204:*.mng=38;2;92;204;204:*.pcx=38;2;92;204;204:*.mov=38;2;92;204;204:*.mpg=38;2;92;204;204:*.mpeg=38;2;92;204;204:*.m2v=38;2;92;204;204:*.mkv=38;2;92;204;204:*.webm=38;2;92;204;204:*.ogm=38;2;92;204;204:*.mp4=38;2;92;204;204:*.m4v=38;2;92;204;204:*.mp4v=38;2;92;204;204:*.vob=38;2;92;204;204:*.qt=38;2;92;204;204:*.nuv=38;2;92;204;204:*.wmv=38;2;92;204;204:*.asf=38;2;92;204;204:*.rm=38;2;92;204;204:*.rmvb=38;2;92;204;204:*.flc=38;2;92;204;204:*.avi=38;2;92;204;204:*.fli=38;2;92;204;204:*.flv=38;2;92;204;204:*.gl=38;2;92;204;204:*.dl=38;2;92;204;204:*.xcf=38;2;92;204;204:*.xwd=38;2;92;204;204:*.yuv=38;2;92;204;204:*.cgm=38;2;92;204;204:*.emf=38;2;92;204;204:*.ogv=38;2;92;204;204:*.ogx=38;2;92;204;204:*.aac=38;2;51;204;204:*.au=38;2;51;204;204:*.flac=38;2;51;204;204:*.m4a=38;2;51;204;204:*.mid=38;2;51;204;204:*.midi=38;2;51;204;204:*.mka=38;2;51;204;204:*.mp3=38;2;51;204;204:*.mpc=38;2;51;204;204:*.ogg=38;2;51;204;204:*.ra=38;2;51;204;204:*.wav=38;2;51;204;204:*.oga=38;2;51;204;204:*.opus=38;2;51;204;204:*.spx=38;2;51;204;204:*.xspf=38;2;51;204;204:'
+export PAGER=less
+
+mkdir -p "$HOME/.cache/zsh"
+zstyle ':completion:*' cache-path "$HOME/.cache/zsh"
+zstyle ':completion:*' completer _extensions _complete _match _approximate
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z} r:|[._-]=** r:|=**'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%F{#009999}-- %d --%f'
+zstyle ':completion:*:messages' format '%F{#ff7400}%d%f'
+zstyle ':completion:*:warnings' format '%F{#ff7400}no matches for:%f %d'
+compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"
+
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' continuous-trigger '/'
+zstyle ':fzf-tab:*' fzf-preview '
+	if [[ -n $realpath && -d $realpath ]]; then
+		eza --all --group-directories-first --icons --color=always -- "$realpath" 2>/dev/null
+	elif [[ -n $realpath && -f $realpath ]]; then
+		bat --style=plain --color=always --line-range=:200 -- "$realpath" 2>/dev/null || sed -n "1,200p" -- "$realpath"
+	else
+		print -r -- $desc
+	fi'
+
+if [[ -r "$DOT/shell/vendor/fzf-tab/fzf-tab.plugin.zsh" ]]; then
+	. "$DOT/shell/vendor/fzf-tab/fzf-tab.plugin.zsh"
+fi
+
+_dotfiles_bindkey_if_set() {
+	emulate -L zsh
+	local sequence="$1"
+	local widget="$2"
+	[[ -n $sequence ]] || return 0
+	bindkey -- "$sequence" "$widget"
+}
+
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+_dotfiles_bindkey_if_set "$terminfo[khome]" beginning-of-line
+_dotfiles_bindkey_if_set "$terminfo[kend]" end-of-line
+_dotfiles_bindkey_if_set "$terminfo[kLFT5]" backward-word
+_dotfiles_bindkey_if_set "$terminfo[kRIT5]" forward-word
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[OH' beginning-of-line
+bindkey '^[OF' end-of-line
+bindkey '^[[1~' beginning-of-line
+bindkey '^[[4~' end-of-line
+bindkey '^[[7~' beginning-of-line
+bindkey '^[[8~' end-of-line
+bindkey '^[[1;5D' backward-word
+bindkey '^[[1;5C' forward-word
+bindkey '^[[5D' backward-word
+bindkey '^[[5C' forward-word
+
+alias ..='../'
+alias ...='../../'
+alias ....='../../../'
+alias .....='../../../../'
+alias ......='../../../../../'
+alias cs='rg'
+alias open='xdg-open'
+alias toad='uv tool run --from batrachian-toad toad'
+
+if command -v eza >/dev/null 2>&1; then
+	alias ls='eza'
+	alias l='eza --group-directories-first --git --icons --classify --time-style=long-iso --group --color-scale=all'
+	alias ll='eza --all --header --long --group-directories-first --git --icons --classify --time-style=long-iso --group --color-scale=all'
+	alias lt='eza --all --header --long --sort=modified --git --icons --classify --time-style=long-iso --group --color-scale=all'
+	alias la='eza -lbhHigUmuSaB@'
+	alias t='eza --tree --group-directories-first --git --icons --classify --time-style=long-iso --group --color-scale=all'
+fi
+
+glob() {
+	find . -maxdepth 1 -name "$1"
+}
+
+globi() {
+	find . -maxdepth 1 -iname "$1"
+}
+
+br() {
+	local cmd_file cmd exit_code
+	cmd_file=$(mktemp) || return 1
+	if broot --outcmd "$cmd_file" "$@"; then
+		cmd=$(<"$cmd_file")
+		rm -f "$cmd_file"
+		eval "$cmd"
+	else
+		exit_code=$?
+		rm -f "$cmd_file"
+		return "$exit_code"
+	fi
+}
+
+if command -v flatpak >/dev/null 2>&1; then
+	while IFS= read -r app_id; do
+		[[ -z $app_id ]] && continue
+		alias_name=${app_id##*.}
+		alias_name=${(L)alias_name}
+		if ! command -v "$alias_name" >/dev/null 2>&1 && ! alias "$alias_name" >/dev/null 2>&1; then
+			alias "$alias_name=flatpak run $app_id"
+		fi
+	done < <(flatpak list --app --columns=application 2>/dev/null)
+fi
+
+if [[ -f "$HOME/Documents/keys/openai.key" ]]; then
+	export OPENAI_API_KEY="$(<"$HOME/Documents/keys/openai.key")"
+fi
+
+if [[ -f "$HOME/Documents/keys/openrouter.key" ]]; then
+	export OPENROUTER_API_KEY="$(<"$HOME/Documents/keys/openrouter.key")"
+fi
+
+if [[ -f "$HOME/.cargo/env" ]]; then
+	. "$HOME/.cargo/env"
+fi
+
+if [[ -z $TMUX && -z $SUING && $TERM_PROGRAM != vscode ]]; then
+	if command -v tmux >/dev/null 2>&1; then
+		exec tmux new-session -A -s "$USER-main"
+	else
+		echo 'Failed to start tmux'
+	fi
+fi
+
+_dotfiles_current_token() {
+	emulate -L zsh
+	local -a tokens
+	if [[ -z $LBUFFER || $LBUFFER[-1] == [[:space:]] ]]; then
+		print -nr -- ''
+		return
+	fi
+	tokens=(${(z)LBUFFER})
+	print -nr -- "${tokens[-1]}"
+}
+
+_dotfiles_replace_current_token() {
+	emulate -L zsh
+	local replacement="$1"
+	local token
+	token=$(_dotfiles_current_token)
+	if [[ -n $token ]]; then
+		LBUFFER="${LBUFFER[1,$(( ${#LBUFFER} - ${#token} ))]}${replacement}"
+	else
+		LBUFFER+="$replacement"
+	fi
+	if [[ -z $RBUFFER || $RBUFFER[1] == [[:space:]] ]]; then
+		LBUFFER+=" "
+	fi
+	CURSOR=${#LBUFFER}
+}
+
+_dotfiles_join_quoted() {
+	emulate -L zsh
+	local -a quoted
+	local item
+	for item in "$@"; do
+		quoted+=("${(q)item}")
+	done
+	print -r -- "${(j: :)quoted}"
+}
+
+_dotfiles_strip_ansi() {
+	emulate -L zsh
+	setopt extended_glob
+	printf '%s' "${1//$'\e'\[[0-9;]#m/}"
+}
+
+_dotfiles_git_status_path_from_line() {
+	emulate -L zsh
+	local file_path status_line
+	status_line=$(_dotfiles_strip_ansi "$1")
+	file_path=${status_line[4,-1]}
+	if [[ ${status_line[1,1]} == R ]]; then
+		file_path=${file_path##* -> }
+	fi
+	print -r -- "$file_path"
+}
+
+_dotfiles_toggle_s_prefix() {
+	emulate -L zsh
+	if [[ $BUFFER == 'S '* ]]; then
+		BUFFER="${BUFFER#S }"
+		(( CURSOR >= 2 )) && CURSOR=$(( CURSOR - 2 ))
+	else
+		BUFFER="S $BUFFER"
+		CURSOR=$(( CURSOR + 2 ))
+	fi
+}
+
+_dotfiles_fzf_directory_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local fd_cmd query selected
+	local -a paths
+	fd_cmd=$(command -v fdfind || command -v fd)
+	[[ -z $fd_cmd ]] && return 1
+	query=$(_dotfiles_current_token)
+	zle -I
+	selected=$(command "$fd_cmd" --hidden --follow --exclude .git . 2>/dev/null |
+		fzf --ansi --prompt='Directory> ' --query="$query" \
+			--preview='if [ -d {} ]; then eza --all --group-directories-first --icons --color=always {} 2>/dev/null | head -200; else bat --style=plain --color=always --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {}; fi') || return 0
+	paths=(${(@f)selected})
+	(( ${#paths[@]} == 0 )) && return 0
+	_dotfiles_replace_current_token "$(_dotfiles_join_quoted "${paths[@]}")"
+	zle redisplay
+}
+
+_dotfiles_fzf_git_status_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local file_path in_zle line preview_cmd selection
+	local -a cleaned_paths
+	git rev-parse --git-dir >/dev/null 2>&1 || return 0
+	preview_cmd="$DOT/shell/git-status-preview"
+	in_zle=0
+	if [[ -n ${WIDGET-} ]]; then
+		in_zle=1
+		zle -I
+	fi
+	selection=$(git -c color.status=always status --short |
+		fzf --ansi --multi --nth='2..' --prompt='Git Status> ' \
+			--preview-window='right:70%:wrap' \
+			--preview="${(q)preview_cmd} {}") || return 0
+	for line in ${(f)selection}; do
+		file_path=$(_dotfiles_git_status_path_from_line "$line")
+		[[ -n $file_path ]] && cleaned_paths+=("$file_path")
+	done
+	(( ${#cleaned_paths[@]} == 0 )) && return 0
+	if (( in_zle )); then
+		_dotfiles_replace_current_token "$(_dotfiles_join_quoted "${cleaned_paths[@]}")"
+		zle redisplay
+	else
+		print -rl -- "${cleaned_paths[@]}"
+	fi
+}
+
+_dotfiles_fzf_git_log_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local selection line abbreviated full_hash
+	local -a hashes
+	git rev-parse --git-dir >/dev/null 2>&1 || return 0
+	zle -I
+	selection=$(git log --no-show-signature --color=always --date=short --format='%C(bold blue)%h%C(reset) - %C(cyan)%ad%C(reset) %C(yellow)%d%C(reset) %s %C(dim normal)[%an]%C(reset)' |
+		fzf --ansi --multi --scheme=history --prompt='Git Log> ' \
+			--preview='git show --color=always --stat --patch {1}') || return 0
+	for line in ${(f)selection}; do
+		abbreviated=${line%% *}
+		full_hash=$(git rev-parse "$abbreviated" 2>/dev/null) || continue
+		hashes+=("$full_hash")
+	done
+	(( ${#hashes[@]} == 0 )) && return 0
+	_dotfiles_replace_current_token "${(j: :)hashes}"
+	zle redisplay
+}
+
+_dotfiles_fzf_processes_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local selection process
+	local -a pids
+	zle -I
+	selection=$(ps -A -o pid,command |
+		fzf --multi --header-lines=1 --prompt='Processes> ' \
+			--preview="ps -o pid,ppid=PARENT,user,%cpu,rss=RSS_IN_KB,start=START_TIME,command -p {1} || echo 'Cannot preview {1} because it exited.'" \
+			--preview-window='bottom:4:wrap') || return 0
+	for process in ${(f)selection}; do
+		pids+=("${${(z)process}[1]}")
+	done
+	(( ${#pids[@]} == 0 )) && return 0
+	_dotfiles_replace_current_token "${(j: :)pids}"
+	zle redisplay
+}
+
+_dotfiles_fzf_variables_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local current_token preserve_dollar selection variable
+	local -a variables results
+	current_token=$(_dotfiles_current_token)
+	[[ $current_token == \$* ]] && preserve_dollar='$'
+	zle -I
+	selection=$(print -rl -- ${(ok)parameters:#history} |
+		fzf --multi --prompt='Variables> ' --query="${current_token#\$}" \
+			--preview='typeset -p {1} 2>/dev/null' \
+			--preview-window='wrap') || return 0
+	variables=(${(@f)selection})
+	for variable in "${variables[@]}"; do
+		results+=("${preserve_dollar}${variable}")
+	done
+	(( ${#results[@]} == 0 )) && return 0
+	_dotfiles_replace_current_token "${(j: :)results}"
+	zle redisplay
+}
+
+_dotfiles_fzf_history_widget() {
+	emulate -L zsh
+	setopt localoptions pipefail no_aliases
+	local selection history_number history_line
+	zle -I
+	selection=$(fc -rl 1 |
+		fzf --scheme=history --prompt='History> ' --query="$BUFFER" \
+			--bind='ctrl-r:toggle-sort' \
+			--preview="printf '%s\n' {} | sed -E 's/^ *[0-9]+\** *//'" \
+			--preview-window='bottom:3:wrap') || return 0
+	history_number=$(printf '%s\n' "$selection" | sed -E 's/^ *([0-9]+).*/\1/')
+	[[ -z $history_number ]] && return 0
+	history_line=$(fc -ln "$history_number" "$history_number") || return 0
+	BUFFER="$history_line"
+	CURSOR=${#BUFFER}
+	zle redisplay
+}
+
+_dotfiles_in_git_repo() {
+	git rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
+_dotfiles_git_branch_name_and_repo_status() {
+	emulate -L zsh
+	local branch status_icons stash_count has_head
+	branch=$(git branch --show-current 2>/dev/null)
+	if [[ -z $branch ]]; then
+		branch=$(git rev-parse --short HEAD 2>/dev/null) || return 1
+	fi
+
+	status_icons=''
+	if git rev-parse --verify HEAD >/dev/null 2>&1; then
+		has_head=true
+	else
+		has_head=false
+	fi
+
+	if [[ $has_head == true ]]; then
+		git diff-index --quiet --cached HEAD -- 2>/dev/null || status_icons+='+'
+	else
+		git diff --cached --quiet 2>/dev/null || status_icons+='+'
+	fi
+
+	git diff-files --quiet 2>/dev/null || status_icons+='!'
+	git ls-files --others --exclude-standard 2>/dev/null | read -r _ && status_icons+='?'
+
+	stash_count=$(git stash list 2>/dev/null | wc -l | tr -d '[:space:]')
+	while [[ -n $stash_count && $stash_count -gt 0 ]]; do
+		status_icons+='s'
+		stash_count=$(( stash_count - 1 ))
+	done
+
+	[[ -z $status_icons ]] && status_icons='✓'
+	print -r -- "$branch $status_icons"
+}
+
+_dotfiles_trim_title() {
+	emulate -L zsh
+	local max_length=20
+	local keep_length title align
+	title="$1"
+	align="$2"
+	title=${title//$'\r'/ }
+	title=${title//$'\n'/ }
+	title=${title//[^[:print:]]/}
+	if (( ${#title} > max_length )); then
+		keep_length=$(( max_length - 1 ))
+		if [[ $align == right ]]; then
+			title="…${title[-$keep_length,-1]}"
+		else
+			title="${title[1,$keep_length]}…"
+		fi
+	fi
+	if [[ -n $SUING ]]; then
+		title="$(whoami)@$title"
+	fi
+	print -nr -- "$title"
+}
+
+_dotfiles_set_title() {
+	printf '\033k%s\033\\' "$(_dotfiles_trim_title "$1" "$2")"
+}
+
+_dotfiles_build_prompt() {
+	emulate -L zsh
+	local prompt prev_bg git_info
+	prompt=$'\n'
+	prev_bg=''
+
+	if [[ -n $SUING ]]; then
+		prompt+='%{%K{#5f00d7}%F{black}%}%{%F{white}%} %n '
+		prev_bg='#5f00d7'
+	fi
+
+	if [[ -n $SSH_CLIENT || -n $SSH_TTY ]]; then
+		if [[ -n $prev_bg ]]; then
+			prompt+="%{%K{yellow}%F{$prev_bg}%}"
+		else
+			prompt+='%{%K{yellow}%F{black}%}'
+		fi
+		prompt+='%{%F{black}%} %m '
+		prev_bg='yellow'
+	fi
+
+	if [[ -n $prev_bg ]]; then
+		prompt+="%{%K{#009999}%F{$prev_bg}%}"
+	else
+		prompt+='%{%K{#009999}%F{black}%}'
+	fi
+	prompt+='%{%F{black}%} %~ '
+	prev_bg='#009999'
+
+	if _dotfiles_in_git_repo; then
+		git_info=$(_dotfiles_git_branch_name_and_repo_status)
+		git_info=${git_info//\%/%%}
+		prompt+="%{%K{#444444}%F{$prev_bg}%}%{%F{#009999}%} ${git_info} "
+		prev_bg='#444444'
+	fi
+
+	prompt+="%{%K{black}%F{$prev_bg}%}%{%k%f%} "
+	print -nr -- "$prompt"
+}
+
+_dotfiles_precmd() {
+	PROMPT="$(_dotfiles_build_prompt)"
+	RPROMPT=''
+	_dotfiles_set_title "${PWD/#$HOME/~}" right
+}
+
+_dotfiles_preexec() {
+	_dotfiles_set_title "$1"
+}
+
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#006363'
+ZSH_AUTOSUGGEST_STRATEGY=(history)
+
+if [[ -r "$DOT/shell/vendor/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+	. "$DOT/shell/vendor/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+
+zle -N _dotfiles_toggle_s_prefix
+zle -N _dotfiles_fzf_history_widget
+zle -N _dotfiles_fzf_directory_widget
+zle -N _dotfiles_fzf_git_log_widget
+zle -N _dotfiles_fzf_git_status_widget
+zle -N _dotfiles_fzf_processes_widget
+zle -N _dotfiles_fzf_variables_widget
+
+bindkey '^[s' _dotfiles_toggle_s_prefix
+bindkey '^R' _dotfiles_fzf_history_widget
+bindkey '^[^F' _dotfiles_fzf_directory_widget
+bindkey '^[^L' _dotfiles_fzf_git_log_widget
+bindkey '^[^P' _dotfiles_fzf_processes_widget
+bindkey '^[S' _dotfiles_fzf_git_status_widget
+bindkey '^V' _dotfiles_fzf_variables_widget
+
+add-zsh-hook precmd _dotfiles_precmd
+
+if [ "$TERM_PROGRAM" != "vscode" ]; then
+	# Set terminal title when not in VSCode terminal
+	add-zsh-hook preexec _dotfiles_preexec
+fi
+
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets cursor)
+ZSH_HIGHLIGHT_MAXLENGTH=400
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#00cc66'
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#00cc66'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#00cc66'
+ZSH_HIGHLIGHT_STYLES[command]='fg=#00cc66'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#00cc66'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#5ccccc,underline'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#5ccccc'
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#ffb273'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#ff9640'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#009999'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#009999'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#5ccccc'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#5ccccc'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#5ccccc'
+ZSH_HIGHLIGHT_STYLES[assign]='fg=#33cccc'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#bf7130'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff7400,bold'
+ZSH_HIGHLIGHT_STYLES[default]='fg=#dddddd'
+ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='fg=#000000,bg=#5ccccc,bold'
+
+print -P "%F{cyan}💡%f  %B%F{cyan}ctrl-r%f%b history   %B%F{cyan}alt-shift-s%f%b git status   %B%F{cyan}ctrl-alt-l%f%b git log   %B%F{cyan}ctrl-alt-f%f%b file   %B%F{cyan}ctrl-alt-p%f%b pid   %B%F{cyan}ctrl-v%f%b var   %B%F{cyan}tab%f%b complete"
+
+if [[ -r "$DOT/shell/vendor/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+	. "$DOT/shell/vendor/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi

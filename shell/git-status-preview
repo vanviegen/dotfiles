@@ -1,0 +1,63 @@
+#!/usr/bin/env zsh
+
+emulate -L zsh
+setopt extended_glob no_aliases pipefail
+
+[[ -z $1 ]] && exit 0
+
+status_line=${1//$'\e'\[[0-9;]#m/}
+git_bin=$(command -v git)
+index_status=${status_line[1,1]}
+working_tree_status=${status_line[2,2]}
+file_path=${status_line[4,-1]}
+
+if [[ -z $git_bin ]]; then
+	printf 'git not found in PATH\n' >&2
+	exit 127
+fi
+
+[[ -z $file_path ]] && exit 0
+
+print_section() {
+	printf '\033[38;2;0;0;0m\033[48;2;0;153;153m %s \033[0m\n' "$1"
+}
+
+preview_file() {
+	if command -v bat >/dev/null 2>&1; then
+		bat --style=plain --color=always --line-range=:200 -- "$1" 2>/dev/null
+	else
+		sed -n '1,200p' -- "$1" 2>/dev/null
+	fi
+}
+
+if [[ $index_status == R ]]; then
+	orig_path=${file_path%% -> *}
+	file_path=${file_path##* -> }
+fi
+
+if [[ $index_status == '?' ]]; then
+	print_section 'Untracked'
+	preview_file "$file_path"
+	exit 0
+fi
+
+if [[ "$index_status$working_tree_status" == (DD|AU|UD|UA|DU|AA|UU) ]]; then
+	print_section 'Unmerged'
+	"$git_bin" diff --color=always -- "$file_path"
+	exit 0
+fi
+
+if [[ $index_status != ' ' ]]; then
+	print_section 'Staged'
+	if [[ $index_status == R ]]; then
+		"$git_bin" diff --staged --color=always -- "$orig_path" "$file_path"
+	else
+		"$git_bin" diff --staged --color=always -- "$file_path"
+	fi
+fi
+
+if [[ $working_tree_status != ' ' ]]; then
+	[[ $index_status != ' ' ]] && printf '\n'
+	print_section 'Unstaged'
+	"$git_bin" diff --color=always -- "$file_path"
+fi

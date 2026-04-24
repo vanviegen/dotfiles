@@ -5,7 +5,12 @@ export SUING="`realpath $SUING`"
 
 export XDG_CONFIG_HOME="$SUING/.config"
 
-export SHELL=$(which fish)
+export SHELL=$(command -v zsh)
+
+if [ -z "$SHELL" ] ; then
+  echo "zsh cannot be found in path: $PATH" >&2
+  exit 1
+fi
 
 if [ "$#" -eq 0 ] ; then
   exec "$SHELL" -i
