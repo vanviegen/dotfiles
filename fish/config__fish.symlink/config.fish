@@ -186,6 +186,14 @@ if status is-interactive
         alias t "eza --tree --group-directories-first $eza_params"
     end
 
+    function glob --description 'Use find to mimic Bash glob expansion'
+        find . -maxdepth 1 -name $argv
+    end
+
+    function globi --description 'Use find to mimic Bash case-insensitive glob expansion'
+        find . -maxdepth 1 -iname $argv
+    end
+
     if command -v flatpak >/dev/null
         # Create aliases for all flatpak commands that are not in the PATH
         for app_id in (flatpak list --app --columns=application)

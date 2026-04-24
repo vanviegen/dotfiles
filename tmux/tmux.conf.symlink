@@ -5,6 +5,10 @@ set -g status-left-length '30'
 set -g status 'on'
 setw -g window-status-separator ''
 
+# better support for alt/shift/etc
+set -g extended-keys on
+set -g extended-keys-format csi-u
+
 set -g status-left '#[fg=colour232,bg=#009999,nobold,nounderscore,noitalics] #H #[fg=#009999,bg=colour235]'
 set -g status-right ''
 setw -g window-status-format '#[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]#[fg=#009999] #W #[fg=colour235,bg=colour235,nobold,nounderscore,noitalics]'

@@ -3,6 +3,14 @@ ControlPath /tmp/ssh_mux_%h_%p_%r
 ForwardX11 yes
 GSSAPIAuthentication no
 # DevPod Start bun.devpod
+Host dune.paiq.nl
+  HostName dune.paiq.nl
+  User paiq
+
+Host iffy.local
+  HostName iffy.local
+  User frank
+
 Host iffy.vanviegen.net
   HostName iffy.vanviegen.net
   User frank
