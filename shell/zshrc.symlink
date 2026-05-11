@@ -112,6 +112,10 @@ bindkey '^[[1;5C' forward-word
 bindkey '^[[5D' backward-word
 bindkey '^[[5C' forward-word
 
+bash() {
+	FORCE_BASH=true command bash "$@"
+}
+
 alias ..='../'
 alias ...='../../'
 alias ....='../../../'
@@ -517,7 +521,7 @@ if [ "$TERM_PROGRAM" != "vscode" ]; then
 	add-zsh-hook preexec _dotfiles_preexec
 fi
 
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets cursor)
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 ZSH_HIGHLIGHT_MAXLENGTH=400
 typeset -gA ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES[alias]='fg=#00cc66'
