@@ -62,12 +62,18 @@ zstyle ':completion:*' special-dirs true
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' verbose yes
-zstyle ':completion:*:descriptions' format '%F{#009999}-- %d --%f'
 zstyle ':completion:*:messages' format '%F{#ff7400}%d%f'
 zstyle ':completion:*:warnings' format '%F{#ff7400}no matches for:%f %d'
-compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"
+zcompdump_file="$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"
+# Reuse a recent completion dump to avoid rerunning expensive checks on every shell.
+if [[ ! -s $zcompdump_file || -n ${zcompdump_file}(#qN.mh+24) ]]; then
+	compinit -d "$zcompdump_file"
+else
+	compinit -C -d "$zcompdump_file"
+fi
 
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' show-group brief
 zstyle ':fzf-tab:*' switch-group '<' '>'
 zstyle ':fzf-tab:*' continuous-trigger '/'
 zstyle ':fzf-tab:*' fzf-preview '
