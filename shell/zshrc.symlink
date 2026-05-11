@@ -407,6 +407,7 @@ _dotfiles_git_branch_name_and_repo_status() {
 		git diff --cached --quiet 2>/dev/null || status_icons+='+'
 	fi
 
+	git update-index --refresh -q --ignore-submodules -- >/dev/null 2>&1
 	git diff-files --quiet 2>/dev/null || status_icons+='!'
 	git ls-files --others --exclude-standard 2>/dev/null | read -r _ && status_icons+='?'
 
