@@ -556,3 +556,5 @@ print -P "%F{cyan}💡%f  %B%F{cyan}ctrl-r%f%b history   %B%F{cyan}alt-shift-s%f
 if [[ -r "$DOT/shell/vendor/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
 	. "$DOT/shell/vendor/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
+
+[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
