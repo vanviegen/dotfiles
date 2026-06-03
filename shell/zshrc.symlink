@@ -76,6 +76,8 @@ zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' show-group brief
 zstyle ':fzf-tab:*' switch-group '<' '>'
 zstyle ':fzf-tab:*' continuous-trigger '/'
+zstyle ':fzf-tab:*' fzf-min-height 12
+zstyle ':fzf-tab:*' fzf-flags '--info=inline'
 zstyle ':fzf-tab:*' fzf-preview '
 	if [[ -n $realpath && -d $realpath ]]; then
 		eza --all --group-directories-first --icons --color=always -- "$realpath" 2>/dev/null
