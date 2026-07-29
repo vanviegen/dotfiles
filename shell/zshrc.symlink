@@ -16,7 +16,6 @@ setopt inc_append_history
 setopt interactive_comments
 setopt no_beep
 setopt prompt_subst
-setopt share_history
 
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
@@ -369,16 +368,24 @@ _dotfiles_fzf_variables_widget() {
 _dotfiles_fzf_history_widget() {
 	emulate -L zsh
 	setopt localoptions pipefail no_aliases
-	local selection history_number history_line
+	local history_line
 	zle -I
-	selection=$(fc -rl 1 |
-		fzf --scheme=history --prompt='History> ' --query="$BUFFER" \
-			--bind='ctrl-r:toggle-sort' \
-			--preview="printf '%s\n' {} | sed -E 's/^ *[0-9]+\** *//'" \
-			--preview-window='bottom:3:wrap') || return 0
-	history_number=$(printf '%s\n' "$selection" | sed -E 's/^ *([0-9]+).*/\1/')
-	[[ -z $history_number ]] && return 0
-	history_line=$(fc -ln "$history_number" "$history_number") || return 0
+	# The fc -RI import (new $HISTFILE entries from other sessions) happens in
+	# a subshell, so it is visible to this search but never enters this
+	# session's arrow-up history (share_history is deliberately off).
+	history_line=$(
+		fc -RI 2>/dev/null
+		local selection history_number
+		selection=$(fc -rl 1 |
+			fzf --scheme=history --prompt='History> ' --query="$BUFFER" \
+				--bind='ctrl-r:toggle-sort' \
+				--preview="printf '%s\n' {} | sed -E 's/^ *[0-9]+\** *//'" \
+				--preview-window='bottom:3:wrap') || exit
+		history_number=$(printf '%s\n' "$selection" | sed -E 's/^ *([0-9]+).*/\1/')
+		[[ -z $history_number ]] && exit
+		fc -ln "$history_number" "$history_number"
+	) || return 0
+	[[ -z $history_line ]] && return 0
 	BUFFER="$history_line"
 	CURSOR=${#BUFFER}
 	zle redisplay
