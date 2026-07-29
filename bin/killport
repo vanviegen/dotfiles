@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+usage() {
+    echo "Shows the startup command of the program listening on a TCP port."
+    echo "Usage: $0 [-f|-F] PORT"
+    echo "  -f   send SIGTERM to the process (graceful)"
+    echo "  -F   send SIGKILL to the process (forceful)"
+    exit 1
+}
+
+signal=""
+port=""
+for arg in "$@"; do
+    case "$arg" in
+        -f) signal="TERM" ;;
+        -F) signal="KILL" ;;
+        -*) usage ;;
+        *)
+            [ -z "$port" ] || usage   # only one port allowed
+            port="$arg"
+            ;;
+    esac
+done
+
+[ -n "$port" ] || usage
+case "$port" in
+    *[!0-9]*) usage ;;
+esac
+
+# Find PIDs of processes with a TCP socket in LISTEN state on $port.
+pids="$(ss -tlnpH "sport = :$port" 2>/dev/null \
+    | grep -oP 'pid=\K[0-9]+' | sort -u)"
+
+if [ -z "$pids" ]; then
+    echo "No process is listening on TCP port $port." >&2
+    exit 1
+fi
+
+for pid in $pids; do
+    if [ ! -d "/proc/$pid" ]; then
+        continue
+    fi
+    cmd="$(tr '\0' ' ' < "/proc/$pid/cmdline")"
+    cmd="${cmd% }"
+    [ -n "$cmd" ] || cmd="[$(cat "/proc/$pid/comm" 2>/dev/null)]"
+    echo "PID $pid: $cmd"
+
+    if [ -n "$signal" ]; then
+        if kill -"$signal" "$pid" 2>/dev/null; then
+            echo "  Sent SIG$signal to $pid."
+        else
+            echo "  Failed to send SIG$signal to $pid." >&2
+        fi
+    fi
+done
+
+if [ -z "$signal" ]; then
+    echo
+    echo "Re-run with -f to send SIGTERM, or -F to send SIGKILL"
+fi
